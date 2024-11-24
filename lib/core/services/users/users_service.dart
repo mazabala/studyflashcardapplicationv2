@@ -128,7 +128,7 @@ class UserService implements IUserService {
           print(user.id);}
 
     try {
-      final result = await _supabaseClient  //her is the error happenning 1 or more returns
+      final result = await _supabaseClient  
           .from('user_subscriptions')
           .select('subscriptionID')
           .eq('user_id', user.id)

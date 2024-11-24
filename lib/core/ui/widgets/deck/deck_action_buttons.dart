@@ -21,14 +21,14 @@ class DeckButtonsWidget extends StatelessWidget {
         children: [
           ElevatedButton(
             onPressed: onCreateDeck,
-            child: Row(
+            child: const Row(
               children: [Icon(Icons.add), Text('Create Deck')],
             ),
           ),
 
            ElevatedButton(
             onPressed: onSeachNewDecks,
-            child: Row(
+            child: const Row(
               children: [Icon(Icons.search), Text('Search New Decks')],
             ),
           ),
@@ -36,7 +36,7 @@ class DeckButtonsWidget extends StatelessWidget {
 
           ElevatedButton(
             onPressed: onSignOut,
-            child: Row(
+            child: const Row(
               children: [Icon(Icons.exit_to_app), Text('Logout')],
             ),
           ),

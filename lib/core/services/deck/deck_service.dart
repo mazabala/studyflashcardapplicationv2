@@ -106,7 +106,7 @@ Future<List<Deck>> getUserDecks(String userId) async {
       print('No decks found for the user. returning');
       return [];
     }
-    print('continue..');
+  
     // Extract deck IDs from the response
     final deckIds = List<String>.from(response.map((item) => item['deck_id']));
 
@@ -125,11 +125,17 @@ Future<List<Deck>> loadDeckPool (String userId) async {
 
 try {
     // Fetch deck IDs for the user (list result)
-    final response = await _supabaseClient
-        .from('user_decks')
-        .select('deck_id')  // This will return a list of deck_id
-        .not('user_id','eq', userId);
 
+ 
+    final response = await _supabaseClient
+        .from('available_decks')
+        .select('deck_id') 
+        .eq('user_id', userId);
+        //inner join user_decks as ud on ud.userid?
+        
+        
+
+  print('response of query: $response');
     if (response == null || response.isEmpty) {
       print('No decks found ');
       throw Exception("No decks found");
@@ -272,15 +278,17 @@ Future<List<Flashcard>> _generateFlashcards({
 
   // Add a flashcard to a specific deck
   @override
-  Future<void> addFlashcardToDeck(
-      String deckId, String question, String answer, String difficultyLevel) async {
+  Future<void> DecktoUser(String deckId, String userId) async {
     try {
-      final PostgrestMap response = await _supabaseClient.from('flashcards').insert({
+      final  response = await _supabaseClient.from('user_decks').insert({
+        'user_id': userId,
         'deck_id': deckId,
-        'question': question,
-        'answer': answer,
-        'difficulty_level': difficultyLevel,
-      }).select().single();
+        'added_at': DateTime.now().toString(),
+        'is_owner': 'false',
+        'cards_mastered': 0,})
+        .select()
+        .single();
+  
 
       if (response['error'] != null) {
         throw ErrorHandler.handle(response['error']);

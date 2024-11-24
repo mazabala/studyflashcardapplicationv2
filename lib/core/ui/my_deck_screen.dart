@@ -24,7 +24,10 @@ class _MyDeckScreenState extends ConsumerState<MyDeckScreen> {
   TextEditingController _searchController = TextEditingController();
   String? _selectedDifficulty;
   String? _selectedCategory;
- List<Deck>? _filteredDecks = [];
+  List<Deck>? _filteredDecks = [];
+  bool isSearchingNewDecks = false;
+
+
   Future<List<String>> _getDeckCategory() async {
     final deckReader = ref.read(deckServiceProvider);
     return await deckReader.getDeckCategory();
@@ -42,6 +45,7 @@ class _MyDeckScreenState extends ConsumerState<MyDeckScreen> {
             final decks = await ref.read(deckProvider.notifier).loadAvailableDecks();
             if (mounted) { // Ensure the widget is still mounted before calling setState
               setState(() {
+                isSearchingNewDecks = true;
                 _filteredDecks = decks;
               });
             }
@@ -151,6 +155,7 @@ Future<void> _loadUserDecks() async {
             DeckDisplayWidget(
               filteredDecks: [],
               searchController: _searchController,
+              isSearchingNewDecks: isSearchingNewDecks,
             ),
             DeckButtonsWidget(
               onSeachNewDecks: () {_searchNewDecks();},

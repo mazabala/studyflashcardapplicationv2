@@ -132,8 +132,12 @@ Future<List<Flashcard>> getDeckFlashcards (String deckid) async
     }
 
     final decks = await _deckService.loadDeckPool(userId);
-    state = state.copyWith(decks: decks);
-    return decks; // Return the list of decks
+    if (decks != null) {
+          state = state.copyWith(decks: decks);
+          return decks; 
+        }
+        else return [];
+// Return the list of decks
   } catch (e) {
     state = state.copyWith(error: e.toString());
     return []; // Return an empty list in case of error
@@ -142,6 +146,31 @@ Future<List<Flashcard>> getDeckFlashcards (String deckid) async
   }
 }
 
+Future<void>addDecktoUser(String deckId) async {
+
+try{
+    state = state.copyWith(isLoading: true, error: '');
+    
+    final userId = _userService.getCurrentUserId();
+    if (userId == null) {
+      throw Exception("User is not logged in");
+    }
+    
+    await _deckService.DecktoUser(deckId, userId);
+
+
+  }
+  catch (e)
+  {
+      print(e);
+      rethrow;
+
+  }
+  finally{  
+    state = state.copyWith(isLoading: false);
+    }
+
+}
 
  Future<List<Deck>> loadUserDecks() async {
   state = state.copyWith(isLoading: true, error: '');
