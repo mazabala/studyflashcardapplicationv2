@@ -28,6 +28,16 @@ class _MyDeckScreenState extends ConsumerState<MyDeckScreen> {
   bool isSearchingNewDecks = false;
 
 
+  // Method to reset the search state and navigate to study screen
+  void _resetSearchStateAndNavigate() {
+    if (mounted) {
+      setState(() {
+        isSearchingNewDecks = false; // Reset search state
+      });
+      Navigator.pushReplacementNamed(context, '/study'); // Navigate to /study
+    }
+  }
+
   Future<List<String>> _getDeckCategory() async {
     final deckReader = ref.read(deckServiceProvider);
     return await deckReader.getDeckCategory();
@@ -156,11 +166,13 @@ Future<void> _loadUserDecks() async {
               filteredDecks: [],
               searchController: _searchController,
               isSearchingNewDecks: isSearchingNewDecks,
+              onDeckAdded: _resetSearchStateAndNavigate,
             ),
             DeckButtonsWidget(
               onSeachNewDecks: () {_searchNewDecks();},
               onCreateDeck: () {_createDeck();}, // Implement create deck logic here
               onSignOut: () {_signOut();}, // Implement sign-out logic here
+              
             ),
           ],
         ),

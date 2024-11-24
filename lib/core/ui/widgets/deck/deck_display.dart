@@ -8,12 +8,14 @@ class DeckDisplayWidget extends StatelessWidget {
   final List<Deck>? filteredDecks;
   final TextEditingController searchController;
   final bool isSearchingNewDecks;
+  final VoidCallback onDeckAdded; 
 
   const DeckDisplayWidget({
     Key? key,
     required this.filteredDecks,
     required this.searchController, 
     required this.isSearchingNewDecks,
+    required this.onDeckAdded,
   }) : super(key: key);
 
   @override
@@ -79,6 +81,7 @@ class DeckDisplayWidget extends StatelessWidget {
                       onPressed: () {
                         // Add deck to library logic here
                          ref.read(deckProvider.notifier).addDecktoUser(deck.id);
+                          onDeckAdded();
                       },
                     ):
               IconButton(
