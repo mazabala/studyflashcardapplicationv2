@@ -56,8 +56,13 @@ class _MyDeckScreenState extends ConsumerState<MyDeckScreen> {
             final decks = await ref.read(deckProvider.notifier).loadAvailableDecks();
             if (mounted) { // Ensure the widget is still mounted before calling setState
               setState(() {
-                isSearchingNewDecks = true;
-                _filteredDecks = decks;
+                if (decks.isEmpty || decks==null || decks == []) {
+                        isSearchingNewDecks = false;
+                        _filteredDecks = decks;
+                        _loadUserDecks();
+                      }
+                  else {isSearchingNewDecks = true;}
+                
               });
             }
         }catch(e){
