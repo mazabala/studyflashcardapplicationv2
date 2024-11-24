@@ -82,6 +82,7 @@ class DeckDisplayWidget extends StatelessWidget {
                         // Add deck to library logic here
                          ref.read(deckProvider.notifier).addDecktoUser(deck.id);
                           onDeckAdded();
+                          Navigator.pushNamed(context, '/myDecks');
                       },
                     ):
               IconButton(

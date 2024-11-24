@@ -34,7 +34,8 @@ class _MyDeckScreenState extends ConsumerState<MyDeckScreen> {
       setState(() {
         isSearchingNewDecks = false; // Reset search state
       });
-      Navigator.pushReplacementNamed(context, '/study'); // Navigate to /study
+      _loadUserDecks();
+      Navigator.pushReplacementNamed(context, '/myDecks'); // Navigate to /study
     }
   }
 
