@@ -1,0 +1,35 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "go.delveConfig": {
+        "dlvLoadConfig": {
+            "maxStringLen": 5000,
+            "maxArrayValues": 1000,
+        },
+    },
+    "configurations": [
+        {
+            "name": "flashcardstudyapplication",
+            "request": "launch",
+            "type": "dart"
+            
+        },
+        {
+            "name": "flashcardstudyapplication (profile mode)",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "profile"
+        },
+        {
+            "name": "flashcardstudyapplication (release mode)",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "release"
+        }
+        
+    ]
+    
+    
+}
