@@ -278,7 +278,7 @@ Future<List<Flashcard>> _generateFlashcards({
 
   // Add a flashcard to a specific deck
   @override
-  Future<void> DecktoUser(String deckId, String userId) async {
+  Future<void> decktoUser(String deckId, String userId) async {
     try {
       final  response = await _supabaseClient.from('user_decks').insert({
         'user_id': userId,
@@ -392,28 +392,17 @@ Future<List<Flashcard>> _generateFlashcards({
 
   // Delete a deck T
   @override
-  Future<void> deleteDeck(String deckId, String userid) async {
+  Future<void> removeDeck(String deckId) async {
     try {
-      // First, delete all flashcards associated with the deck (list result)
-      final PostgrestList flashcardsResponse = await _supabaseClient
-          .from('flashcards')
+
+
+      final  deckResponse = await _supabaseClient
+          .from('user_decks')
           .delete()
           .eq('deck_id', deckId);
 
-      if (flashcardsResponse != null) {
-        throw ErrorHandler.handle(flashcardsResponse);
-      }
-
-      // Then delete the deck itself (single result)
-      final PostgrestMap deckResponse = await _supabaseClient
-          .from('decks')
-          .delete()
-          .eq('id', deckId);
-
-      if (deckResponse['error'] != null) {
-        throw ErrorHandler.handle(deckResponse['error']);
-      }
     } catch (e) {
+      print ('Error Removing Deck: $e');
       throw ErrorHandler.handle(e);
     }
   }

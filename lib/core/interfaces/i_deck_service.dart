@@ -13,7 +13,7 @@ abstract class IDeckService {
   Future<List<Deck>> getUserDecks(String userId);
 
   // Add flashcard to a deck
-  Future<void> DecktoUser(String deckId, String userId);
+  Future<void> decktoUser(String deckId, String userId);
 
   // Create a new deck
   Future<void> createDeck(String title,String category, String description,String difficultyLevel, String userid, int cardCount);
@@ -21,7 +21,7 @@ abstract class IDeckService {
   Future<void> updateDeck(String deckId, String title, String difficultyLevel, String userid);
 
   // Delete deck
-  Future<void> deleteDeck(String deckId, String userid);
+  Future<void> removeDeck(String deckId);
 
   //Get deck category
   Future<List> getDeckCategory();

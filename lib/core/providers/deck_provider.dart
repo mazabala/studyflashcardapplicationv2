@@ -66,7 +66,7 @@ class DeckNotifier extends StateNotifier<DeckState> {
   DeckNotifier(this._deckService, this._userService) : super(const DeckState()) {
 
     _loadUserDecks();
-    //_loadAvailableDecks();
+    
   }
 
 
@@ -75,10 +75,7 @@ class DeckNotifier extends StateNotifier<DeckState> {
     await loadUserDecks();
   }
 
-  Future<void> _loadAvailableDecks()async {
-
-    await loadAvailableDecks();
-  }
+  
 
 Future<List<Flashcard>> getDeckFlashcards (String deckid) async
 {
@@ -156,7 +153,7 @@ try{
       throw Exception("User is not logged in");
     }
     
-    await _deckService.DecktoUser(deckId, userId);
+    await _deckService.decktoUser(deckId, userId);
 
 
   }
@@ -227,7 +224,7 @@ try{
         throw Exception("User is not logged in");
       }
 
-      await _deckService.deleteDeck(deckId, userId);
+      await _deckService.removeDeck(deckId);
       final decks = await _deckService.getUserDecks(userId);
       state = state.copyWith(decks: decks);
     } catch (e) {
