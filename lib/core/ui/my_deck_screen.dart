@@ -37,10 +37,27 @@ class _MyDeckScreenState extends ConsumerState<MyDeckScreen> {
     return await deckReader.getDeckDifficulty(subscriptionId);
   }
 
+  void _searchNewDecks() async {
+        try{
+            final decks = await ref.read(deckProvider.notifier).loadAvailableDecks();
+            if (mounted) { // Ensure the widget is still mounted before calling setState
+              setState(() {
+                _filteredDecks = decks;
+              });
+            }
+        }catch(e){
+          print (e);
+          rethrow;
+        }
+          
+  }
+
   void _searchDecks(String query) {
-    setState(() {
-      // Add filtering logic here if needed
-    });
+    if (mounted) {
+  setState(() {
+    // Add filtering logic here if needed
+  });
+}
   }
 
   // Function to handle logout
@@ -54,6 +71,7 @@ class _MyDeckScreenState extends ConsumerState<MyDeckScreen> {
     print("Widget already disposed, can't navigate.");
   }
 }
+ 
   // Function to show the Create Deck dialog and create the deck
   void _createDeck() async {
   final deckCategory = await _getDeckCategory();
@@ -80,6 +98,8 @@ class _MyDeckScreenState extends ConsumerState<MyDeckScreen> {
     },
   );
 }
+ 
+ 
   // Function to load user decks from the service
 Future<void> _loadUserDecks() async {
   final userId = ref.read(userServiceProvider).getCurrentUserId();
@@ -92,6 +112,8 @@ Future<void> _loadUserDecks() async {
     }
   }
 }
+ 
+ 
   @override
   Widget build(BuildContext context) {
     final String currentRoute = ModalRoute.of(context)?.settings.name ?? '/';
@@ -131,6 +153,7 @@ Future<void> _loadUserDecks() async {
               searchController: _searchController,
             ),
             DeckButtonsWidget(
+              onSeachNewDecks: () {_searchNewDecks();},
               onCreateDeck: () {_createDeck();}, // Implement create deck logic here
               onSignOut: () {_signOut();}, // Implement sign-out logic here
             ),

@@ -70,6 +70,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
         isLoading: false,
       );
     } catch (e) {
+      
       state = state.copyWith(
         errorMessage: e.toString(),
         isLoading: false,

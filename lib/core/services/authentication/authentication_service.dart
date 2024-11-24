@@ -28,9 +28,17 @@ class AuthService implements IAuthService {
 
   @override
   Future<void> signUp(String email, String password) async {
-    final response = await _supabaseClient.auth.signUp(email: email, password: password);
-    if (response != null) {
+    
+    try{
+      
+      final response = await _supabaseClient.auth.signUp(email: email, password: password);
+
+    if (response == null ) {
       throw Exception(response); // Handle error
+    }
+    }catch (e){
+      print (e);
+      throw e;
     }
   }
 

@@ -2,12 +2,14 @@ import 'package:flutter/material.dart';
 
 class DeckButtonsWidget extends StatelessWidget {
   final VoidCallback onCreateDeck;
+  final VoidCallback onSeachNewDecks;
   final VoidCallback onSignOut;
 
   const DeckButtonsWidget({
     Key? key,
     required this.onCreateDeck,
     required this.onSignOut,
+    required this.onSeachNewDecks,
   }) : super(key: key);
 
   @override
@@ -23,6 +25,15 @@ class DeckButtonsWidget extends StatelessWidget {
               children: [Icon(Icons.add), Text('Create Deck')],
             ),
           ),
+
+           ElevatedButton(
+            onPressed: onSeachNewDecks,
+            child: Row(
+              children: [Icon(Icons.search), Text('Search New Decks')],
+            ),
+          ),
+
+
           ElevatedButton(
             onPressed: onSignOut,
             child: Row(

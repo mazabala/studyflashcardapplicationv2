@@ -65,17 +65,21 @@ class DeckNotifier extends StateNotifier<DeckState> {
 
   DeckNotifier(this._deckService, this._userService) : super(const DeckState()) {
 
-    _loadDecks();
+    _loadUserDecks();
+    //_loadAvailableDecks();
   }
 
 
-  Future<void> _loadDecks() async {
+  Future<void> _loadUserDecks() async {
     // Call loadUserDecks to load the decks as soon as the provider is initialized
-    print(
-          'fetching user decks'
-    );
     await loadUserDecks();
   }
+
+  Future<void> _loadAvailableDecks()async {
+
+    await loadAvailableDecks();
+  }
+
 Future<List<Flashcard>> getDeckFlashcards (String deckid) async
 {
   try{
@@ -115,21 +119,51 @@ Future<List<Flashcard>> getDeckFlashcards (String deckid) async
     }
   }
 
- Future<List<Deck>> loadUserDecks() async {
+ Future<List<Deck>> loadAvailableDecks() async {
   state = state.copyWith(isLoading: true, error: '');
 
   try {
     print(
-          'fetching user decks'
+          'fetching available decks'
     );
     final userId = _userService.getCurrentUserId();
     if (userId == null) {
       throw Exception("User is not logged in");
     }
 
-    final decks = await _deckService.getUserDecks(userId);
+    final decks = await _deckService.loadDeckPool(userId);
     state = state.copyWith(decks: decks);
     return decks; // Return the list of decks
+  } catch (e) {
+    state = state.copyWith(error: e.toString());
+    return []; // Return an empty list in case of error
+  } finally {
+    state = state.copyWith(isLoading: false);
+  }
+}
+
+
+ Future<List<Deck>> loadUserDecks() async {
+  state = state.copyWith(isLoading: true, error: '');
+
+  try {
+    
+    final userId = _userService.getCurrentUserId();
+    if (userId == null) {
+      throw Exception("User is not logged in");
+    }
+    
+    final decks = await _deckService.getUserDecks(userId);
+    if (decks == null || decks.isEmpty)
+     {      print('decks are null: $decks');
+          return [];
+        }
+        else{
+
+            state = state.copyWith(decks: decks);
+            return decks; 
+        }
+// Return the list of decks
   } catch (e) {
     state = state.copyWith(error: e.toString());
     return []; // Return an empty list in case of error

@@ -62,7 +62,7 @@ Future<void> checkAPI() async {
  
   // Implement missing method getDeckDetails
   @override
-  Future<List<Deck>> getDeckDetails(List<String> deckId) async {   //THIS IS RETURNING NULLS
+  Future<List<Deck>> getDeckDetails(List<String> deckId) async {   
     try {
       // Fetch deck metadata (single result)
       final  deckResponse = await _supabaseClient
@@ -73,18 +73,20 @@ Future<void> checkAPI() async {
 
 
       if (deckResponse == null|| deckResponse.isEmpty) {
-        throw ErrorHandler.handle(deckResponse);
+        throw 'User has no decks';
       }
+      else{
 
 
      final decks = (deckResponse )
           .map((deckData) => Deck.fromJson(deckData))
           .toList();
-
+          return decks;
+      }
  
      
       // Return the deck with its flashcards
-      return decks;
+      
     } catch (e) {
       throw ErrorHandler.handle(e);
     }
@@ -101,10 +103,10 @@ Future<List<Deck>> getUserDecks(String userId) async {
         .eq('user_id', userId);
 
     if (response == null || response.isEmpty) {
-      print('No decks found for the user.');
-      throw Exception("No decks found for the user.");
+      print('No decks found for the user. returning');
+      return [];
     }
-
+    print('continue..');
     // Extract deck IDs from the response
     final deckIds = List<String>.from(response.map((item) => item['deck_id']));
 
@@ -114,10 +116,40 @@ Future<List<Deck>> getUserDecks(String userId) async {
     // Return the list of Deck objects
     return decks;
   } catch (e) {
-    print(e);
+    print('get users deck: $e');
     throw ErrorHandler.handle(e);
   }
 }
+
+Future<List<Deck>> loadDeckPool (String userId) async {
+
+try {
+    // Fetch deck IDs for the user (list result)
+    final response = await _supabaseClient
+        .from('user_decks')
+        .select('deck_id')  // This will return a list of deck_id
+        .not('user_id','eq', userId);
+
+    if (response == null || response.isEmpty) {
+      print('No decks found ');
+      throw Exception("No decks found");
+    }
+
+    // Extract deck IDs from the response
+    final deckIds = List<String>.from(response.map((item) => item['deck_id']));
+
+    // Fetch details for all decks
+    final decks = await getDeckDetails(deckIds);
+
+    return decks;
+}
+catch (e)
+
+{print (e);
+rethrow;
+}
+}
+
 Future <Map<String, dynamic>> _getModelConfig(String deckDifficultyIds) async {
   
   try
@@ -385,16 +417,16 @@ Future<List<String>> getDeckDifficulty (String subscriptionId) async {
    
   final  subscriptionTypeID = await _supabaseClient
   .from('user_subscriptions')
-  .select('subscriptiontypeID')
+  .select('subscriptionTypeID')
   .eq('subscriptionID',subscriptionId)
   .single();
+
 
 
   final PostgrestList deckDifficultyId = await _supabaseClient
   .from('decksubscription_difficulty')
   .select()
-  .eq('subscriptionTypeID',subscriptionTypeID['subscriptiontypeID']);
-
+  .eq('subscriptionTypeID',subscriptionTypeID['subscriptionTypeID']);
 
   if (deckDifficultyId == null || deckDifficultyId.isEmpty)
   {throw ErrorHandler.handle(deckDifficultyId);}
@@ -408,6 +440,8 @@ final PostgrestList difficultyNamesResponse = await _supabaseClient
   .from('deck_difficulties')  // Assuming 'deck_difficulties' is your table
   .select('name')
   .inFilter('difficultyType_id', difficultyTypeIds);
+
+
  
   // Check if there was an error or if no data was found
 if (difficultyNamesResponse== null || difficultyNamesResponse.isEmpty) {
@@ -508,12 +542,14 @@ Future<List<String>> getDeckCategory() async
    final PostgrestList deckCategory = await _supabaseClient
    .from('categories')
    .select();
+  
 
    return (deckCategory as List)
    .map((deckCat) => deckCat['name'].toString())
    .toList();
     }catch (e)
-    {throw ErrorHandler.handle(e);}
+    {print (e);
+      throw ErrorHandler.handle(e);}
 
 
 
