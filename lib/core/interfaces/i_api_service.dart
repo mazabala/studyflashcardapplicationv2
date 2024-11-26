@@ -18,8 +18,7 @@ abstract class IApiService {
   // Send a DELETE request to the given endpoint
   Future<Map<String, dynamic>> delete(String endpoint);
 
-  String getSupabaseUrl();
-  String getSupabaseAnonKey();
+
 
   
 

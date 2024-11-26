@@ -28,6 +28,7 @@ dependencies:
   app_links: ^6.3.2
   path_provider: ^2.0.9
   google_fonts: ^6.2.1
+  purchases_flutter: ^4.0.0
 
   
 

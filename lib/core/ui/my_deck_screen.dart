@@ -147,27 +147,7 @@ Future<void> _loadUserDecks() async {
               controller: _searchController,
               onChanged: _searchDecks,
             ),
-            FetchAndDisplayDifficultyLevelWidget(
-              selectedDifficulty: _selectedDifficulty,
-             onChanged: (value) {
-                        if (mounted) {
-                          setState(() {
-                            _selectedDifficulty = value;
-                          });
-                        }
-                      },
-              fetchDifficulty: _getDeckDifficulty,
-            ),
-            FetchAndDisplayCategorySelectionWidget(
-              selectedCategory: _selectedCategory,
-              onChanged: (value) { setState(() {
-                if(mounted){
-                _selectedCategory = value;
-                }
-              });}
-              ,
-              fetchCategory: _getDeckCategory,
-            ),
+
             DeckDisplayWidget(
               filteredDecks: [],
               searchController: _searchController,

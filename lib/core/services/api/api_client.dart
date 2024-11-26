@@ -11,6 +11,7 @@ class ApiClient implements IApiService {
   late final String _baseKey;
   late final String _supabaseUrl;
   late final String _supabaseAnonKey;
+  late final String _getRevenueCatApiKey;
 
   late final http.Client _client;
   late final Map<String, dynamic> _config;
@@ -40,7 +41,7 @@ class ApiClient implements IApiService {
       }
       
       
-     
+     _getRevenueCatApiKey = _config['revenuecat']['rev_key'];
 
       // Set Supabase credentials
       _supabaseUrl = _config['supabase']['supabase_url'];
@@ -49,12 +50,18 @@ class ApiClient implements IApiService {
       // Set base URL (e.g., for OpenAI API)
       _baseUrl = _config['openai']['base_url'];
       _baseKey= _config['openai']['openai_key'];
+
       _initialized = true;
+
     } catch (e) {
       print('Error initializing ApiClient: $e');
       throw ErrorHandler.handle(e, message: 'Failed to load API configuration');
     }
   }
+
+
+  @override
+  String getRevenueCatApiKey() => _getRevenueCatApiKey;
 
   @override
   String getSupabaseUrl() => _supabaseUrl;

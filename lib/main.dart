@@ -1,3 +1,4 @@
+import 'package:flashcardstudyapplication/core/services/api/revenuecat_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flashcardstudyapplication/core/services/api/api_client.dart'; // Import ApiClient and the provider
 import 'package:flashcardstudyapplication/core/themes/app_theme.dart';
@@ -10,6 +11,8 @@ void main() async {
 
   // Initialize the ApiClient (which will fetch Supabase credentials)
   final apiClient = ApiClient();
+  
+ 
   try {
     await apiClient.initialize();
   } catch (e) {
@@ -17,8 +20,7 @@ void main() async {
      return; 
   }
 
-  
-
+    
   // Get Supabase credentials from ApiClient
   final supabaseUrl = apiClient.getSupabaseUrl(); // Method to get the Supabase URL
   final supabaseAnonKey = apiClient.getSupabaseAnonKey(); // Method to get the Supabase anon key
@@ -30,6 +32,8 @@ void main() async {
   );
 
   final supabaseClient = Supabase.instance.client;
+
+  final revClient = RevenueCat_Client(rev_key: apiClient.getRevenueCatApiKey());
 
   // Run the app and pass the initialized ApiClient and SupabaseClient to MyApp
   runApp(MyApp(apiClient: apiClient, supabaseClient: supabaseClient));
