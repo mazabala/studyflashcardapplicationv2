@@ -75,6 +75,15 @@ class FlashcardNotifier extends StateNotifier<FlashcardState> {
   }
 
 
+Future<void> reportCard(Flashcard flashcard) async{
+
+    final flashcardId = flashcard.id;
+   
+    await _deckService.flagFlashcard(flashcardId);
+    
+
+}
+
   // Method to flip the card
   void toggleFlip() {
     state = state.copyWith(isFlipped: !state.isFlipped);

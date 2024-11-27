@@ -1,0 +1,11 @@
+api:
+  openai:
+    base_url: https://api.openai.com/v1/chat/completions
+    openai_key: sk-svcacct--o8esExxyxXf16gCwYX_MbOffbh3Sw5ElUybLIZluNLYNgXKEKYTdUfHYGUuhcpAQRQ3U2T3BlbkFJXXsvzEAExuDYu0SPdMy7Ys2UQudaQmldzpIamLdgULGaOyEwlq_s9aTDLotfg3A8fhBaIA
+  supabase:
+    supabase_url: https://ukumtektnsotntrmwpim.supabase.co
+    supabase_key: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVrdW10ZWt0bnNvdG50cm13cGltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzAyOTExMDcsImV4cCI6MjA0NTg2NzEwN30.jF18XyQBC_y1lEEUvhnQH8ezkhOf_W7k2eBCWi5bPmw
+  revenuecat:
+    rev_key: rcb_sb_WvtPzRCyJkMbXweqxIUjjgpLX
+  
+  

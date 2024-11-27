@@ -75,7 +75,20 @@ class DeckNotifier extends StateNotifier<DeckState> {
     await loadUserDecks();
   }
 
-  
+Future<void> flagCard(String flashcardId) async{
+
+try {
+  state = state.copyWith(isLoading: true, error: '');
+  await _deckService.flagFlashcard(flashcardId);
+
+}catch (e)
+{
+  throw e;
+  }
+  finally {
+      state = state.copyWith(isLoading: false);
+    }
+}
 
 Future<List<Flashcard>> getDeckFlashcards (String deckid) async
 {

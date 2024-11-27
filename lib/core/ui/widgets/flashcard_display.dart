@@ -26,60 +26,93 @@ class FlashcardDisplay extends ConsumerWidget {
         // Flip the card by calling the provider method via controller
         ref.read(flashcardProvider.notifier).toggleFlip();
       },
-      child: Card(
-        elevation: 5,
-        margin: const EdgeInsets.all(16),
-        color: Theme.of(context).cardColor, // Use card color from theme
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12), // Rounded corners for a modern look
-        ),
-        child: Container(
-          padding: const EdgeInsets.all(35),
-          width: double.infinity,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(12), // Same border radius as the card
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [
-                Theme.of(context).colorScheme.primary.withOpacity(0.1),
-                Theme.of(context).colorScheme.primary.withOpacity(0.2),
-              ],
+      child: Stack(  // Stack to overlay the circle
+        children: [
+          Card(
+            elevation: 5,
+            margin: const EdgeInsets.all(16),
+            color: Theme.of(context).cardColor, // Use card color from theme
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12), // Rounded corners for a modern look
+            ),
+            child: Container(
+              padding: const EdgeInsets.all(35),
+              width: double.infinity,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(12), // Same border radius as the card
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    Theme.of(context).colorScheme.primary.withOpacity(0.1),
+                    Theme.of(context).colorScheme.primary.withOpacity(0.2),
+                  ],
+                ),
+              ),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    flashcardState.isFlipped ? 'Answer' : 'Question',
+                    style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                          color: Theme.of(context).colorScheme.secondary,
+                        ),
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    flashcardState.isFlipped
+                        ? currentFlashcard.back
+                        : currentFlashcard.front,
+                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                          fontWeight: FontWeight.bold, // Make the question/answer bold
+                        ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 24),
+                  Icon(
+                    Icons.touch_app,
+                    color: Theme.of(context).colorScheme.secondary.withOpacity(0.5),
+                  ),
+                  Text(
+                    'Tap to flip',
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: Theme.of(context).colorScheme.onBackground.withOpacity(0.6), // Lighter color for secondary text
+                        ),
+                  ),
+                ],
+              ),
             ),
           ),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(
-                flashcardState.isFlipped ? 'Answer' : 'Question',
-                style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                      color: Theme.of(context).colorScheme.secondary,
-                    ),
+          // Alert Button (Red Circle) that triggers the reportCard method
+          Positioned(
+            top: 25,  // Position from the top edge
+            right: 25, // Position from the right edge
+            child: GestureDetector(
+              onTap: () async {
+                // Trigger the reportCard method when the alert button is pressed
+                
+                await ref.read(flashcardProvider.notifier).reportCard(currentFlashcard);
+                if (flashcardState.currentCardIndex >= 0){
+                        print('nextcard');
+                       ref.read(flashcardProvider.notifier).nextCard(deckId, flashcardState.currentCardIndex);
+                       }
+              },
+              child: Container(
+                height: 30,  // Circle diameter
+                width: 30,   // Circle diameter
+                decoration: const BoxDecoration(
+                  color: Colors.redAccent,  // Circle color
+                  shape: BoxShape.circle,  // Makes it a circle
+                ),
+                child: const Icon(
+                  Icons.report,
+                  size: 15,
+                  color: Colors.white,
+                ),
               ),
-              const SizedBox(height: 16),
-              Text(
-                flashcardState.isFlipped
-                    ? currentFlashcard.back
-                    : currentFlashcard.front,
-                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                      fontWeight: FontWeight.bold, // Make the question/answer bold
-                    ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 24),
-              Icon(
-                Icons.touch_app,
-                color: Theme.of(context).colorScheme.secondary.withOpacity(0.5),
-              ),
-              Text(
-                'Tap to flip',
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: Theme.of(context).colorScheme.onBackground.withOpacity(0.6), // Lighter color for secondary text
-                    ),
-              ),
-            ],
+            ),
           ),
-        ),
+        ],
       ),
     );
   }

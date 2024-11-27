@@ -1,4 +1,4 @@
-import 'package:flashcardstudyapplication/core/services/api/revenuecat_service.dart';
+import 'package:flashcardstudyapplication/core/services/revenuecat/revenuecat_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flashcardstudyapplication/core/services/api/api_client.dart'; // Import ApiClient and the provider
 import 'package:flashcardstudyapplication/core/themes/app_theme.dart';
@@ -33,17 +33,22 @@ void main() async {
 
   final supabaseClient = Supabase.instance.client;
 
-  final revClient = RevenueCat_Client(rev_key: apiClient.getRevenueCatApiKey());
+  // Initialize RevenueCat using the provider (this should happen automatically when the app starts)
+  final revenueCatClient = RevenueCat_Client(rev_key: apiClient.getRevenueCatApiKey());
+  await revenueCatClient.initialize();  // Initialize it once here, on app start
+
+
 
   // Run the app and pass the initialized ApiClient and SupabaseClient to MyApp
-  runApp(MyApp(apiClient: apiClient, supabaseClient: supabaseClient));
+  runApp(MyApp(apiClient: apiClient, supabaseClient: supabaseClient, revenueCatClient: revenueCatClient));
 }
 
 class MyApp extends StatelessWidget {
   final ApiClient apiClient;
   final SupabaseClient supabaseClient;
+  final RevenueCat_Client revenueCatClient;
 
-  const MyApp({required this.apiClient, required this.supabaseClient});
+  const MyApp({required this.apiClient, required this.supabaseClient, required this.revenueCatClient});
 
   @override
   Widget build(BuildContext context) {

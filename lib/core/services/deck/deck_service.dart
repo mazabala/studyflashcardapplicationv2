@@ -187,6 +187,21 @@ Future <Map<String, dynamic>> _getModelConfig(String deckDifficultyIds) async {
 }
 
 
+Future<void>flagFlashcard (String flashcardId) async {
+    try {
+            final response = await _supabaseClient.from('flashcards')
+            .update({'isFlagged':true})
+            .eq('id',flashcardId);
+
+            print('card flagged $response');
+
+    }catch(e)
+    {print (e);
+    throw Exception ('There was a problem flagging the card.');}
+
+
+}
+
 Future<List<Flashcard>> _generateFlashcards({
     required String title,
     required String category,
