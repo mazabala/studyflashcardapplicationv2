@@ -145,6 +145,13 @@ class _MyDeckScreenState extends ConsumerState<MyDeckScreen> {
               },
               child: const Text('Renew Subscription'),
             ),
+              TextButton(
+              onPressed: () {
+                // Navigate to subscription renewal page
+                      _signOut(); // Implement sign-out logic here
+              },
+              child: const Text('Logout'),
+            ),
           ],
         );
       },

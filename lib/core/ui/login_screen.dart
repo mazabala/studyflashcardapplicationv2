@@ -1,8 +1,10 @@
-
-import 'package:flashcardstudyapplication/core/ui/widgets/CustomScaffold.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flashcardstudyapplication/core/providers/auth_provider.dart';
+import 'package:flashcardstudyapplication/core/ui/widgets/CustomScaffold.dart';
+import 'package:flashcardstudyapplication/core/ui/widgets/CustomTextField.dart';
+import 'package:flashcardstudyapplication/core/ui/widgets/CustomButton.dart';
+import 'package:flashcardstudyapplication/core/ui/widgets/ErrorMessage.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
   @override
@@ -47,8 +49,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
     final email = _emailController.text.trim();
     final password = _passwordController.text.trim();
-
-    // Get the AuthNotifier from provider
     final authNotifier = ref.read(authProvider.notifier);
 
     try {
@@ -58,28 +58,19 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         await authNotifier.signIn(email, password);
       }
 
-      // After successful login, check if the user is authenticated
       final authState = ref.read(authProvider);
       if (authState.isAuthenticated) {
-        // Use `mounted` check before navigating
         if (mounted) {
-          
           Navigator.pushReplacementNamed(context, '/myDecks');
-          
-          
         }
       }
     } catch (e) {
-      // Error handling delegated to provider, just show snackbar if needed
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(e.toString())),
-      );
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString())));
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    // Watch auth state changes
     final authState = ref.watch(authProvider);
 
     return CustomScaffold(
@@ -96,68 +87,46 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 style: Theme.of(context).textTheme.displayLarge,
               ),
               const SizedBox(height: 20),
-              
-              TextFormField(
+              CustomTextField(
                 controller: _emailController,
-                decoration: const InputDecoration(
-                  labelText: 'Email',
-                  hintText: 'Enter your email',
-                ),
+                label: 'Email',
+                hint: 'Enter your email',
                 validator: _validateEmail,
                 enabled: !authState.isLoading,
               ),
-              
               const SizedBox(height: 16),
-              
-              TextFormField(
+              CustomTextField(
                 controller: _passwordController,
-                decoration: InputDecoration(
-                  labelText: 'Password',
-                  hintText: 'Enter your password',
-                  suffixIcon: IconButton(
-                    icon: Icon(
-                      _obscurePassword ? Icons.visibility : Icons.visibility_off,
-                    ),
-                    onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
-                  ),
-                ),
+                label: 'Password',
+                hint: 'Enter your password',
                 obscureText: _obscurePassword,
                 validator: _validatePassword,
                 enabled: !authState.isLoading,
-              ),
-              
-              const SizedBox(height: 20),
-              
-              if (authState.errorMessage != null)
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 20),
-                  child: Text(
-                    authState.errorMessage!,
-                    style: TextStyle(color: Theme.of(context).colorScheme.error),
+                suffixIcon: IconButton(
+                  icon: Icon(
+                    _obscurePassword ? Icons.visibility : Icons.visibility_off,
                   ),
+                  onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
                 ),
-              
+              ),
+              const SizedBox(height: 20),
+              if (authState.errorMessage != null)
+                ErrorMessage(message: authState.errorMessage!),
               Row(
                 children: [
                   Expanded(
-                    child: ElevatedButton(
-                      onPressed: authState.isLoading 
-                        ? null 
-                        : () => _handleSubmit(false),
-                      child: authState.isLoading
-                        ? const CircularProgressIndicator()
-                        : const Text('Sign In'),
+                    child: CustomButton(
+                      text: 'Sign In',
+                      isLoading: authState.isLoading,
+                      onPressed: authState.isLoading ? null : () => _handleSubmit(false),
                     ),
                   ),
                   const SizedBox(width: 16),
                   Expanded(
-                    child: ElevatedButton(
-                      onPressed: authState.isLoading 
-                        ? null 
-                        : () => _handleSubmit(true),
-                      child: authState.isLoading
-                        ? const CircularProgressIndicator()
-                        : const Text('Sign Up'),
+                    child: CustomButton(
+                      text: 'Sign Up',
+                      isLoading: authState.isLoading,
+                      onPressed: authState.isLoading ? null : () => _handleSubmit(true),
                     ),
                   ),
                 ],
