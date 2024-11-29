@@ -21,7 +21,7 @@ class FetchAndDisplayCategorySelectionWidget extends StatelessWidget {
           future: fetchCategory(),
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
-              return CircularProgressIndicator();
+              return const CircularProgressIndicator();
             } else if (snapshot.hasError) {
               return Text('Error: ${snapshot.error}');
             } else if (snapshot.hasData) {
@@ -38,7 +38,7 @@ class FetchAndDisplayCategorySelectionWidget extends StatelessWidget {
                 }).toList(),
               );
             } else {
-              return Text('No categories available');
+              return const Text('No categories available');
             }
           },
         );

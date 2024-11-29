@@ -34,21 +34,21 @@ void main() async {
   final supabaseClient = Supabase.instance.client;
 
   // Initialize RevenueCat using the provider (this should happen automatically when the app starts)
-  final revenueCatClient = RevenueCat_Client(rev_key: apiClient.getRevenueCatApiKey());
-  await revenueCatClient.initialize();  // Initialize it once here, on app start
+ // final revenueCatClient = RevenueCat_Client(rev_key: apiClient.getRevenueCatApiKey());
+  //await revenueCatClient.initialize();  // Initialize it once here, on app start
 
-
+    //  revenueCatClient.openBillingPortal(customerId: 'cus_RIbWKKvktg3A6V');
 
   // Run the app and pass the initialized ApiClient and SupabaseClient to MyApp
-  runApp(MyApp(apiClient: apiClient, supabaseClient: supabaseClient, revenueCatClient: revenueCatClient));
+  runApp(MyApp(apiClient: apiClient, supabaseClient: supabaseClient));
 }
 
 class MyApp extends StatelessWidget {
   final ApiClient apiClient;
   final SupabaseClient supabaseClient;
-  final RevenueCat_Client revenueCatClient;
+  //final RevenueCat_Client revenueCatClient;
 
-  const MyApp({required this.apiClient, required this.supabaseClient, required this.revenueCatClient});
+  const MyApp({required this.apiClient, required this.supabaseClient});
 
   @override
   Widget build(BuildContext context) {

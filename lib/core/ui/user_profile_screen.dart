@@ -9,7 +9,7 @@ class UserProfileScreen extends StatelessWidget {
 
     return CustomScaffold(
       currentRoute: currentRoute,  // Pass the current route to customize the AppBar
-      body: Center(
+      body: const Center(
         child: Text('Welcome to the User Profile Screen'),
       ),
     );

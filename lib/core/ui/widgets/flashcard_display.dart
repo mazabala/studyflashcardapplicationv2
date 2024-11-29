@@ -55,7 +55,7 @@ class FlashcardDisplay extends ConsumerWidget {
                   Text(
                     flashcardState.isFlipped ? 'Answer' : 'Question',
                     style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                          color: Theme.of(context).colorScheme.secondary,
+                          color: Theme.of(context).colorScheme.tertiary,
                         ),
                   ),
                   const SizedBox(height: 16),
@@ -71,12 +71,12 @@ class FlashcardDisplay extends ConsumerWidget {
                   const SizedBox(height: 24),
                   Icon(
                     Icons.touch_app,
-                    color: Theme.of(context).colorScheme.secondary.withOpacity(0.5),
+                    color: Theme.of(context).colorScheme.tertiary.withOpacity(0.9),
                   ),
                   Text(
                     'Tap to flip',
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: Theme.of(context).colorScheme.onBackground.withOpacity(0.6), // Lighter color for secondary text
+                          fontWeight: FontWeight.normal,
                         ),
                   ),
                 ],

@@ -1,7 +1,10 @@
+import 'package:flashcardstudyapplication/core/providers/user_provider.dart';
+import 'package:flashcardstudyapplication/core/services/subscription/subscription_service.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flashcardstudyapplication/core/services/authentication/authentication_service.dart';
 import 'package:flashcardstudyapplication/core/interfaces/i_auth_service.dart';
+import 'package:flashcardstudyapplication/core/providers/subscription_provider.dart'; // Import your subscription provider
 
 // AuthState class to hold the authentication state
 class AuthState {
@@ -35,20 +38,31 @@ class AuthState {
 // StateNotifier to manage authentication state
 class AuthNotifier extends StateNotifier<AuthState> {
   final IAuthService _authService;
+  final SubscriptionNotifier _subscriptionNotifier; // Inject SubscriptionNotifier
 
-  AuthNotifier(this._authService) : super(const AuthState());
+  AuthNotifier(this._authService, this._subscriptionNotifier) : super(const AuthState());
 
   Future<void> signIn(String email, String password) async {
     state = state.copyWith(isLoading: true, errorMessage: null);
     
     try {
+      // Sign the user in
       await _authService.signIn(email, password);
       final user = await _authService.getCurrentUser();
+      
+      // Update the authentication state
       state = state.copyWith(
         user: user,
         isAuthenticated: true,
         isLoading: false,
       );
+        
+      // If the user is logged in, fetch their subscription status
+      if (user != null) {
+        print('updating status');
+        await _subscriptionNotifier.fetchSubscriptionStatus(user.id); // Fetch subscription status
+      }
+
     } catch (e) {
       state = state.copyWith(
         errorMessage: e.toString(),
@@ -62,15 +76,23 @@ class AuthNotifier extends StateNotifier<AuthState> {
     state = state.copyWith(isLoading: true, errorMessage: null);
     
     try {
+      // Sign the user up
       await _authService.signUp(email, password);
       final user = await _authService.getCurrentUser();
+      
+      // Update the authentication state
       state = state.copyWith(
         user: user,
         isAuthenticated: true,
         isLoading: false,
       );
+
+      // Fetch the subscription status for the user
+      if (user != null) {
+        await _subscriptionNotifier.fetchSubscriptionStatus(user.id);
+      }
+
     } catch (e) {
-      
       state = state.copyWith(
         errorMessage: e.toString(),
         isLoading: false,
@@ -139,8 +161,11 @@ final authServiceProvider = Provider<IAuthService>((ref) {
   return AuthService(supabaseClient);
 });
 
+
+
 // The main auth provider that will be used by the UI
 final authProvider = StateNotifierProvider<AuthNotifier, AuthState>((ref) {
   final authService = ref.watch(authServiceProvider);
-  return AuthNotifier(authService);
+  final subscriptionNotifier = ref.watch(subscriptionProvider.notifier);  // Access the subscription provider
+  return AuthNotifier(authService, subscriptionNotifier);
 });

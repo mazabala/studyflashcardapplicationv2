@@ -63,7 +63,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       if (authState.isAuthenticated) {
         // Use `mounted` check before navigating
         if (mounted) {
+          
           Navigator.pushReplacementNamed(context, '/myDecks');
+          
+          
         }
       }
     } catch (e) {

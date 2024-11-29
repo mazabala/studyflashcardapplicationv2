@@ -4,7 +4,6 @@ import 'package:flashcardstudyapplication/core/ui/widgets/navigation_button.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flashcardstudyapplication/core/providers/flashcard_provider.dart';
-import 'package:flashcardstudyapplication/core/ui/study_screen_controller.dart';
 import 'package:flashcardstudyapplication/core/ui/widgets/flashcard_display.dart';
 import 'package:flashcardstudyapplication/core/ui/widgets/progress_indicator.dart';
 import 'package:flashcardstudyapplication/core/ui/widgets/progress_button.dart';

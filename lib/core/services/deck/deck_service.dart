@@ -3,9 +3,6 @@
 
 import 'dart:convert';
 
-import 'package:flashcardstudyapplication/core/services/api/openapi_service.dart';
-import 'package:flutter/foundation.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flashcardstudyapplication/core/models/deck.dart';
 import 'package:flashcardstudyapplication/core/models/flashcard.dart';
@@ -14,8 +11,6 @@ import 'package:flashcardstudyapplication/core/error/error_handler.dart';
 import 'package:flashcardstudyapplication/core/interfaces/i_api_service.dart';
 import 'package:flashcardstudyapplication/core/services/api/api_client.dart';
 import 'package:uuid/uuid.dart';
-import 'dart:io';
-import 'package:path_provider/path_provider.dart';
 
 class DeckService implements IDeckService {
   final SupabaseClient _supabaseClient;
@@ -35,7 +30,7 @@ Future<List<Flashcard>> getFlashcards(String deckid) async{
 
 
 
-            if (flashcardsResponse == null || flashcardsResponse.isEmpty) {
+            if (flashcardsResponse.isEmpty) {
         throw ErrorHandler.handle(flashcardsResponse);
       }
 
@@ -72,7 +67,7 @@ Future<void> checkAPI() async {
           
 
 
-      if (deckResponse == null|| deckResponse.isEmpty) {
+      if (deckResponse.isEmpty) {
         throw 'User has no decks';
       }
       else{
@@ -102,7 +97,7 @@ Future<List<Deck>> getUserDecks(String userId) async {
         .select('deck_id')  // This will return a list of deck_id
         .eq('user_id', userId);
 
-    if (response == null || response.isEmpty) {
+    if (response.isEmpty) {
       print('No decks found for the user. returning');
       return [];
     }
@@ -136,7 +131,7 @@ try {
         
 
   
-    if (response == null || response.isEmpty) {
+    if (response.isEmpty) {
       print('No decks found ');
       throw Exception("No decks found");
     }
@@ -180,7 +175,7 @@ Future <Map<String, dynamic>> _getModelConfig(String deckDifficultyIds) async {
   return config;
   } catch (e)
   {print ('Error setting modelconfig: $e');
-  throw (e);
+  rethrow;
   }
 
 
@@ -360,7 +355,7 @@ Future<List<Flashcard>> _generateFlashcards({
       
       
       // If there are flashcards, create them with their own UUIDs
-      if (aiFlashcards.length >0) {
+      if (aiFlashcards.isNotEmpty) {
         final flashcardsData = aiFlashcards.map((card) => {
           'id': _uuid.v4(),  // Generate UUID for each flashcard
           'deck_id': deckId, // Link to the deck's UUID
@@ -440,7 +435,7 @@ Future<List<String>> getDeckDifficulty (String subscriptionId) async {
   .select()
   .eq('subscriptionTypeID',subscriptionTypeID['subscriptionTypeID']);
 
-  if (deckDifficultyId == null || deckDifficultyId.isEmpty)
+  if (deckDifficultyId.isEmpty)
   {throw ErrorHandler.handle(deckDifficultyId);}
 
 
@@ -490,7 +485,7 @@ Future<String>_getDifficultyPrompt (String difficultyTypeid) async
   }catch (e)
   {
   print('prompt: $e');
-   throw (e);}
+   rethrow;}
 
 }
 @override
@@ -508,7 +503,7 @@ Future<List> _getModel () async
   }catch (e)
   {
   print('MaxTokens: $e');
-   throw (e);}
+   rethrow;}
 
 }
 
@@ -526,7 +521,7 @@ Future<double> _getDeckMaxTokens (String difficultyTypeid) async
   }catch (e)
   {
   print('MaxTokens: $e');
-   throw (e);}
+   rethrow;}
 
 }
 @override

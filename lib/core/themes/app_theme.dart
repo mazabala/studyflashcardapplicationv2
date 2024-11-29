@@ -8,9 +8,10 @@ class AppTheme {
     brightness: Brightness.light,
 
     // Use colorScheme for primary, secondary, and error
-    colorScheme: ColorScheme.light(
+    colorScheme: const ColorScheme.light(
       primary: AppColors.primaryColor,
       secondary: AppColors.accentColor,
+      tertiary: AppColors.secondaryColor,
       error: AppColors.errorColor,
     ),
     
@@ -19,15 +20,17 @@ class AppTheme {
 
     // Updated text theme for Flutter 2.0+
     textTheme: TextTheme(
+      bodySmall: AppTypography.bodySmall,
       bodyLarge: AppTypography.bodyText1, // Body text for light theme
       bodyMedium: AppTypography.bodyText2, // Secondary body text for light theme
+      headlineSmall: AppTypography.headlineSmall,
       displayLarge: AppTypography.headline1, // Headline 1 for light theme
       displayMedium: AppTypography.headline2, // Headline 2 for light theme
       labelLarge: AppTypography.button, // Button text for light theme
     ),
 
     // Button Theme
-    buttonTheme: ButtonThemeData(
+    buttonTheme: const ButtonThemeData(
       buttonColor: AppColors.primaryColor,
       textTheme: ButtonTextTheme.primary,
     ),
@@ -37,7 +40,7 @@ class AppTheme {
       filled: true,
       fillColor: Colors.white,
       border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-      labelStyle: TextStyle(color: AppColors.textSecondaryColor),
+      labelStyle: const TextStyle(color: AppColors.textSecondaryColor),
     ),
   );
 
@@ -46,34 +49,37 @@ class AppTheme {
     brightness: Brightness.dark,
 
     // Use colorScheme for primary, secondary, and error
-    colorScheme: ColorScheme.dark(
+    colorScheme: const ColorScheme.dark(
       primary: AppColors.primaryColor,
       secondary: AppColors.accentColor,
+      tertiary: AppColors.secondaryColor,
       error: AppColors.errorColor,
     ),
 
-    scaffoldBackgroundColor: Color(0xFF303030),
-    cardColor: Color(0xFF424242),
+    scaffoldBackgroundColor: const Color(0xFF303030),
+    cardColor: const Color(0xFF424242),
 
     // Updated text theme for Flutter 2.0+
     textTheme: TextTheme(
+      bodySmall: AppTypography.bodysmallDark,
       bodyLarge: AppTypography.bodyText1Dark, // Body text for dark theme
       bodyMedium: AppTypography.bodyText2Dark, // Secondary body text for dark theme
+      headlineSmall: AppTypography.headlineSmallDark,
       displayLarge: AppTypography.headline1Dark, // Headline 1 for dark theme
       displayMedium: AppTypography.headline2Dark, // Headline 2 for dark theme
       labelLarge: AppTypography.buttonDark, // Button text for dark theme
     ),
 
-    buttonTheme: ButtonThemeData(
+    buttonTheme: const ButtonThemeData(
       buttonColor: AppColors.primaryColor,
       textTheme: ButtonTextTheme.primary,
     ),
 
     inputDecorationTheme: InputDecorationTheme(
       filled: true,
-      fillColor: Color(0xFF616161),
+      fillColor: const Color(0xFF616161),
       border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-      labelStyle: TextStyle(color: Colors.white70),
+      labelStyle: const TextStyle(color: Colors.white70),
     ),
   );
 }

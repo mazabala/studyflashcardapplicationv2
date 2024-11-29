@@ -1,14 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:flashcardstudyapplication/core/themes/app_theme.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flashcardstudyapplication/core/providers/auth_provider.dart';
-//import 'package:flashcardstudyapplication/core/themes/colors.dart'; // Import the AppColors class
 
-class CustomScaffold extends StatelessWidget {
+class CustomScaffold extends ConsumerWidget {
   final String currentRoute;
   final Widget body;  // This is where we'll pass the unique content of each screen
-  
-  
-  CustomScaffold({required this.currentRoute, required this.body});
+
+  const CustomScaffold({required this.currentRoute, required this.body});
 
   void _navigateWithoutAnimation(BuildContext context, String route) {
     if (ModalRoute.of(context)?.settings.name != route) {
@@ -17,32 +15,37 @@ class CustomScaffold extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
-    // Get the current theme (light or dark)
-  final ThemeData theme = Theme.of(context);
+  Widget build(BuildContext context, WidgetRef ref) {
+    final ThemeData theme = Theme.of(context);
+    final authState = ref.watch(authProvider);
+    bool isLoggedIn = authState.isAuthenticated;
+
+    // Get screen size for responsive layout
+    double screenHeight = MediaQuery.of(context).size.height;
+    double screenWidth = MediaQuery.of(context).size.width;
+    double headerHeight = screenHeight * 0.25; // 25% of screen height for the header
+    double navBarHeight = screenHeight * 0.06; // 6% of screen height for the navbar
+
+    // Check if the screen is small (e.g., width < 600 for mobile screens)
+    bool isSmallScreen = screenWidth < 600;
 
     return Scaffold(
-      backgroundColor: theme.scaffoldBackgroundColor, // Use scaffold background color from the theme
-      
+      backgroundColor: theme.scaffoldBackgroundColor,
       body: SafeArea(
         child: Column(
           children: [
             // Header Image
             Container(
-              height: 300,
+              height: headerHeight,
               width: double.infinity,
               decoration: const BoxDecoration(
-               
                 image: DecorationImage(
                   image: AssetImage('assets/images/medical_bg.jpg'),
                   fit: BoxFit.cover,
-                  
-                  
                 ),
               ),
               child: Container(
                 decoration: BoxDecoration(
-                  
                   gradient: LinearGradient(
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
@@ -54,45 +57,48 @@ class CustomScaffold extends StatelessWidget {
                 ),
                 child: Center(
                   child: Text(
-                    'Medical Flashcards',
+                    'Brain Decks',
                     style: theme.textTheme.displayLarge!.copyWith(
-                      color: Colors.white, // Override text color for header
+                      color: Colors.white,
                     ),
                   ),
                 ),
               ),
             ),
-            
+
             // Navigation Bar
             Container(
               decoration: BoxDecoration(
-                color: theme.colorScheme.secondary, // Use secondary color for the navigation bar
+                color: theme.colorScheme.secondary,
                 borderRadius: const BorderRadius.only(
                   bottomLeft: Radius.circular(5),
                   bottomRight: Radius.circular(5),
                 ),
               ),
-              height: 45,
+              height: navBarHeight,
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
-                  _buildNavItem(context, 'Home', '/'),
-                  _buildNavItem(context, 'Decks & Flashcards', '/deck'),
-                  _buildNavItem(context, 'Pricing', '/prices'),
-                  _buildNavItem(context, 'Contact Us', '/contactUs'),
-                  _buildNavItem(context, 'About Us', '/aboutUs'),
-                  _buildNavItem(context, 'Login', '/login'),
+                  _buildNavItem(context, 'Home', '/', isSmallScreen ? Icons.home : 'Home'),
+                  _buildNavItem(context, 'Decks & Flashcards', '/deck', isSmallScreen ? Icons.library_books : 'Decks & Flashcards'),
+                  _buildNavItem(context, 'Pricing', '/prices', isSmallScreen ? Icons.monetization_on : 'Pricing'),
+                  _buildNavItem(context, 'Contact Us', '/contactUs', isSmallScreen ? Icons.phone : 'Contact Us'),
+                  _buildNavItem(context, 'About Us', '/aboutUs', isSmallScreen ? Icons.info : 'About Us'),
 
+                  // Conditional navigation item based on login status
+                  if (isLoggedIn)
+                    _buildNavItem(context, 'My Decks', '/myDecks', isSmallScreen ? Icons.folder : 'My Decks')
+                  else
+                    _buildNavItem(context, 'Login', '/login', isSmallScreen ? Icons.login : 'Login'),
                 ],
               ),
-              
             ),
-            
+
             // Content Area
             Expanded(
               child: SingleChildScrollView(
                 child: Padding(
-                  padding: const EdgeInsets.all(16.0),
+                  padding: EdgeInsets.all(screenWidth * 0.04), // 4% of screen width for padding
                   child: body,
                 ),
               ),
@@ -103,33 +109,54 @@ class CustomScaffold extends StatelessWidget {
     );
   }
 
-Widget _buildNavItem(BuildContext context, String label, String route) {
-  final currentRoute = ModalRoute.of(context)?.settings.name;
-  final isSelected = currentRoute == route;
-  final ThemeData theme = Theme.of(context);
+  Widget _buildNavItem(BuildContext context, String label, String route, dynamic icon) {
+    final currentRoute = ModalRoute.of(context)?.settings.name;
+    final isSelected = currentRoute == route;
+    final ThemeData theme = Theme.of(context);
 
-  return GestureDetector(
-    onTap: () => _navigateWithoutAnimation(context, route),
-    child: Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      decoration: BoxDecoration(
-        color: isSelected
-            ? theme.colorScheme.primary.withOpacity(0.2) // Highlight selected item with primary color
-            : null,
-        borderRadius: BorderRadius.circular(4),
-      ),
-      child: Text(
-        label,
-        style: isSelected
-            ? theme.textTheme.bodyLarge?.copyWith(
-                color: theme.colorScheme.onSurface, // Ensure text color is visible on the primary background
-              )
-            : theme.textTheme.bodyMedium?.copyWith(
-                color: theme.colorScheme.onPrimary, // Ensure text color contrasts on non-selected items
-              ),
-      ),
-    ),
-  );
-}
-
+    // Use icon for small screens, text for larger screens
+    if (icon is IconData) {
+      return GestureDetector(
+        onTap: () => _navigateWithoutAnimation(context, route),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          decoration: BoxDecoration(
+            color: isSelected
+                ? theme.colorScheme.primary.withOpacity(0.2)
+                : null,
+            borderRadius: BorderRadius.circular(4),
+          ),
+          child: Icon(
+            icon,
+            color: isSelected
+                ? theme.colorScheme.onSurface
+                : theme.colorScheme.onPrimary,
+          ),
+        ),
+      );
+    } else {
+      return GestureDetector(
+        onTap: () => _navigateWithoutAnimation(context, route),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          decoration: BoxDecoration(
+            color: isSelected
+                ? theme.colorScheme.primary.withOpacity(0.2)
+                : null,
+            borderRadius: BorderRadius.circular(4),
+          ),
+          child: Text(
+            icon,  // Here, icon is a label string
+            style: isSelected
+                ? theme.textTheme.bodyLarge?.copyWith(
+                    color: theme.colorScheme.onSurface,
+                  )
+                : theme.textTheme.bodyMedium?.copyWith(
+                    color: theme.colorScheme.onPrimary,
+                  ),
+          ),
+        ),
+      );
+    }
+  }
 }

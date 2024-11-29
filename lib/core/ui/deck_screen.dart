@@ -6,13 +6,15 @@ import 'package:flutter/material.dart';
 
 
 class DeckScreen extends StatelessWidget {
+  const DeckScreen({super.key});
+
   @override
   Widget build(BuildContext context) {
     final String currentRoute = ModalRoute.of(context)?.settings.name ?? '/deck';
 
     return CustomScaffold(
       currentRoute: currentRoute,  // Pass the current route to customize the AppBar
-      body: Center(
+      body: const Center(
         child: Text('Welcome to the Deck Screen'),
       ),
     );

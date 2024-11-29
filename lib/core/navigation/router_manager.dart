@@ -1,3 +1,4 @@
+
 import 'package:flashcardstudyapplication/core/ui/study_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flashcardstudyapplication/core/ui/deck_screen.dart';
@@ -7,8 +8,11 @@ import 'package:flashcardstudyapplication/core/ui/home_screen.dart';
 import 'package:flashcardstudyapplication/core/ui/my_deck_screen.dart';
 
 
+
 class RouteManager {
   static Route<dynamic> generateRoute(RouteSettings settings) {
+
+   
 
         // Handle routes that need arguments
     if (settings.name == '/study') {
@@ -23,17 +27,18 @@ class RouteManager {
     
     switch (settings.name) {
       case '/':
-        return _noAnimationRoute (HomeScreen());
+        return _noAnimationRoute (const HomeScreen());
       case '/deck':
         return _noAnimationRoute (DeckScreen());
       case '/userProfile':
         return _noAnimationRoute (UserProfileScreen());
       case '/login':
+        
         return _noAnimationRoute (LoginScreen());
       case '/myDecks':
-        return _noAnimationRoute(MyDeckScreen());
+        return _noAnimationRoute(const MyDeckScreen());
       default:
-        return _noAnimationRoute (HomeScreen());  // Default route
+        return _noAnimationRoute (const HomeScreen());  // Default route
     }
   }
 
@@ -52,7 +57,7 @@ class RouteManager {
   // Optional: If you need static routes as a map for navigation or deep linking.
   static Map<String, Widget Function(BuildContext)> get routes {
     return {
-      '/': (_) => HomeScreen(),
+      '/': (_) => const HomeScreen(),
       '/deck': (_) => DeckScreen(),
       '/userProfile': (_) => UserProfileScreen(),
       '/login': (_) => LoginScreen(),

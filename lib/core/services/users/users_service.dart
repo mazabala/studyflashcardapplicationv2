@@ -14,6 +14,26 @@ class UserService implements IUserService {
     return user?.id;
   }
 
+
+@override
+Future<bool> isUserExpired(DateTime expiryDate) async {
+  try {
+    // Parse the expiryDate string into a DateTime object
+    
+
+    // Compare with the current date and time
+    if (expiryDate.isBefore(DateTime.now())) {
+      return true; // Expired
+    } else {
+      return false; // Not expired
+    }
+  } catch (e) {
+    // Handle parsing errors
+    print("Error parsing expiry date: $e");
+    return false; // Return false or handle the error appropriately
+  }
+}
+
   @override
   Future<String?> getCurrentUserEmail() async {
     final user = _supabaseClient.auth.currentUser;
@@ -164,8 +184,8 @@ class UserService implements IUserService {
 
     try {
       final result = await _supabaseClient
-          .from('subscriptions')
-          .select('expiry_date')
+          .from('user_subscriptions')
+          .select('end_date')
           .eq('user_id', user.id)
           .single();
 
@@ -175,8 +195,8 @@ class UserService implements IUserService {
           'No subscription found'
         );
       }
-
-      final expiryDate = result['expiry_date'] as String?;
+      
+      final expiryDate = result['end_date'] as String?;
       return expiryDate != null ? DateTime.tryParse(expiryDate) : null;
     } on PostgrestException catch (e) {
       throw ErrorHandler.handleDatabaseError(e, specificType: ErrorType.subscription);
@@ -194,11 +214,11 @@ class UserService implements IUserService {
     final now = DateTime.now();
     switch (planType.toLowerCase()) {
       case 'basic':
-        return now.add(Duration(days: 30));
+        return now.add(const Duration(days: 30));
       case 'advanced':
-        return now.add(Duration(days: 30));
+        return now.add(const Duration(days: 30));
       default:
-        return now.add(Duration(days: 3));
+        return now.add(const Duration(days: 3));
     }
   }
 }

@@ -1,10 +1,7 @@
-import 'package:flashcardstudyapplication/core/interfaces/i_api_service.dart';
 import 'package:flashcardstudyapplication/core/models/flashcard.dart';
 import 'package:flashcardstudyapplication/core/providers/user_provider.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:http/http.dart' as http;
 import 'package:flashcardstudyapplication/core/models/deck.dart';
 import 'package:flashcardstudyapplication/core/services/deck/deck_service.dart';
 import 'package:flashcardstudyapplication/core/services/api/api_client.dart';
@@ -83,7 +80,7 @@ try {
 
 }catch (e)
 {
-  throw e;
+  rethrow;
   }
   finally {
       state = state.copyWith(isLoading: false);
@@ -193,7 +190,7 @@ try{
     }
     
     final decks = await _deckService.getUserDecks(userId);
-    if (decks == null || decks.isEmpty)
+    if (decks.isEmpty)
      {      print('decks are null: $decks');
           return [];
         }

@@ -7,7 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';  // Make sure this impo
 class CreateDeckDialog extends ConsumerStatefulWidget {
   final Function(String title, String description,String category, String difficultyLevel, int cardcount) onSubmit;
 
-  CreateDeckDialog({required this.onSubmit});
+  const CreateDeckDialog({required this.onSubmit});
 
   @override
   _CreateDeckDialogState createState() => _CreateDeckDialogState();

@@ -60,13 +60,10 @@ class ApiClient implements IApiService {
   }
 
 
-  @override
   String getRevenueCatApiKey() => _getRevenueCatApiKey;
 
-  @override
   String getSupabaseUrl() => _supabaseUrl;
 
-  @override
   String getSupabaseAnonKey() => _supabaseAnonKey;
 
   @override
@@ -141,7 +138,7 @@ class ApiClient implements IApiService {
   // Utility to get API key
   String _getApiKey()  {
 
-    if(_baseKey.isEmpty || _baseKey==null){
+    if(_baseKey.isEmpty){
 
       throw Exception ('key not found');
     }

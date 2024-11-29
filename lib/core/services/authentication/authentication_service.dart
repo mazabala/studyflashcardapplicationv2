@@ -10,8 +10,12 @@ class AuthService implements IAuthService {
   // Constructor that takes SupabaseClient
   AuthService(this._supabaseClient);
 
+
+
   @override
   Future<void> signIn(String email, String password) async {
+
+
     final response = await _supabaseClient.auth.signInWithPassword(
       email: email,
       password: password,
@@ -38,7 +42,7 @@ class AuthService implements IAuthService {
     }
     }catch (e){
       print (e);
-      throw e;
+      rethrow;
     }
   }
 
