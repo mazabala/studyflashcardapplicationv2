@@ -52,7 +52,7 @@ class DeckDisplayWidget extends StatelessWidget {
               focusColor: theme.secondaryHeaderColor,
               title: Text(
                 deck.title,
-                style: theme.textTheme.bodyMedium,
+                style: Theme.of(context).textTheme.bodyLarge,
                 ),
               subtitle: Text(
                 'Difficulty: ${deck.difficultyLevel}',

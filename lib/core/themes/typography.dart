@@ -14,13 +14,13 @@ class AppTypography {
 
   static TextStyle bodyText1 = GoogleFonts.openSans(
     color: AppColors.textPrimaryColor, // Dark text for light backgrounds
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: FontWeight.normal,
   );
 
   static TextStyle bodyText2 = GoogleFonts.openSans(
-    color: AppColors.textSecondaryColor, // Softer text for secondary content
-    fontSize: 18,
+    color: AppColors.textPrimaryColor, // Softer text for secondary content
+    fontSize: 16,
     fontWeight: FontWeight.normal,
   );
 
