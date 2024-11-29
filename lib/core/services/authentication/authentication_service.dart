@@ -11,7 +11,12 @@ class AuthService implements IAuthService {
   AuthService(this._supabaseClient);
 
 
+Future<void>  forgotPassword(String email) async{
 
+      final response = await Supabase.instance.client.auth
+        .resetPasswordForEmail(email);
+
+}
   @override
   Future<void> signIn(String email, String password) async {
 

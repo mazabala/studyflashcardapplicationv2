@@ -1,3 +1,4 @@
+import 'package:flashcardstudyapplication/core/ui/widgets/CustomDialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flashcardstudyapplication/core/providers/auth_provider.dart';
@@ -129,11 +130,64 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       onPressed: authState.isLoading ? null : () => _handleSubmit(true),
                     ),
                   ),
+                  const SizedBox(width: 16),
+
                 ],
               ),
+              
+          
+              Row(
+                
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  
+                    GestureDetector(
+                      onTap: _onForgotPasswordTapped,
+                      child: Text(
+                        'Forgot Password?',
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: Theme.of(context).colorScheme.primary
+                        ),
+                      ),
+                    ),
+                  
+                ],
+              )
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  void _onForgotPasswordTapped() {
+    final authWatcher = ref.watch(authProvider.notifier);
+    final authState = ref.watch(authProvider);
+    final resetEmailController = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (context) => CustomDialogWidget(
+        title: 'Forgot Password',
+        dialogContent: [
+          const Text('Enter your email address:'),
+          CustomTextField(
+            controller: resetEmailController,
+            label: 'Email Address',
+            hint: 'Enter your email address here',
+          ),
+          CustomButton(
+            text: 'Reset Password',
+            isLoading: authState.isLoading,
+            onPressed: () {
+              authWatcher.resetPassword(resetEmailController.text);
+              if (mounted) {
+                 Navigator.of(context).pop(); 
+                  }
+// Close the dialog after reset
+            },
+          ),
+        ],
       ),
     );
   }

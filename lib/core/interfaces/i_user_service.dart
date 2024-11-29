@@ -7,4 +7,5 @@ abstract class IUserService {
   Future<void> downgradeSubscription(String planType);
   Future<String> getUserSubscriptionPlan();
   Future<DateTime?> getSubscriptionExpiry();
+  
 }

@@ -8,4 +8,5 @@ abstract class IAuthService {
   Future<void> signUp(String email, String password);
   Future<void> refreshToken();
   Future<User?> getCurrentUser();
+  Future<void>  forgotPassword(String email);
 }

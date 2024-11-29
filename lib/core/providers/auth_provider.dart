@@ -148,6 +148,13 @@ class AuthNotifier extends StateNotifier<AuthState> {
       );
     }
   }
+
+ Future<void> resetPassword (String email) async{
+
+    await _authService.forgotPassword(email);
+
+ }
+
 }
 
 // Provider for Supabase client
