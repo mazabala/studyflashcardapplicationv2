@@ -41,3 +41,8 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+Application Certificates
+Application Certificates/Apple/development.cer
+Application Certificates/Apple/mykey.key
+AWS - pairname/brainfocuspairname.pem
+AWS - pairname/DNS_Configuration.csv

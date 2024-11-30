@@ -212,7 +212,8 @@ class AboutUsScreen extends StatelessWidget {
           style: ElevatedButton.styleFrom(
             backgroundColor: Theme.of(context).colorScheme.primary,
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-            textStyle: Theme.of(context).textTheme.labelLarge,
+            textStyle: Theme.of(context).textTheme.labelLarge?.copyWith(
+                         color: Colors.white,)
           ),
         ),
       ],
