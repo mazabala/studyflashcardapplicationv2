@@ -13,8 +13,8 @@ class AppColors {
   static const Color cardBackgroundColor = Color(0xFF003366);  // Light Slate Blue - Subtle contrast
 
   // Text Colors
-  static const Color textPrimaryColor = Color(0xFF212121);  // Charcoal - Strong contrast for text
-  static const Color textSecondaryColor = Color.fromARGB(255, 151, 151, 151);  // Silver - Softer, secondary text color
+  static const Color textPrimaryColor = Color(0xFF003366);  // Charcoal - Strong contrast for text
+  static const Color textSecondaryColor = Color(0xFF212121);  // Silver - Softer, secondary text color
 
   // Error Color
   static const Color errorColor = Color(0xFFD32F2F);  // Crimson Red for errors

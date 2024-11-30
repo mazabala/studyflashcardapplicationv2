@@ -26,7 +26,8 @@ class AppTheme {
       headlineSmall: AppTypography.headlineSmall,
       displayLarge: AppTypography.headline1, // Headline 1 for light theme
       displayMedium: AppTypography.headline2, // Headline 2 for light theme
-      labelLarge: AppTypography.button, // Button text for light theme
+      labelLarge: AppTypography.button,
+        // Button text for light theme
     ),
 
     // Button Theme
