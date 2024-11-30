@@ -1,11 +1,11 @@
 import 'package:flashcardstudyapplication/core/providers/deck_provider.dart';
 import 'package:flashcardstudyapplication/core/providers/user_provider.dart';
-
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';  // Make sure this import is there
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flashcardstudyapplication/core/ui/widgets/CardCountSlider.dart';  // Make sure to import the slider widget
 
 class CreateDeckDialog extends ConsumerStatefulWidget {
-  final Function(String title, String description,String category, String difficultyLevel, int cardcount) onSubmit;
+  final Function(String title, String description, String category, String difficultyLevel, int cardcount) onSubmit;
 
   const CreateDeckDialog({required this.onSubmit});
 
@@ -22,23 +22,23 @@ class _CreateDeckDialogState extends ConsumerState<CreateDeckDialog> {
   List<String> categories = [];
   List<String> difficultyLevels = [];
 
-  // Declare a TextEditingController for the deck title
+  // Declare TextEditingController for the deck title and description
   final TextEditingController _titleController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
-  final TextEditingController _cardCountController = TextEditingController();
+  
+  double _cardCount = 10.0;  // Initial slider value
 
   // Function to fetch categories (replace with your actual fetching logic)
   Future<void> _fetchCategories() async {
     try {
       final deckReader = ref.read(deckServiceProvider);
       final categoriesFromDb = await deckReader.getDeckCategory(); // Assuming `getDeckCategories` exists in your service
-      
-            if (mounted){
-           setState(() {
-        categories = categoriesFromDb;
-      });
-            }
 
+      if (mounted) {
+        setState(() {
+          categories = categoriesFromDb;
+        });
+      }
     } catch (e) {
       print('Error fetching categories: $e');
     }
@@ -51,12 +51,12 @@ class _CreateDeckDialogState extends ConsumerState<CreateDeckDialog> {
       final userReader = ref.read(userServiceProvider);
       final subscriptionId = await userReader.getUserSubscriptionPlan();
       final deckDifficulty = await deckReader.getDeckDifficulty(subscriptionId);
-      if (mounted){
-           setState(() {
-        difficultyLevels = deckDifficulty;
-      });
-            }
-      
+
+      if (mounted) {
+        setState(() {
+          difficultyLevels = deckDifficulty;
+        });
+      }
     } catch (e) {
       print('Error fetching difficulty levels: $e');
     }
@@ -68,8 +68,6 @@ class _CreateDeckDialogState extends ConsumerState<CreateDeckDialog> {
     super.initState();
     _fetchCategories();  // Fetch categories
     _fetchDeckDifficulty();  // Fetch difficulty levels
-
-
   }
 
   @override
@@ -86,16 +84,19 @@ class _CreateDeckDialogState extends ConsumerState<CreateDeckDialog> {
                   controller: _titleController,
                   decoration: InputDecoration(labelText: 'Deck Title'),
                 ),
-                  TextField(
+                TextField(
                   controller: _descriptionController,
                   decoration: InputDecoration(labelText: 'Deck Description'),
-                  
                 ),
-                TextField(
-                  controller: _cardCountController,
-                  keyboardType: TextInputType.number,
-                  decoration: InputDecoration(labelText: 'Amount of flashcards'),
-                  
+
+                // Replace the TextField with the CardCountSlider widget
+                CardCountSlider(
+                  initialValue: _cardCount,  // Set the initial value for the slider
+                  onChanged: (value) {
+                    setState(() {
+                      _cardCount = value;  // Update the card count based on slider value
+                    });
+                  },
                 ),
 
                 // Category Dropdown
@@ -103,10 +104,10 @@ class _CreateDeckDialogState extends ConsumerState<CreateDeckDialog> {
                   value: _selectedCategory,
                   hint: Text('Select Category'),
                   onChanged: (newValue) {
-                    if(mounted){
-                    setState(() {
-                      _selectedCategory = newValue;
-                    });
+                    if (mounted) {
+                      setState(() {
+                        _selectedCategory = newValue;
+                      });
                     }
                   },
                   items: categories.map<DropdownMenuItem<String>>((String category) {
@@ -122,10 +123,10 @@ class _CreateDeckDialogState extends ConsumerState<CreateDeckDialog> {
                   value: _selectedDifficulty,
                   hint: Text('Select Difficulty Level'),
                   onChanged: (newValue) {
-                    if(mounted){
-                    setState(() {
-                      _selectedDifficulty = newValue;
-                    });
+                    if (mounted) {
+                      setState(() {
+                        _selectedDifficulty = newValue;
+                      });
                     }
                   },
                   items: difficultyLevels.map<DropdownMenuItem<String>>((String level) {
@@ -141,8 +142,8 @@ class _CreateDeckDialogState extends ConsumerState<CreateDeckDialog> {
         TextButton(
           onPressed: () {
             // Close the dialog
-           if (mounted){
-            Navigator.pop(context);
+            if (mounted) {
+              Navigator.pop(context);
             }
           },
           child: Text('Cancel'),
@@ -153,7 +154,7 @@ class _CreateDeckDialogState extends ConsumerState<CreateDeckDialog> {
             final category = _selectedCategory ?? '';  // Default to empty string if no category selected
             final difficultyLevel = _selectedDifficulty ?? ''; // Default to empty string if no difficulty selected
             final description = _descriptionController.text;
-            final cardcount = int.tryParse(_cardCountController.text)??0;
+            final cardcount = _cardCount.toInt();  // Convert the slider value to an integer
 
             if (category.isEmpty || difficultyLevel.isEmpty) {
               // You can show a warning or error here if category or difficulty is not selected
@@ -162,11 +163,11 @@ class _CreateDeckDialogState extends ConsumerState<CreateDeckDialog> {
             }
 
             // Call the onSubmit callback with the values entered
-            widget.onSubmit(title, description,category, difficultyLevel, cardcount);
+            widget.onSubmit(title, description, category, difficultyLevel, cardcount);
 
             // Close the dialog after submitting
-            if (mounted){
-            Navigator.pop(context);
+            if (mounted) {
+              Navigator.pop(context);
             }
           },
           child: Text('Create'),
