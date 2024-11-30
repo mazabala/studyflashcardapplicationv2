@@ -4,17 +4,21 @@ class DeckButtonsWidget extends StatelessWidget {
   final VoidCallback onCreateDeck;
   final VoidCallback onSeachNewDecks;
   final VoidCallback onSignOut;
+  final bool isSearchingNewDecks;
 
   const DeckButtonsWidget({
     Key? key,
     required this.onCreateDeck,
     required this.onSignOut,
     required this.onSeachNewDecks,
+    required this.isSearchingNewDecks,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    
     return Padding(
+      
       padding: const EdgeInsets.all(8.0),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -25,13 +29,16 @@ class DeckButtonsWidget extends StatelessWidget {
               children: [Icon(Icons.add), Text('Create Deck')],
             ),
           ),
-
-           ElevatedButton(
-            onPressed: onSeachNewDecks,
-            child: const Row(
-              children: [Icon(Icons.search), Text('Search New Decks')],
-            ),
-          ),
+ElevatedButton(
+  onPressed: isSearchingNewDecks ? onSeachNewDecks : onSeachNewDecks,
+  child: Row(
+    children: [
+      
+      Icon(isSearchingNewDecks ? Icons.arrow_back :Icons.search ),
+      Text(isSearchingNewDecks ? 'My Decks' : 'Search New Decks'),
+    ],
+  ),
+),
 
 
           ElevatedButton(
@@ -44,4 +51,6 @@ class DeckButtonsWidget extends StatelessWidget {
       ),
     );
   }
+
+
 }

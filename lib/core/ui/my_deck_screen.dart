@@ -118,13 +118,18 @@ class _MyDeckScreenState extends ConsumerState<MyDeckScreen> {
   // Function to load user decks from the service
   Future<void> _loadUserDecks() async {
     final userId = ref.read(userServiceProvider).getCurrentUserId();
+
     if (userId != null) {
+
       final decks = await ref.read(deckProvider.notifier).loadUserDecks();
+
       if (mounted) { // Ensure the widget is still mounted before calling setState
         setState(() {
           _filteredDecks = decks;
+          isSearchingNewDecks = false;
         });
       }
+    
     }
   }
 
@@ -190,7 +195,13 @@ class _MyDeckScreenState extends ConsumerState<MyDeckScreen> {
             // If subscription expired, disable the Deck buttons
             if (!subscriptionStatus.isExpired)
               DeckButtonsWidget(
-                onSeachNewDecks: () {_searchNewDecks();},
+                isSearchingNewDecks: isSearchingNewDecks,
+                onSeachNewDecks: () {
+                  if (!isSearchingNewDecks) {
+                       _searchNewDecks();
+                            }
+                  else {_loadUserDecks();}
+                  },
                 onCreateDeck: () {_createDeck();}, // Implement create deck logic here
                 onSignOut: () {_signOut();}, // Implement sign-out logic here
               ),
