@@ -37,6 +37,8 @@ class AppTypography {
     fontWeight: FontWeight.bold,
   );
 
+
+
   // headlineSmall (for use in small headings like flashcards)
   static TextStyle headlineSmall = GoogleFonts.openSans(
     color: AppColors.textSecondaryColor, // Dark text for small headings

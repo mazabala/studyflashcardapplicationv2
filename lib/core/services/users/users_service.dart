@@ -14,7 +14,33 @@ class UserService implements IUserService {
     return user?.id;
   }
 
+Future<bool> isSystemAdmin() async{
+    try{
+      final userid = getCurrentUserId();
+      if(userid == null)
+      {
+        return false;
+      }
 
+      final userRole = await _supabaseClient  
+          .from('user_roles')
+          .select('role')
+          .eq('user_id', userid)
+          .maybeSingle();
+
+
+      if(userRole?['role'] == 'superAdmin')
+      {return true;}
+      else return false;
+      
+    }
+    catch (e){
+
+          print(e);
+          rethrow;
+           }
+
+}
 
 @override
 Future<bool> isUserExpired(DateTime expiryDate) async {

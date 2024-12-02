@@ -89,6 +89,18 @@ class UserNotifier extends StateNotifier<UserState> {
     }
   }
 
+Future<bool> isUserAdmin () async{
+
+  try{
+    final userRole =  await userService.isSystemAdmin();
+      return userRole;
+  }
+  catch (e)
+  {
+    print (e);
+    throw e;
+  } 
+}
 
 
 

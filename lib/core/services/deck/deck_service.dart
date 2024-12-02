@@ -12,12 +12,28 @@ import 'package:flashcardstudyapplication/core/interfaces/i_api_service.dart';
 import 'package:flashcardstudyapplication/core/services/api/api_client.dart';
 import 'package:uuid/uuid.dart';
 
+
+class SystemDeckConfig {
+  final String category;
+  final String description;
+  final String difficultyLevel;
+  final int cardCount;
+
+  SystemDeckConfig({
+    required this.category,
+    required this.description,
+    required this.difficultyLevel,
+    required this.cardCount,
+  });
+}
 class DeckService implements IDeckService {
   final SupabaseClient _supabaseClient;
   final IApiService _apiService;
   final _uuid = const Uuid();
 
   DeckService(this._supabaseClient, this._apiService);
+
+
 
 Future<List<Flashcard>> getFlashcards(String deckid) async{
 
@@ -209,6 +225,7 @@ Future<List<Flashcard>> _generateFlashcards({
       // 1. Get the system prompt and API model configuration based on difficulty level
       final deckdifficulty = await _getDeckDifficultyID(difficultyLevel);
       
+      
       final systemPrompt = await _getDifficultyPrompt(deckdifficulty);
       final apiModel = await _getModelConfig(deckdifficulty);
 
@@ -224,11 +241,11 @@ Future<List<Flashcard>> _generateFlashcards({
           },
           {
             'role': 'user',
-            'content': '''Create exactly $cardCount medical flashcards about $category in $description.
-                          Follow the difficulty level guidelines provided.
-                          IMPORTANT: Return ONLY a JSON array in this exact format: [{"front":"question text", "back":"answer text"}]
-                          Do not include any additional text or explanation.
-                          PROVIDE VALID JSON FORMAT'''
+            'content': '''Create exactly $cardCount flashcards about $category in $description for $difficultyLevel-level clinical students. 
+            The flashcards should include clinical applications, disease mechanisms, pathophysiology, and differential diagnoses based on reliable, evidence-based medical knowledge from trusted sources such as textbooks, clinical guidelines, and peer-reviewed literature. 
+            Ensure the content is challenging yet relevant to a clinical student at this level. 
+            Return ONLY a JSON array in this exact format: [{\"front\":\"question text\", \"back\":\"answer text\"}]
+            '''
           }
         ],
       };
@@ -376,7 +393,7 @@ Future<List<Flashcard>> _generateFlashcards({
         .update({'total_cards':flashcardsData.length})
         .eq('id', deckId);
       }
-
+      print('Deck Created $title');
     } catch (e) {
       throw ErrorHandler.handle(e);
     }
@@ -623,5 +640,42 @@ Future<void> addDeckCategory(String category) async {
   
 
 }
+
+// In deck_service.dart
+
+// Add this method to the DeckService class
+
+  Future<void> systemCreateDeck(List<SystemDeckConfig> configs, String userId) async {
+  try {
+
+
+    // Create decks using existing createDeck method
+    for (var config in configs) {
+
+       
+       print('Category: ${config.category}');
+       print('Description: ${config.description}');
+
+      // Generate system-specific title
+      final title = '${config.category} - ${config.description}';
+      
+      // Use existing createDeck method but add system-specific handling
+      await createDeck(
+        title,
+        config.category,
+        config.description,
+        config.difficultyLevel,
+        userId,
+        config.cardCount
+      );
+
+
+    }
+  } catch (e) {
+    print('Error in systemCreateDeck: $e');
+    throw ErrorHandler.handle(e);
+  }
+}
+
 
 }

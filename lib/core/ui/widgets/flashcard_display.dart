@@ -65,6 +65,7 @@ class FlashcardDisplay extends ConsumerWidget {
                         : currentFlashcard.front,
                     style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                           fontWeight: FontWeight.bold, // Make the question/answer bold
+                          color: Theme.of(context).scaffoldBackgroundColor,
                         ),
                     textAlign: TextAlign.center,
                   ),
@@ -77,6 +78,7 @@ class FlashcardDisplay extends ConsumerWidget {
                     'Tap to flip',
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
                           fontWeight: FontWeight.normal,
+                          color:  Theme.of(context).scaffoldBackgroundColor,
                         ),
                   ),
                 ],

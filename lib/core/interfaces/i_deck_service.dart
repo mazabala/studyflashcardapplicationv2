@@ -2,6 +2,7 @@
 
 
 import 'package:flashcardstudyapplication/core/models/deck.dart';
+import 'package:flashcardstudyapplication/core/services/deck/deck_service.dart';
 
 abstract class IDeckService {
 
@@ -14,6 +15,8 @@ abstract class IDeckService {
 
   // Add flashcard to a deck
   Future<void> decktoUser(String deckId, String userId);
+
+  Future<void> systemCreateDeck(List<SystemDeckConfig> configs, String userId);
 
   // Create a new deck
   Future<void> createDeck(String title,String category, String description,String difficultyLevel, String userid, int cardCount);

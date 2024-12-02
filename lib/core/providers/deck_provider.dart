@@ -67,6 +67,7 @@ class DeckNotifier extends StateNotifier<DeckState> {
   }
 
 
+
   Future<void> _loadUserDecks() async {
     // Call loadUserDecks to load the decks as soon as the provider is initialized
     await loadUserDecks();
@@ -260,11 +261,50 @@ Future<List<String>> getDeckCategory() async{
   }catch (error)
   {throw Exception(error);}
 }
+
+Future<void> addDeckCategory(String category) async {
+
+try{
+    final deckinsert = _deckService.addDeckCategory(category);
+
+}catch (e)
+{
+  print('unable to add category - Error: $e');
+  throw e;
+
+}
+
+}
+
+Future<void> systemCreateDecks(List<SystemDeckConfig> configs) async {
+  state = state.copyWith(isLoading: true, error: '');
+  try {
+    final userId = _userService.getCurrentUserId();
+    if (userId == null) {
+      throw Exception("System user is not logged in");
+    }
+
+      
+    await _deckService.systemCreateDeck(configs, userId);
+    
+    // Refresh the available decks list after creation
+    await loadAvailableDecks();
+  } catch (e) {
+    print('Error in systemCreateDecks: $e');
+    state = state.copyWith(error: e.toString());
+  } finally {
+    state = state.copyWith(isLoading: false);
+  }
+}
+
+
+
 }
 
 /// Provider for DeckNotifier that ties together DeckService and UserService
 final deckProvider = StateNotifierProvider<DeckNotifier, DeckState>((ref) {
   final deckService = ref.watch(deckServiceProvider);
   final userService = ref.watch(userServiceProvider);
+ 
   return DeckNotifier(deckService, userService);
 });
