@@ -216,7 +216,7 @@ Future<void>flagFlashcard (String flashcardId) async {
 Future<List<Flashcard>> _generateFlashcards({
     required String title,
     required String category,
-    required String description,
+    required String focus,
     required String difficultyLevel,
     required int cardCount,
     required String deckid,
@@ -241,7 +241,7 @@ Future<List<Flashcard>> _generateFlashcards({
           },
           {
             'role': 'user',
-            'content': '''Create exactly $cardCount flashcards about $category in $description for $difficultyLevel-level clinical students. 
+            'content': '''Create exactly $cardCount flashcards about $category focus specifically in $focus for $difficultyLevel-level clinical students. 
             The flashcards should include clinical applications, disease mechanisms, pathophysiology, and differential diagnoses based on reliable, evidence-based medical knowledge from trusted sources such as textbooks, clinical guidelines, and peer-reviewed literature. 
             Ensure the content is challenging yet relevant to a clinical student at this level. 
             Return ONLY a JSON array in this exact format: [{\"front\":\"question text\", \"back\":\"answer text\"}]
@@ -368,7 +368,7 @@ Future<List<Flashcard>> _generateFlashcards({
 
       //Generation Flashcards now
 
-      final aiFlashcards = await _generateFlashcards(title: title, deckid: deckId, category: category, description: description, difficultyLevel: difficultyLevel, cardCount: cardCount); 
+      final aiFlashcards = await _generateFlashcards(title: title, deckid: deckId, category: category, focus: description, difficultyLevel: difficultyLevel, cardCount: cardCount); 
       
       
       // If there are flashcards, create them with their own UUIDs
@@ -645,6 +645,7 @@ Future<void> addDeckCategory(String category) async {
 
 // Add this method to the DeckService class
 
+  @override
   Future<void> systemCreateDeck(List<SystemDeckConfig> configs, String userId) async {
   try {
 

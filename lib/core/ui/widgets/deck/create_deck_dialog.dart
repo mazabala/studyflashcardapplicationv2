@@ -86,7 +86,7 @@ class _CreateDeckDialogState extends ConsumerState<CreateDeckDialog> {
                 ),
                 TextField(
                   controller: _descriptionController,
-                  decoration: InputDecoration(labelText: 'Deck Description'),
+                  decoration: InputDecoration(labelText: 'Deck Focus'),
                 ),
 
                 // Replace the TextField with the CardCountSlider widget

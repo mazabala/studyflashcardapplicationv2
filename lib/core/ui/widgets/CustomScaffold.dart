@@ -5,8 +5,9 @@ import 'package:flashcardstudyapplication/core/providers/auth_provider.dart';
 class CustomScaffold extends ConsumerWidget {
   final String currentRoute;
   final Widget body;  // This is where we'll pass the unique content of each screen
+  final bool useScroll;
 
-  const CustomScaffold({required this.currentRoute, required this.body});
+  const CustomScaffold({required this.currentRoute, required this.body,this.useScroll = true,super.key});
 
   void _navigateWithoutAnimation(BuildContext context, String route) {
     if (ModalRoute.of(context)?.settings.name != route) {
@@ -57,7 +58,7 @@ class CustomScaffold extends ConsumerWidget {
                 ),
                 child: Center(
                   child: Text(
-                    'Brain Decks',
+                    'BDeck Focus',
                     style: theme.textTheme.displayLarge!.copyWith(
                       color: Colors.white,
                     ),
@@ -96,13 +97,15 @@ class CustomScaffold extends ConsumerWidget {
 
             // Content Area
             Expanded(
-              child: SingleChildScrollView(
+              child: useScroll ? SingleChildScrollView(
                 child: Padding(
                   padding: EdgeInsets.all(screenWidth * 0.04), // 4% of screen width for padding
                   child: body,
-                ),
+                  ) 
+                  
+                ): body,
               ),
-            ),
+            
           ],
         ),
       ),

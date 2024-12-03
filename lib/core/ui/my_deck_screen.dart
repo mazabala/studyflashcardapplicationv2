@@ -1,4 +1,5 @@
 import 'package:flashcardstudyapplication/core/models/deck.dart';
+import 'package:flashcardstudyapplication/core/navigation/router_manager.dart';
 import 'package:flashcardstudyapplication/core/providers/auth_provider.dart';
 import 'package:flashcardstudyapplication/core/services/deck/deck_service.dart';
 import 'package:flashcardstudyapplication/core/ui/widgets/CategoryMultiSelect.dart';
@@ -76,14 +77,13 @@ TextEditingController _cardCountController = TextEditingController();
     return await deckReader.getDeckCategory();
   }
 
-  Future<List<String>> _getDeckDifficulty() async {
+ 
+ Future<List<String>> _getDeckDifficulty() async {
     final deckReader = ref.read(deckServiceProvider);
     final userReader = ref.read(userServiceProvider);
     final subscriptionId = await userReader.getUserSubscriptionPlan();
-    
     return await deckReader.getDeckDifficulty(subscriptionId);
   }
-
 
 
   void _searchNewDecks() async {
@@ -200,112 +200,69 @@ TextEditingController _cardCountController = TextEditingController();
     );
   }
 
- // Show system deck creation dialog
- void _showSystemDeckDialog() async {
-  final deckDifficulty = await _getDeckDifficulty();
-  final categories = await _getDeckCategory();
+//  // Show system deck creation dialog
+//  void _showSystemDeckDialog() async {
+//   final deckDifficulty = await _getDeckDifficulty();
+//   final categories = await _getDeckCategory();
 
-  // Map to store description controllers dynamically
-  final descriptionControllers = <String, TextEditingController>{};
+//   // Map to store description controllers dynamically
+//   final descriptionControllers = <String, TextEditingController>{};
 
-  showDialog(
-    context: context,
-    builder: (context) => SystemDeckDialog(
-      categories: categories,
-      difficulties: deckDifficulty,
-      selectedCategories: _selectedCategories ?? [],
-      selectedDifficulty: _selectedDifficulty,
-      cardCountController: _cardCountController,
-      descriptionControllers: descriptionControllers,
-      onCategoryToggle: (category) {
-        setState(() {
-          if (_selectedCategories?.contains(category) ?? false) {
-            _selectedCategories?.remove(category);
-            descriptionControllers.remove(category);
-          } else {
-            _selectedCategories?.add(category);
-            descriptionControllers[category] = TextEditingController();
-          }
-        });
-      },
-      onAddCategory: (newCategory) async {
-        await ref.read(deckProvider.notifier).addDeckCategory(newCategory);
-        final updatedCategories = await _getDeckCategory(); // Ensure updated list
+//   showDialog(
+//     context: context,
+//     builder: (context) => SystemDeckDialog(
+//       categories: categories,
+//       difficulties: deckDifficulty,
+//       selectedCategories: _selectedCategories ?? [],
+//       selectedDifficulty: _selectedDifficulty,
+//       cardCountController: _cardCountController,
+//       descriptionControllers: descriptionControllers,
+//       onCategoryToggle: (category) {
+//         setState(() {
+//           if (_selectedCategories?.contains(category) ?? false) {
+//             _selectedCategories?.remove(category);
+//             descriptionControllers.remove(category);
+//           } else {
+//             _selectedCategories?.add(category);
+//             descriptionControllers[category] = TextEditingController();
+//           }
+//         });
+//       },
+//       onAddCategory: (newCategory) async {
+//         await ref.read(deckProvider.notifier).addDeckCategory(newCategory);
+//         final updatedCategories = await _getDeckCategory(); // Ensure updated list
 
-        setState(() {
-          categories.clear();
-          categories.addAll(updatedCategories);
-          if (!categories.contains(newCategory)) {
-            categories.add(newCategory);
-          }
-        });
-      },
-      onDifficultyChanged: (difficulty) {
-        setState(() {
-          _selectedDifficulty = difficulty;
-        });
-      },
-      onConfirm: () async { 
+//         setState(() {
+//           categories.clear();
+//           categories.addAll(updatedCategories);
+//           if (!categories.contains(newCategory)) {
+//             categories.add(newCategory);
+//           }
+//         });
+//       },
+//       onDifficultyChanged: (difficulty) {
+//         setState(() {
+//           _selectedDifficulty = difficulty;
+//         });
+//       },
+//       onConfirm: () async { 
 
-        // Extract descriptions
-      List<String> descriptions = descriptionControllers.values
-          .map((controller) => controller.text)
-          .toList();
+//         // Extract descriptions
+//       List<String> descriptions = descriptionControllers.values
+//           .map((controller) => controller.text)
+//           .toList();
 
-        print('$_selectedCategories and: $descriptions');
-         _createSystemDecks(_selectedCategories!,descriptions);
-         }
-    ),
-  );
-}
-
-
+//         print('$_selectedCategories and: $descriptions');
+//          _createSystemDecks(_selectedCategories!,descriptions);
+//          }
+//     ),
+//   );
+// }
 
 
- Future<void> _createSystemDecks(List<String> categories, List<String> descriptions) async {
-  try {
-    // Split the input strings into lists and trim whitespace
 
-    final cardCount = int.tryParse(_cardCountController.text) ?? 10;
 
-    // Validate that we have matching categories and descriptions
-    if (categories.length != descriptions.length) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Categories and descriptions must match in number')),
-      );
-      return;
-    }
-
-    // Create a list of SystemDeckConfig objects by mapping the input data
-    final configs = List<SystemDeckConfig>.generate(
-      categories.length,
-      (index) => SystemDeckConfig(
-        category: categories[index],
-        description: descriptions[index],
-        difficultyLevel: _selectedDifficulty ?? '',
-        cardCount: cardCount
-      )
-    );
-  
-
-      
-    // Call the new systemCreateDecks method with our configurations
-    await ref.read(deckProvider.notifier).systemCreateDecks(configs);
-
-    // If successful, close the dialog and refresh the view
-    if (mounted) {
-      Navigator.pop(context);
-      _resetSearchStateAndNavigate();
-    }
-  } catch (e) {
-    // Handle any errors that occur during deck creation
-    if (mounted) {
-      print (e);      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error creating system decks: $e')),
-      );
-    }
-  }
-}
+ 
 
 
 
@@ -335,9 +292,13 @@ TextEditingController _cardCountController = TextEditingController();
             if (isSystemUser) ...[
               const SizedBox(height: 16),
               CustomButton(
-                text: 'Create System Decks',
+                text: 'Admin Panel',
                 isLoading: false,
-                onPressed: _showSystemDeckDialog,
+                onPressed:   ()
+                        {    
+                  print('?');
+                  Navigator.pushReplacementNamed(context, '/admin');
+                        },
               ),
               const SizedBox(height: 16),
               const Divider(),
