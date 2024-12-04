@@ -35,7 +35,7 @@ class _AdminManagementScreenState extends ConsumerState<AdminManagementScreen> {
                       padding: const EdgeInsets.all(16.0),
                       child: Text(
                         'Admin Management',
-                        style: Theme.of(context).textTheme.titleMedium,
+                        style: Theme.of(context).textTheme.bodyLarge,
                       ),
                     ),
                     const TabBar(
@@ -53,15 +53,15 @@ class _AdminManagementScreenState extends ConsumerState<AdminManagementScreen> {
                   physics: const NeverScrollableScrollPhysics(), // This might help with layout issues
                   children: [
                     Container(
-                      color: Colors.white,
+                      color: Theme.of(context).scaffoldBackgroundColor,
                       child:  UserManagementPage(),
                     ),
                     Container(
-                      color: Colors.white,
+                      color: Theme.of(context).scaffoldBackgroundColor,
                       child:  DeckManagementPage(),
                     ),
                     Container(
-                      color: Colors.white,
+                      color: Theme.of(context).scaffoldBackgroundColor,
                       child: const SystemDeckScreen(),
                     ),
                   ],

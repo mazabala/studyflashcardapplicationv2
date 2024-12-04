@@ -1,11 +1,16 @@
-import 'package:flashcardstudyapplication/core/themes/app_theme.dart';
+// user_management_page.dart
+import 'package:flashcardstudyapplication/core/providers/user_provider.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flashcardstudyapplication/core/themes/app_theme.dart';
 
+class UserManagementPage extends ConsumerWidget {
+  const UserManagementPage({super.key});
 
-// Main User Management Page
-class UserManagementPage extends StatelessWidget {
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final userState = ref.watch(userProvider);
+    
     return Scaffold(
       appBar: AppBar(
         title: Text('User Management', style: Theme.of(context).textTheme.titleMedium),
@@ -13,6 +18,14 @@ class UserManagementPage extends StatelessWidget {
       body: Column(
         children: [
           UserActions(),
+          if (userState.errorMessage != null)
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Text(
+                userState.errorMessage!,
+                style: TextStyle(color: Colors.red),
+              ),
+            ),
           Expanded(child: UserListView()),
         ],
       ),
@@ -20,17 +33,26 @@ class UserManagementPage extends StatelessWidget {
   }
 }
 
-// User Actions Widget
-class UserActions extends StatelessWidget {
+class UserActions extends ConsumerWidget {
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
           ElevatedButton(
-            onPressed: () => _navigateTo(context, CreateUserPage()),
+            onPressed: () async {
+              final userNotifier = ref.read(userProvider.notifier);
+              final isAdmin = await userNotifier.isUserAdmin();
+              if (isAdmin) {
+                _navigateTo(context, CreateUserPage());
+              } else {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('Only admins can create users')),
+                );
+              }
+            },
             child: Text('Create User'),
           ),
           ElevatedButton(
@@ -50,69 +72,185 @@ class UserActions extends StatelessWidget {
   }
 }
 
-// User List View
-class UserListView extends StatelessWidget {
-  final List<String> users = ['User 1', 'User 2', 'User 3']; // Mock data
+class UserListView extends ConsumerStatefulWidget {
+  @override
+  _UserListViewState createState() => _UserListViewState();
+}
+
+class _UserListViewState extends ConsumerState<UserListView> {
+  @override
+  void initState() {
+    super.initState();
+    // Fetch user details when the widget is initialized
+    ref.read(userProvider.notifier).fetchUserDetails();
+  }
 
   @override
   Widget build(BuildContext context) {
+    final userState = ref.watch(userProvider);
+
+    if (userState.errorMessage != null) {
+      return Center(child: Text('Error: ${userState.errorMessage}'));
+    }
+
     return ListView.builder(
-      itemCount: users.length,
+      itemCount: 3, // Replace with actual user count
       itemBuilder: (context, index) {
         return ListTile(
-          title: Text(users[index], style: Theme.of(context).textTheme.labelLarge),
-          onTap: () => _navigateTo(context, UserDetailsView(user: users[index])),
+          title: Text(
+            'User ${index + 1}',
+            style: Theme.of(context).textTheme.titleMedium,
+          ),
+          subtitle: Text(
+            'Subscription: ${userState.subscriptionPlan ?? "None"}',
+            style: Theme.of(context).textTheme.bodySmall,
+          ),
+          trailing: userState.isExpired == true
+            ? Icon(Icons.warning, color: Colors.red)
+            : null,
+          onTap: () => _navigateToDetails(context, index),
         );
       },
     );
   }
 
-  void _navigateTo(BuildContext context, Widget page) {
+  void _navigateToDetails(BuildContext context, int index) {
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => page),
+      MaterialPageRoute(
+        builder: (context) => UserDetailsView(user: 'User ${index + 1}'),
+      ),
     );
   }
 }
 
-// User Details View (Edit/View User)
-class UserDetailsView extends StatelessWidget {
+class UserDetailsView extends ConsumerWidget {
   final String user;
 
   UserDetailsView({required this.user});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final userState = ref.watch(userProvider);
+
     return Scaffold(
       appBar: AppBar(
-        title: Text('Edit $user', 
-        style: Theme.of(context).textTheme.labelLarge,),
+        title: Text('Edit $user', style: Theme.of(context).textTheme.labelLarge),
       ),
-      body: Center(child: Text('Edit details for $user', style: Theme.of(context).textTheme.bodyLarge)),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'User Details',
+              style: Theme.of(context).textTheme.titleLarge,
+            ),
+            SizedBox(height: 16),
+            Text(
+              'Subscription Plan: ${userState.subscriptionPlan ?? "None"}',
+              style: Theme.of(context).textTheme.bodyLarge,
+            ),
+            SizedBox(height: 8),
+            if (userState.isExpired == true)
+              Text(
+                'Subscription Expired',
+                style: TextStyle(color: Colors.red),
+              ),
+            SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: () {
+                // Implement upgrade subscription logic
+                ref.read(userProvider.notifier).upgradeSubscription('premium');
+              },
+              child: Text('Upgrade Subscription'),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
 
-// Review Membership Page
-class ReviewMembershipPage extends StatelessWidget {
+class ReviewMembershipPage extends ConsumerWidget {
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final userState = ref.watch(userProvider);
+
     return Scaffold(
       appBar: AppBar(
         title: Text('Review Membership', style: Theme.of(context).textTheme.titleLarge),
       ),
-      body: Center(child: Text('Membership details here', style: Theme.of(context).textTheme.bodyMedium)),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Current Plan: ${userState.subscriptionPlan ?? "None"}',
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
+            SizedBox(height: 8),
+            if (userState.isExpired == true)
+              Text(
+                'Your subscription has expired',
+                style: TextStyle(color: Colors.red),
+              ),
+            SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: () {
+                ref.read(userProvider.notifier).upgradeSubscription('premium');
+              },
+              child: Text('Upgrade to Premium'),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
 
-// Mock CreateUserPage for navigation
-class CreateUserPage extends StatelessWidget {
+class CreateUserPage extends ConsumerWidget {
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final TextEditingController nameController = TextEditingController();
+    final TextEditingController emailController = TextEditingController();
+
     return Scaffold(
-      appBar: AppBar(title: Text('Create User', style: Theme.of(context).textTheme.labelLarge)),
-      body: Center(child: Text('Form to create a user', style: Theme.of(context).textTheme.titleMedium)),
+      appBar: AppBar(
+        title: Text('Create User', style: Theme.of(context).textTheme.labelLarge),
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          children: [
+            TextField(
+              controller: nameController,
+              decoration: InputDecoration(labelText: 'Name'),
+            ),
+            SizedBox(height: 16),
+            TextField(
+              controller: emailController,
+              decoration: InputDecoration(labelText: 'Email'),
+            ),
+            SizedBox(height: 24),
+            ElevatedButton(
+              onPressed: () async {
+                try {
+                  await ref.read(userProvider.notifier)
+                      .updateUserProfile(nameController.text, emailController.text);
+                  Navigator.pop(context);
+                } catch (e) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text(e.toString())),
+                  );
+                }
+              },
+              child: Text('Create User'),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

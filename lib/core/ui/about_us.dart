@@ -86,7 +86,7 @@ class AboutUsScreen extends StatelessWidget {
 
   Widget _buildMissionText(BuildContext context) {
     return Text(
-      'That is why I created Brain Decks: an app designed to make studying easier, more engaging, and efficient. Brain Decks isn’t just another flashcard app; it is a tool that integrates seamlessly into your daily life, offering an intuitive and simple way to retain knowledge.',
+      'That is why I created Brain Decks: an app designed to make studying easier, more engaging, and efficient. Deck Focus isn’t just another flashcard app; it is a tool that integrates seamlessly into your daily life, offering an intuitive and simple way to retain knowledge.',
       style: Theme.of(context).textTheme.bodyMedium,
     );
   }
