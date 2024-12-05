@@ -1,4 +1,5 @@
 // flashcard_state.dart
+import 'package:flashcardstudyapplication/core/models/deck.dart';
 import 'package:flashcardstudyapplication/core/models/flashcard.dart';
 import 'package:flashcardstudyapplication/core/providers/deck_provider.dart';
 import 'package:flashcardstudyapplication/core/services/deck/deck_service.dart';
@@ -73,6 +74,9 @@ class FlashcardNotifier extends StateNotifier<FlashcardState> {
       rethrow;
     }
   }
+
+
+
 
 
 Future<void> reportCard(Flashcard flashcard) async{

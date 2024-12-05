@@ -65,7 +65,7 @@ class DeckDisplayWidget extends StatelessWidget {
                   try {
                     await ref.read(flashcardProvider.notifier).getFlashcardsForDeck(deck.id);
                     if (context.mounted) {
-                      Navigator.pushNamed(context, '/study', arguments: deck.id);
+                      Navigator.pushNamed(context, '/study', arguments: deck);
                     }
                   } catch (e) {
                     if (context.mounted) {

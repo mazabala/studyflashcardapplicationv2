@@ -81,136 +81,140 @@ class _FlashcardPreviewState extends State<FlashcardPreviewScreen> {
               ),
               child: 
               
-              Card(
-                elevation: 4,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: IntrinsicHeight(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      // Deck Header
-                      Container(
-                        padding: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          color: theme.colorScheme.primary,
-                          borderRadius: const BorderRadius.only(
-                            topLeft: Radius.circular(12),
-                            topRight: Radius.circular(12),
-                          ),
-                        ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    currentDeck['title'],
-                                    style: theme.textTheme.titleLarge?.copyWith(color: Colors.white),
-                                  ),
-                                  Text(
-                                    currentDeck['category'],
-                                    style: theme.textTheme.bodyMedium?.copyWith(color: Colors.white70),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.end,
-                              children: [
-                                Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                                  decoration: BoxDecoration(
-                                    color: theme.colorScheme.secondary,
-                                    borderRadius: BorderRadius.circular(20),
-                                  ),
-                                  child: Text(
-                                    currentDeck['difficulty'],
-                                    style: theme.textTheme.bodySmall?.copyWith(color: Colors.white),
-                                  ),
-                                ),
-                                const SizedBox(height: 4),
-                                Text(
-                                  '${currentDeck['cardCount']} cards',
-                                  style: theme.textTheme.bodySmall?.copyWith(color: Colors.white70),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ),
-
-                      // Flashcard Preview (dynamic height)
-                      Expanded(
-                        child: GestureDetector(
-                          onTap: () {
-                            setState(() {
-                              isFlipped = !isFlipped;
-                            });
-                          },
-                          child: Container(
-                            margin: const EdgeInsets.all(16),
-                            decoration: BoxDecoration(
-                              color: isFlipped
-                                  ? theme.colorScheme.secondary.withOpacity(0.1)
-                                  : Colors.white,
-                              border: Border.all(
-                                color: theme.colorScheme.primary.withOpacity(0.2),
-                              ),
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: Padding(
-                              padding: const EdgeInsets.all(16.0),
-                              child: Text(
-                                isFlipped
-                                    ? currentDeck['previewCard']['back']
-                                    : currentDeck['previewCard']['front'],
-                                style: theme.textTheme.bodyLarge,
-                                textAlign: TextAlign.justify,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-
-                      // Navigation Buttons
-                      Padding(
-                        padding: const EdgeInsets.all(16.0),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                          children: [
-                            ElevatedButton(
-                              onPressed: () {
-                                setState(() {
-                                  currentDeckIndex = (currentDeckIndex - 1 + previewDecks.length) % previewDecks.length;
-                                  isFlipped = false;
-                                });
-                              },
-                              child: const Text('Previous Deck'),
-                            ),
-                            ElevatedButton(
-                              onPressed: () {
-                                setState(() {
-                                  currentDeckIndex = (currentDeckIndex + 1) % previewDecks.length;
-                                  isFlipped = false;
-                                });
-                              },
-                              child: const Text('Next Deck'),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
+              Flashcard_Display_new(theme, currentDeck),
             ),
           );
         },
       ),
     );
+  }
+
+  Card Flashcard_Display_new(ThemeData theme, Map<String, dynamic> currentDeck) {
+    return Card(
+              elevation: 4,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: IntrinsicHeight(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    // Deck Header
+                    Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: theme.colorScheme.primary,
+                        borderRadius: const BorderRadius.only(
+                          topLeft: Radius.circular(12),
+                          topRight: Radius.circular(12),
+                        ),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  currentDeck['title'],
+                                  style: theme.textTheme.titleLarge?.copyWith(color: Colors.white),
+                                ),
+                                Text(
+                                  currentDeck['category'],
+                                  style: theme.textTheme.bodyMedium?.copyWith(color: Colors.white70),
+                                ),
+                              ],
+                            ),
+                          ),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                decoration: BoxDecoration(
+                                  color: theme.colorScheme.secondary,
+                                  borderRadius: BorderRadius.circular(20),
+                                ),
+                                child: Text(
+                                  currentDeck['difficulty'],
+                                  style: theme.textTheme.bodySmall?.copyWith(color: Colors.white),
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                '${currentDeck['cardCount']} cards',
+                                style: theme.textTheme.bodySmall?.copyWith(color: Colors.white70),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    // Flashcard Preview (dynamic height)
+                    Expanded(
+                      child: GestureDetector(
+                        onTap: () {
+                          setState(() {
+                            isFlipped = !isFlipped;
+                          });
+                        },
+                        child: Container(
+                          margin: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: isFlipped
+                                ? theme.colorScheme.secondary.withOpacity(0.1)
+                                : Colors.white,
+                            border: Border.all(
+                              color: theme.colorScheme.primary.withOpacity(0.2),
+                            ),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.all(16.0),
+                            child: Text(
+                              isFlipped
+                                  ? currentDeck['previewCard']['back']
+                                  : currentDeck['previewCard']['front'],
+                              style: theme.textTheme.bodyLarge,
+                              textAlign: TextAlign.justify,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+
+                    // Navigation Buttons
+                    Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          ElevatedButton(
+                            onPressed: () {
+                              setState(() {
+                                currentDeckIndex = (currentDeckIndex - 1 + previewDecks.length) % previewDecks.length;
+                                isFlipped = false;
+                              });
+                            },
+                            child: const Text('Previous Deck'),
+                          ),
+                          ElevatedButton(
+                            onPressed: () {
+                              setState(() {
+                                currentDeckIndex = (currentDeckIndex + 1) % previewDecks.length;
+                                isFlipped = false;
+                              });
+                            },
+                            child: const Text('Next Deck'),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
   }
 }

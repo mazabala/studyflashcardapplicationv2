@@ -1,3 +1,4 @@
+import 'package:flashcardstudyapplication/core/models/deck.dart';
 import 'package:flashcardstudyapplication/core/ui/study_screen_controller.dart';
 import 'package:flashcardstudyapplication/core/ui/widgets/CustomScaffold.dart';
 import 'package:flashcardstudyapplication/core/ui/widgets/navigation_button.dart';
@@ -10,14 +11,20 @@ import 'package:flashcardstudyapplication/core/ui/widgets/progress_button.dart';
 
 
 class StudyScreen extends ConsumerWidget {
-  final String deckId;
+  final Deck deck;
 
-  const StudyScreen({Key? key, required this.deckId}) : super(key: key);
+  const StudyScreen({Key? key, required this.deck}) : super(key: key);
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     // Initialize the controller, passing in deckId
+     final deckId = deck.id;
+     final deckTitle = deck.title;
+     final deckDescription = deck.description;
+     final deckDifficulty = deck.difficultyLevel;
+
     final controller = StudyScreenController(ref: ref, deckId: deckId);
+   
     final flashcardState = ref.watch(flashcardProvider);
     final flashcards = flashcardState.flashcardsByDeck[deckId] ?? [];
     final String currentRoute = ModalRoute.of(context)?.settings.name ?? '/';
@@ -29,7 +36,8 @@ class StudyScreen extends ConsumerWidget {
           ProgressIndicatorWidget(deckId: deckId),  // Pass deckId here
 
           // Flashcard Display - Displays current card
-          FlashcardDisplay(deckId: deckId),  // Pass deckId here
+          FlashcardDisplay(deckTitle, deckDescription, deckDifficulty, deckId: deckId),
+           // Pass deckId here
 
           // Navigation Buttons (Next, Previous)
           NavigationButtonsWidget(controller: controller),  // Pass controller here

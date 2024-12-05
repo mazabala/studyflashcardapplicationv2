@@ -1,4 +1,5 @@
 
+import 'package:flashcardstudyapplication/core/models/deck.dart';
 import 'package:flashcardstudyapplication/core/ui/about_us.dart';
 import 'package:flashcardstudyapplication/core/ui/admin_management_screen.dart';
 import 'package:flashcardstudyapplication/core/ui/study_screen.dart';
@@ -20,11 +21,11 @@ class RouteManager {
         // Handle routes that need arguments
     if (settings.name == '/study') {
       // Extract the deck ID from arguments
-      final String? deckId = settings.arguments as String?;
-      if (deckId == null) {
+      final Deck? deck = settings.arguments as Deck?;
+      if (deck == null) {
         throw ArgumentError('Deck ID is required for study screen');
       }
-      return _noAnimationRoute(StudyScreen(deckId: deckId));
+     return _noAnimationRoute(StudyScreen(deck: deck));
     }
     
     
