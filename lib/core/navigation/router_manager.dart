@@ -32,7 +32,7 @@ class RouteManager {
       case '/':
         return _noAnimationRoute (const HomeScreen());
       case '/deck':
-             return _noAnimationRoute (const DeckScreen());
+             return _noAnimationRoute (const FlashcardPreviewScreen());
       case '/aboutUs':
         return _noAnimationRoute (const AboutUsScreen());
       case '/userProfile':
@@ -66,7 +66,7 @@ class RouteManager {
   static Map<String, Widget Function(BuildContext)> get routes {
     return {
       '/': (_) => const HomeScreen(),
-      '/deck': (_) => DeckScreen(),
+      '/deck': (_) => FlashcardPreviewScreen(),
       '/userProfile': (_) => UserProfileScreen(),
       '/login': (_) => LoginScreen(),
       '/mydecks': (_) =>MyDeckScreen(),

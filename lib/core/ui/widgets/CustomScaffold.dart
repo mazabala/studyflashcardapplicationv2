@@ -58,7 +58,7 @@ class CustomScaffold extends ConsumerWidget {
                 ),
                 child: Center(
                   child: Text(
-                    'BDeck Focus',
+                    'Deck Focus',
                     style: theme.textTheme.displayLarge!.copyWith(
                       color: Colors.white,
                     ),
@@ -70,7 +70,7 @@ class CustomScaffold extends ConsumerWidget {
             // Navigation Bar
             Container(
               decoration: BoxDecoration(
-                color: theme.colorScheme.secondary,
+                color: theme.colorScheme.primary,
                 borderRadius: const BorderRadius.only(
                   bottomLeft: Radius.circular(5),
                   bottomRight: Radius.circular(5),
