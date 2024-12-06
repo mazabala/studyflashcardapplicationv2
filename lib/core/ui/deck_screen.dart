@@ -69,25 +69,207 @@ class _FlashcardPreviewState extends State<FlashcardPreviewScreen> {
   Widget build(BuildContext context) {
     final currentDeck = previewDecks[currentDeckIndex];
     final theme = Theme.of(context);
-
+    final screenSize = MediaQuery.of(context).size;
+    
+    // Breakpoints
+    const tabletBreakpoint = 768.0;
+    const desktopBreakpoint = 1024.0;
+    
     return CustomScaffold(
       currentRoute: '/preview',
+      useScroll: false, // We'll handle scrolling within our layout
       body: LayoutBuilder(
         builder: (context, constraints) {
-          return Center(
-            child: ConstrainedBox(
-              constraints: BoxConstraints(
-                maxWidth: constraints.maxWidth * 0.9,
-              ),
-              child: 
-              
-              Flashcard_Display_new(theme, currentDeck),
-            ),
-          );
+          // Determine layout based on screen width
+          if (constraints.maxWidth >= desktopBreakpoint) {
+            return _buildDesktopLayout(theme, currentDeck, constraints);
+          } else if (constraints.maxWidth >= tabletBreakpoint) {
+            return _buildTabletLayout(theme, currentDeck, constraints);
+          } else {
+            return _buildMobileLayout(theme, currentDeck, constraints);
+          }
         },
       ),
     );
   }
+
+  Widget _buildDesktopLayout(ThemeData theme, Map<String, dynamic> currentDeck, BoxConstraints constraints) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Left Side Content
+        Expanded(
+          flex: 2,
+          child: SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.all(24.0),
+              child: _buildFeaturesList(theme),
+            ),
+          ),
+        ),
+        
+        // Right Side Flashcard
+        Expanded(
+          flex: 3,
+          child: Container(
+            height: constraints.maxHeight,
+            padding: const EdgeInsets.all(24.0),
+            child: Flashcard_Display_new(theme, currentDeck),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildTabletLayout(ThemeData theme, Map<String, dynamic> currentDeck, BoxConstraints constraints) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Left Side Content
+        Expanded(
+          child: SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: _buildFeaturesList(theme),
+            ),
+          ),
+        ),
+        
+        // Right Side Flashcard
+        Expanded(
+          child: Container(
+            height: constraints.maxHeight,
+            padding: const EdgeInsets.all(16.0),
+            child: Flashcard_Display_new(theme, currentDeck),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildMobileLayout(ThemeData theme, Map<String, dynamic> currentDeck, BoxConstraints constraints) {
+    return SingleChildScrollView(
+      child: Column(
+        children: [
+          // Flashcard Section
+          Container(
+            height: constraints.maxHeight * 0.5, // Take half the screen height
+            padding: const EdgeInsets.all(16.0),
+            child: Flashcard_Display_new(theme, currentDeck),
+          ),
+          
+          // Features Section
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: _buildFeaturesList(theme),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildFeaturesList(ThemeData theme) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        FittedBox(
+          fit: BoxFit.scaleDown,
+          child: Text(
+            'What Makes FlashCard Study Pro Unique?',
+            style: theme.textTheme.headlineMedium?.copyWith(
+              fontWeight: FontWeight.bold,
+              color: theme.colorScheme.primary,
+            ),
+          ),
+        ),
+        const SizedBox(height: 32),
+        _buildFeatureSection(
+          '1. Customizable Flashcards',
+          'Create, edit, and manage flashcards tailored to your study needs. Each card can include text, images, and explanations for more engaging learning.',
+          Icons.edit,
+          theme,
+        ),
+        _buildFeatureSection(
+          '2. Smart Deck Organization',
+          'Group flashcards into decks by subjects or categories. Track your progress and prioritize challenging topics with dynamic difficulty tagging.',
+          Icons.folder_special,
+          theme,
+        ),
+        _buildFeatureSection(
+          '3. Interactive Study Modes',
+          'Switch between multiple study modes including Preview Mode, Flip Mode, and Quiz Mode for comprehensive learning.',
+          Icons.switch_access_shortcut,
+          theme,
+        ),
+        _buildFeatureSection(
+          '4. Progress Tracking & Insights',
+          'Monitor your performance with detailed insights on cards reviewed, mastery level, and areas needing focus.',
+          Icons.insights,
+          theme,
+        ),
+        _buildFeatureSection(
+          '5. Seamless Navigation',
+          'Easily switch between decks and cards with intuitive navigation controls. Swipe, tap, or use buttons to move through content without breaking focus.',
+          Icons.swipe,
+          theme,
+        ),
+        const SizedBox(height: 32),
+        Center(
+          child: _buildCTAButton(theme),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildFeatureSection(String title, String description, IconData icon, ThemeData theme) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 24.0),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(icon, size: 24, color: theme.colorScheme.primary),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  description,
+                  style: theme.textTheme.bodyMedium,
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCTAButton(ThemeData theme) {
+    return ElevatedButton(
+      style: ElevatedButton.styleFrom(
+        padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+        backgroundColor: theme.colorScheme.primary,
+      ),
+      onPressed: () {
+        Navigator.pushNamed(context, '/signup');
+      },
+      child: Text(
+        'Sign Up for Demo',
+        style: theme.textTheme.titleMedium?.copyWith(
+          color: Colors.white,
+        ),
+      ),
+    );
+  }
+
 
   Card Flashcard_Display_new(ThemeData theme, Map<String, dynamic> currentDeck) {
     return Card(
@@ -99,6 +281,8 @@ class _FlashcardPreviewState extends State<FlashcardPreviewScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
+
+                    
                     // Deck Header
                     Container(
                       padding: const EdgeInsets.all(16),
