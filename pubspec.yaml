@@ -43,6 +43,7 @@ flutter:
   assets:
     - assets/images/medical_bg.jpg
     - lib\core\config\api.config.yaml
+    - 'assets/images/logo.png'
     
   # Add custom fonts if needed
   # fonts:

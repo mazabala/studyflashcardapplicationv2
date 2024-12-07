@@ -7,7 +7,7 @@ class ProgressButtonWidget extends StatelessWidget {
 
   const ProgressButtonWidget({Key? key, required this.controller}) : super(key: key);
 
-  @override
+  @override //TODO: This is getting pushed when the flashcard is long.
   Widget build(BuildContext context) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,

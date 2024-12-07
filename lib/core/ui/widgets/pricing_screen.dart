@@ -16,7 +16,7 @@ class PricingScreen extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Text(
-              'Choose Your Plan',
+              'Choose Your Plan', //this is overflowing
               style: Theme.of(context).textTheme.displayLarge?.copyWith(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 20),
