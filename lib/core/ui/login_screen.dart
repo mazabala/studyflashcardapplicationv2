@@ -45,6 +45,16 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     return null;
   }
 
+  Future<void> _signWithGoogle() async {
+    final authNotifier = ref.read(authProvider.notifier);
+    await authNotifier.googleSignin();
+    
+    final isAuthed = ref.read(authProvider).isAuthenticated;
+    if(isAuthed) {
+      Navigator.popAndPushNamed(context, '/myDecks');
+    }
+  }
+
   Future<void> _handleSubmit(bool isSignUp) async {
     if (!_formKey.currentState!.validate()) return;
 
@@ -73,87 +83,138 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     final authState = ref.watch(authProvider);
-
+    
     return CustomScaffold(
       currentRoute: '/login',
-      body: Padding(
-        padding: const EdgeInsets.all(50.0),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(
-                'Sign In',
-                style: Theme.of(context).textTheme.displayLarge,
-              ),
-              const SizedBox(height: 20),
-              CustomTextField(
-                controller: _emailController,
-                label: 'Email',
-                hint: 'Enter your email',
-                validator: _validateEmail,
-                enabled: !authState.isLoading,
-              ),
-              const SizedBox(height: 16),
-              CustomTextField(
-                controller: _passwordController,
-                label: 'Password',
-                hint: 'Enter your password',
-                obscureText: _obscurePassword,
-                validator: _validatePassword,
-                enabled: !authState.isLoading,
-                suffixIcon: IconButton(
-                  icon: Icon(
-                    _obscurePassword ? Icons.visibility : Icons.visibility_off,
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24.0),
+          child: Form(
+            key: _formKey,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const SizedBox(height: 60),
+                Text(
+                  'Sign In',
+                  style: Theme.of(context).textTheme.displayLarge?.copyWith(
+                    color: const Color(0xFF002B5C),
+                    fontWeight: FontWeight.bold,
                   ),
-                  onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
                 ),
-              ),
-              const SizedBox(height: 20),
-              if (authState.errorMessage != null)
-                ErrorMessage(message: authState.errorMessage!),
-              Row(
-                children: [
-                  Expanded(
-                    child: CustomButton(
-                      text: 'Sign In',
-                      isLoading: authState.isLoading,
-                      onPressed: authState.isLoading ? null : () => _handleSubmit(false),
+                const SizedBox(height: 24),
+                CustomTextField(
+                  controller: _emailController,
+                  label: 'Email',
+                  hint: 'Enter your email',
+                  validator: _validateEmail,
+                  enabled: !authState.isLoading,
+                  decoration: InputDecoration(
+                    filled: true,
+                    fillColor: Colors.white,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(30),
+                      borderSide: BorderSide.none,
+                    ),
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 20,
+                      vertical: 16,
                     ),
                   ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: CustomButton(
-                      text: 'Sign Up',
-                      isLoading: authState.isLoading,
-                      onPressed: authState.isLoading ? null : () => _handleSubmit(true),
+                ),
+                const SizedBox(height: 16),
+                CustomTextField(
+                  controller: _passwordController,
+                  label: 'Password',
+                  hint: 'Enter your password',
+                  obscureText: _obscurePassword,
+                  validator: _validatePassword,
+                  enabled: !authState.isLoading,
+                  decoration: InputDecoration(
+                    filled: true,
+                    fillColor: Colors.white,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(30),
+                      borderSide: BorderSide.none,
+                    ),
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 20,
+                      vertical: 16,
+                    ),
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        _obscurePassword ? Icons.visibility : Icons.visibility_off,
+                        color: Colors.grey,
+                      ),
+                      onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
                     ),
                   ),
-                  const SizedBox(width: 16),
-
-                ],
-              ),
-              
-          
-              Row(
-                
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  
-                    GestureDetector(
-                      onTap: _onForgotPasswordTapped,
-                      child: Text(
-                        'Forgot Password?',
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: Theme.of(context).colorScheme.primary
+                ),
+                const SizedBox(height: 24),
+                if (authState.errorMessage != null)
+                  ErrorMessage(message: authState.errorMessage!),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    SizedBox(
+                      width: 100,
+                      child: CustomButton(
+                        text: 'Sign In',
+                        isLoading: authState.isLoading,
+                        onPressed: authState.isLoading ? null : () async => await _handleSubmit(false),
+                        style: ElevatedButton.styleFrom(
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(30),
+                          ),
+                          padding: const EdgeInsets.symmetric(vertical: 12),
                         ),
                       ),
                     ),
-                  
-                ],
-              )
-            ],
+                    SizedBox(
+                      width: 100,
+                      child: CustomButton(
+                        text: 'Google',
+                        isLoading: authState.isLoading,
+                        onPressed: _signWithGoogle,
+                        style: ElevatedButton.styleFrom(
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(30),
+                          ),
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                        ),
+                      ),
+                    ),
+                    SizedBox(
+                      width: 100,
+                      child: CustomButton(
+                        text: 'Sign Up',
+                        isLoading: authState.isLoading,
+                        onPressed: authState.isLoading ? null : () => _handleSubmit(true),
+                        style: ElevatedButton.styleFrom(
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(30),
+                          ),
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                Center(
+                  child: TextButton(
+                    onPressed: _onForgotPasswordTapped,
+                    child: Text(
+                      'Forgot Password?',
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.primary,
+                        fontSize: 14,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -182,9 +243,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             onPressed: () {
               authWatcher.resetPassword(resetEmailController.text);
               if (mounted) {
-                 Navigator.of(context).pop(); 
-                  }
-// Close the dialog after reset
+                Navigator.of(context).pop();
+              }
             },
           ),
         ],

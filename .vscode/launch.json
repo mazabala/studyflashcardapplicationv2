@@ -24,7 +24,7 @@
             "flutterMode": "profile"
         },
         {
-            "name": "flashcardstudyapplication (Android)",
+            "name": "flashcardstudyapplication (Medium_Phone_API_35)",
             "request": "launch",
             "type": "dart",
             "deviceId": "emulator-5554"

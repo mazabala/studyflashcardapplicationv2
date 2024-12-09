@@ -42,6 +42,13 @@ class AuthNotifier extends StateNotifier<AuthState> {
 
   AuthNotifier(this._authService, this._subscriptionNotifier) : super(const AuthState());
 
+Future<void> googleSignin() async {
+
+  await _authService.signInWithGoogle();
+
+
+}
+
   Future<void> signIn(String email, String password) async {
     state = state.copyWith(isLoading: true, errorMessage: null);
     

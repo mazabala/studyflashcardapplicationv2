@@ -1,3 +1,4 @@
+
 import 'package:flashcardstudyapplication/core/services/revenuecat/revenuecat_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flashcardstudyapplication/core/services/api/api_client.dart'; // Import ApiClient and the provider
@@ -12,6 +13,7 @@ void main() async {
   // Initialize the ApiClient (which will fetch Supabase credentials)
   final apiClient = ApiClient();
   
+ 
  
   try {
     await apiClient.initialize();
@@ -41,6 +43,8 @@ void main() async {
 
   // Run the app and pass the initialized ApiClient and SupabaseClient to MyApp
   runApp(MyApp(apiClient: apiClient, supabaseClient: supabaseClient));
+
+
 }
 
 class MyApp extends StatelessWidget {
