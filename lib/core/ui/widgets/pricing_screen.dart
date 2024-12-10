@@ -1,7 +1,7 @@
+import 'package:flashcardstudyapplication/core/themes/colors.dart';
 import 'package:flashcardstudyapplication/core/ui/widgets/CustomScaffold.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
 
 class PricingScreen extends StatelessWidget {
   const PricingScreen({Key? key}) : super(key: key);
@@ -10,64 +10,215 @@ class PricingScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return CustomScaffold(
       currentRoute: '/prices',
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Text(
-              'Choose Your Plan', //this is overflowing
-              style: Theme.of(context).textTheme.displayLarge?.copyWith(fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 20),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                _buildPricingCard(context, 'Basic', 9.99, 'Perfect for individuals just starting', 'Basic Plan'),
-                _buildPricingCard(context, 'Advanced', 14.99, 'For those who want more features and flexibility', 'Advanced Plan'),
-              ],
-            ),
-          ],
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(24.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              // Header Section
+              _buildHeader(context),
+              const SizedBox(height: 48),
+              // Pricing Cards Section
+              _buildPricingCards(context),
+            ],
+          ),
         ),
       ),
     );
   }
 
-  Widget _buildPricingCard(BuildContext context, String planName, double price, String description, String planType) {
+  Widget _buildHeader(BuildContext context) {
+    return Column(
+      children: [
+        FittedBox(
+          fit: BoxFit.scaleDown,
+          child: Text(
+            'Choose Your Plan',
+            style: Theme.of(context).textTheme.displayLarge?.copyWith(
+              fontWeight: FontWeight.bold,
+              color: Theme.of(context).colorScheme.primary,
+            ),
+          ),
+        ),
+        const SizedBox(height: 16),
+        Text(
+          'Select the perfect plan for your study needs',
+          style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+            color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
+          ),
+          textAlign: TextAlign.center,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildPricingCards(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        if (constraints.maxWidth < 600) {
+          // Mobile layout
+          return Column(
+            children: [
+              _buildPricingCard(context, 'Basic', 9.99),
+              const SizedBox(height: 24),
+              _buildPricingCard(context, 'Advanced', 14.99, isPremium: true),
+            ],
+          );
+        } else {
+          // Tablet and Desktop layout
+          return Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(child: _buildPricingCard(context, 'Basic', 9.99)),
+              const SizedBox(width: 24),
+              Expanded(child: _buildPricingCard(context, 'Advanced', 14.99, isPremium: true)),
+            ],
+          );
+        }
+      },
+    );
+  }
+
+  Widget _buildPricingCard(BuildContext context, String planName, double price, {bool isPremium = false}) {
+    final features = isPremium ? [
+      'All Basic features',
+      'Unlimited difficulty on decks',
+      'Up to 60 flashcard decks',
+
+
+    ] : [
+      'Up to 15 flashcard decks',
+      'Limited difficulty on decks'
+
+
+    ];
+
     return Card(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      elevation: 5,
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
+      elevation: 8,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: BorderSide(
+          color: isPremium 
+              ? Theme.of(context).colorScheme.primary 
+              : Colors.transparent,
+          width: 2,
+        ),
+      ),
+      child: Container(
+        padding: const EdgeInsets.all(24),
         child: Column(
-          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              planName,
-              style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
+            // Plan header
+            Row(
+              children: [
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      planName,
+                      style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: isPremium 
+                            ? Theme.of(context).colorScheme.primary
+                            : Theme.of(context).colorScheme.onSurface,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    RichText(
+                      text: TextSpan(
+                        children: [
+                          TextSpan(
+                            text: '\$$price',
+                            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          TextSpan(
+                            text: '/month',
+                            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                if (isPremium) ...[
+                  const Spacer(),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Text(
+                      'Popular',
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: Theme.of(context).colorScheme.primary,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ],
+              ],
             ),
-            SizedBox(height: 10),
-            Text(
-              '\$$price/month',
-              style: Theme.of(context).textTheme.bodyLarge?.copyWith(color: Colors.green),
-            ),
-            SizedBox(height: 10),
-            Text(
-              description,
-              style: Theme.of(context).textTheme.bodyMedium,
-              textAlign: TextAlign.center,
-            ),
-            SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: () {
-                // Handle subscription logic here, for now just print.
-                print('Subscribed to $planType');
-              },
-              style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 12),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            const SizedBox(height: 32),
+            
+            // Features list
+            ...features.map((feature) => Padding(
+              padding: const EdgeInsets.only(bottom: 16),
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.check_circle,
+                    color: Theme.of(context).colorScheme.primary,
+                    size: 20,
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      feature,
+                      style: Theme.of(context).textTheme.bodyMedium,
+                    ),
+                  ),
+                ],
               ),
-              child: Text('Subscribe'),
+            )),
+            
+            const SizedBox(height: 32),
+            
+            // Subscribe button
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: () {
+                  // Handle subscription
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: isPremium 
+                      ? Theme.of(context).colorScheme.tertiary
+                      : Theme.of(context).colorScheme.primary,
+                  foregroundColor: isPremium 
+                      ? Colors.white
+                      : Theme.of(context).colorScheme.primary,
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    side: BorderSide(
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
+                  ),
+                ),
+                child: Text(
+                  'Get Started',
+                  style: isPremium
+                  ? Theme.of(context).textTheme.labelLarge?.copyWith(color: AppColors.primaryColor, fontWeight: FontWeight.bold,)
+                  : Theme.of(context).textTheme.labelLarge?.copyWith(fontWeight: FontWeight.bold,),
+                ),
+              ),
             ),
           ],
         ),
