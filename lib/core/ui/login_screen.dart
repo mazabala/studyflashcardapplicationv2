@@ -5,7 +5,6 @@ import 'package:flashcardstudyapplication/core/providers/auth_provider.dart';
 import 'package:flashcardstudyapplication/core/ui/widgets/CustomScaffold.dart';
 import 'package:flashcardstudyapplication/core/ui/widgets/CustomTextField.dart';
 import 'package:flashcardstudyapplication/core/ui/widgets/CustomButton.dart';
-import 'package:flashcardstudyapplication/core/ui/widgets/ErrorMessage.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
   @override
@@ -45,15 +44,21 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     return null;
   }
 
-  Future<void> _signWithGoogle() async {
-    final authNotifier = ref.read(authProvider.notifier);
-    await authNotifier.googleSignin();
-    
-    final isAuthed = ref.read(authProvider).isAuthenticated;
-    if(isAuthed) {
-      Navigator.popAndPushNamed(context, '/myDecks');
-    }
+Future<void> _signWithGoogle() async {
+
+  final authNotifier = ref.read(authProvider.notifier);
+  await authNotifier.googleSignin();
+  
+  final isAuthed = ref.read(authProvider).isAuthenticated;
+
+  if(isAuthed )
+ 
+  {
+
+ Navigator.popAndPushNamed(context, '/myDecks');
   }
+  
+}
 
   Future<void> _handleSubmit(bool isSignUp) async {
     if (!_formKey.currentState!.validate()) return;
@@ -61,10 +66,46 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     final email = _emailController.text.trim();
     final password = _passwordController.text.trim();
     final authNotifier = ref.read(authProvider.notifier);
+  
 
     try {
       if (isSignUp) {
-        await authNotifier.signUp(email, password);
+
+    showDialog(
+      context: context,
+      builder: (context) => CustomDialogWidget(
+        title: 'Register',
+        dialogContent: [
+          const Text('Enter your email address:'),
+          CustomTextField(
+            controller: _emailController,
+            label: 'Email Address',
+            hint: 'Enter your email address here',
+          ),
+           const Text('Enter password:'),
+          CustomTextField(
+            controller: _passwordController,
+            label: 'Password',
+            hint: 'Enter your password here',
+          ),
+           const SizedBox(width: 10),
+          CustomButton(
+            text: 'Finish',
+            isLoading: false,
+            onPressed: () async {
+              await authNotifier.signUp(email, password);
+              if (mounted) {
+                 Navigator.of(context).pop(); 
+                  }
+// Close the dialog after reset
+            },
+          ),
+        ],
+      ),
+    );
+
+
+        
       } else {
         await authNotifier.signIn(email, password);
       }
@@ -80,148 +121,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     }
   }
 
-  @override
-  Widget build(BuildContext context) {
-    final authState = ref.watch(authProvider);
-    
-    return CustomScaffold(
-      currentRoute: '/login',
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24.0),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const SizedBox(height: 60),
-                Text(
-                  'Sign In',
-                  style: Theme.of(context).textTheme.displayLarge?.copyWith(
-                    color: const Color(0xFF002B5C),
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 24),
-                CustomTextField(
-                  controller: _emailController,
-                  label: 'Email',
-                  hint: 'Enter your email',
-                  validator: _validateEmail,
-                  enabled: !authState.isLoading,
-                  decoration: InputDecoration(
-                    filled: true,
-                    fillColor: Colors.white,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(30),
-                      borderSide: BorderSide.none,
-                    ),
-                    contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 20,
-                      vertical: 16,
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 16),
-                CustomTextField(
-                  controller: _passwordController,
-                  label: 'Password',
-                  hint: 'Enter your password',
-                  obscureText: _obscurePassword,
-                  validator: _validatePassword,
-                  enabled: !authState.isLoading,
-                  decoration: InputDecoration(
-                    filled: true,
-                    fillColor: Colors.white,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(30),
-                      borderSide: BorderSide.none,
-                    ),
-                    contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 20,
-                      vertical: 16,
-                    ),
-                    suffixIcon: IconButton(
-                      icon: Icon(
-                        _obscurePassword ? Icons.visibility : Icons.visibility_off,
-                        color: Colors.grey,
-                      ),
-                      onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 24),
-                if (authState.errorMessage != null)
-                  ErrorMessage(message: authState.errorMessage!),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    SizedBox(
-                      width: 100,
-                      child: CustomButton(
-                        text: 'Sign In',
-                        isLoading: authState.isLoading,
-                        onPressed: authState.isLoading ? null : () async => await _handleSubmit(false),
-                        style: ElevatedButton.styleFrom(
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(30),
-                          ),
-                          padding: const EdgeInsets.symmetric(vertical: 12),
-                        ),
-                      ),
-                    ),
-                    SizedBox(
-                      width: 100,
-                      child: CustomButton(
-                        text: 'Google',
-                        isLoading: authState.isLoading,
-                        onPressed: _signWithGoogle,
-                        style: ElevatedButton.styleFrom(
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(30),
-                          ),
-                          padding: const EdgeInsets.symmetric(vertical: 12),
-                        ),
-                      ),
-                    ),
-                    SizedBox(
-                      width: 100,
-                      child: CustomButton(
-                        text: 'Sign Up',
-                        isLoading: authState.isLoading,
-                        onPressed: authState.isLoading ? null : () => _handleSubmit(true),
-                        style: ElevatedButton.styleFrom(
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(30),
-                          ),
-                          padding: const EdgeInsets.symmetric(vertical: 12),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 16),
-                Center(
-                  child: TextButton(
-                    onPressed: _onForgotPasswordTapped,
-                    child: Text(
-                      'Forgot Password?',
-                      style: TextStyle(
-                        color: Theme.of(context).colorScheme.primary,
-                        fontSize: 14,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  void _onForgotPasswordTapped() {
+void _onForgotPasswordTapped() {
     final authWatcher = ref.watch(authProvider.notifier);
     final authState = ref.watch(authProvider);
     final resetEmailController = TextEditingController();
@@ -243,11 +143,182 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             onPressed: () {
               authWatcher.resetPassword(resetEmailController.text);
               if (mounted) {
-                Navigator.of(context).pop();
-              }
+                 Navigator.of(context).pop(); 
+                  }
+// Close the dialog after reset
             },
           ),
         ],
+      ),
+    );
+  }
+  @override
+  Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
+    final isWeb = size.width > 800;
+    final authState = ref.watch(authProvider);
+
+    Widget loginForm = Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        if (!isWeb) const SizedBox(height: 40),
+        if (!isWeb) Row(
+          children: [
+            IconButton(
+              icon: const Icon(Icons.close),
+              onPressed: () => Navigator.pop(context),
+            ),
+            const Expanded(
+              child: Center(
+                child: Text(
+                  'Log in',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(width: 48), // Balance for close button
+          ],
+        ),
+        if (!isWeb) const SizedBox(height: 20),
+        CustomButton(
+          text: 'Continue with Apple',
+          isLoading: false,
+          onPressed: () {/* Implement Apple sign in */},
+        ),
+        const SizedBox(height: 12),
+        CustomButton(
+          text: 'Continue with Google',
+          isLoading: false,
+          onPressed: () {_signWithGoogle();},
+        ),
+        const SizedBox(height: 24),
+        const Center(child: Text('OR')),
+        const SizedBox(height: 24),
+        CustomTextField(
+          controller: _emailController,
+          label: 'Email Address',
+          hint: 'Enter your email',
+          decoration: InputDecoration(
+            filled: true,
+            fillColor: Colors.grey[100],
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: const BorderSide(width: 1),
+            ),
+          ),
+        ),
+        const SizedBox(height: 12),
+        CustomTextField(
+          controller: _passwordController,
+          label: 'Password',
+          hint: 'Enter your password',
+          obscureText: _obscurePassword,
+          decoration: InputDecoration(
+            filled: true,
+            fillColor: Colors.grey[100],
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: const BorderSide(width: 1),
+            ),
+            suffixIcon: IconButton(
+              icon: Icon(_obscurePassword ? Icons.visibility : Icons.visibility_off),
+              onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
+            ),
+          ),
+        ),
+        const SizedBox(height: 24),
+        CustomButton(
+          text: 'Log In',
+          isLoading: authState.isLoading,
+          onPressed: () {_handleSubmit(false);},
+        ),
+        const SizedBox(height: 16),
+        Center(
+          child: TextButton(
+            onPressed: () {_handleSubmit(true);},
+            child: const Text('Dont have an account? Register Here!'),
+          ),
+        ),
+        const SizedBox(height: 2),
+        Center(
+          child: TextButton(
+            onPressed: () {_onForgotPasswordTapped();},
+            child: const Text('Forgotten your password?'),
+          ),
+        ),
+        if (!isWeb) const SizedBox(height: 16),
+        if (!isWeb) Center(
+          child: RichText(
+            text: TextSpan(
+              style: const TextStyle(color: Colors.black87),
+              children: [
+                const TextSpan(text: 'By continuing, you agree to Haniel '),
+                TextSpan(
+                  text: 'Terms of Service',
+                  style: TextStyle(color: Theme.of(context).primaryColor),
+                ),
+                const TextSpan(text: ' and '),
+                TextSpan(
+                  text: 'Privacy Policy',
+                  style: TextStyle(color: Theme.of(context).primaryColor),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+
+    if (isWeb) {
+      return CustomScaffold(
+        currentRoute: '/login',
+        body: Row(
+          children: [
+            // Left side - Image
+            Expanded(
+              child: Container(
+                color: Colors.grey[300],
+                child: const Center(
+                  child: Text('Placeholder for landscape image'),
+                ),
+              ),
+            ),
+            // Right side - Login form
+            Container(
+              width: 400,
+              padding: const EdgeInsets.all(40),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  const Text(
+                    'Nice to see you again',
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 40),
+                  loginForm,
+                ],
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return CustomScaffold(
+      currentRoute: '/login',
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(horizontal: 24),
+          child: loginForm,
+        ),
       ),
     );
   }
