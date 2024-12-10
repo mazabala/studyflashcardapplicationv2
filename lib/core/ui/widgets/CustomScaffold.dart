@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flashcardstudyapplication/core/providers/auth_provider.dart';
+import 'dart:io' show Platform;
 
 class CustomScaffold extends ConsumerWidget {
   final String currentRoute;
@@ -16,10 +17,22 @@ class CustomScaffold extends ConsumerWidget {
   });
 
   void _navigateWithoutAnimation(BuildContext context, String route) {
-    if (ModalRoute.of(context)?.settings.name != route) {
-      Navigator.of(context).pushReplacementNamed(route);
+  if (ModalRoute.of(context)?.settings.name != route) {
+    if (Platform.isAndroid || Platform.isIOS) {
+      // Use animation for mobile platforms
+      Navigator.of(context).pushReplacementNamed(
+        route,
+        arguments: RouteSettings(name: route),
+      );
+    } else {
+      // No animation for other platforms
+      Navigator.of(context).pushReplacementNamed(
+        route,
+        arguments: RouteSettings(name: route),
+      );
     }
   }
+}
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -91,8 +104,8 @@ class CustomScaffold extends ConsumerWidget {
               _buildNavLink(context, 'Home', '/'),
               _buildNavLink(context, 'Decks & Flashcards', '/deck'),
               _buildNavLink(context, 'Pricing', '/prices'),
-              _buildNavLink(context, 'Contact Us', '/contactUs'),
-              _buildNavLink(context, 'About Us', '/aboutUs'),
+             //TODO: Maybe move this to the profile page?  _buildNavLink(context, 'Contact Us', '/contactUs'),
+             //TODO: Maybe move this to the profile page? _buildNavLink(context, 'About Us', '/aboutUs'),
               if (isLoggedIn)
                 _buildNavLink(context, 'My Decks', '/myDecks')
               else

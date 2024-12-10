@@ -55,7 +55,7 @@ Future<void> _signWithGoogle() async {
  
   {
 
- Navigator.popAndPushNamed(context, '/myDecks');
+ Navigator.pushReplacementNamed(context, '/myDecks');
   }
   
 }
@@ -70,6 +70,8 @@ Future<void> _signWithGoogle() async {
 
     try {
       if (isSignUp) {
+        final signUpEmailController = TextEditingController();
+        final signUpPasswordController = TextEditingController();
 
     showDialog(
       context: context,
@@ -78,13 +80,13 @@ Future<void> _signWithGoogle() async {
         dialogContent: [
           const Text('Enter your email address:'),
           CustomTextField(
-            controller: _emailController,
+            controller: signUpEmailController,
             label: 'Email Address',
             hint: 'Enter your email address here',
           ),
            const Text('Enter password:'),
           CustomTextField(
-            controller: _passwordController,
+            controller: signUpPasswordController,
             label: 'Password',
             hint: 'Enter your password here',
           ),

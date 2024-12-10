@@ -9,8 +9,13 @@ class CustomTextField extends StatelessWidget {
   final FormFieldValidator<String>? validator;
   final Widget? suffixIcon;
   final InputDecoration? decoration;
+  final FocusNode? focusNode;
+  final TextInputAction? textInputAction;
+  final Function(String)? onFieldSubmitted;
+  final TextInputType? keyboardType;
 
-  CustomTextField({
+  const CustomTextField({
+    Key? key,
     required this.controller,
     required this.label,
     required this.hint,
@@ -19,13 +24,22 @@ class CustomTextField extends StatelessWidget {
     this.validator,
     this.suffixIcon,
     this.decoration,
-  });
+    this.focusNode,
+    this.textInputAction,
+    this.onFieldSubmitted,
+    this.keyboardType,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return TextFormField(
       controller: controller,
-      decoration: decoration ?? InputDecoration(
+      focusNode: focusNode,
+      decoration: decoration?.copyWith(
+        labelText: label,
+        hintText: hint,
+        suffixIcon: suffixIcon,
+      ) ?? InputDecoration(
         labelText: label,
         hintText: hint,
         suffixIcon: suffixIcon,
@@ -33,6 +47,15 @@ class CustomTextField extends StatelessWidget {
       obscureText: obscureText,
       validator: validator,
       enabled: enabled,
+      textInputAction: textInputAction,
+      onFieldSubmitted: onFieldSubmitted,
+      keyboardType: keyboardType,
+      // Maintain focus when validation errors occur
+      onTap: () {
+        if (focusNode != null && !focusNode!.hasFocus) {
+          FocusScope.of(context).requestFocus(focusNode);
+        }
+      },
     );
   }
 }
