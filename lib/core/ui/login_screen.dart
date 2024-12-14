@@ -14,13 +14,14 @@ class LoginScreen extends ConsumerStatefulWidget {
 class _LoginScreenState extends ConsumerState<LoginScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
-  final _formKey = GlobalKey<FormState>();
+  final _passwordFocusNode = FocusNode(); // Add this
+  static final   _formKey = GlobalKey<FormState>();
   bool _obscurePassword = true;
 
   @override
   void dispose() {
     _emailController.dispose();
-    _passwordController.dispose();
+    //_passwordController.dispose();
     super.dispose();
   }
 
@@ -154,125 +155,129 @@ void _onForgotPasswordTapped() {
       ),
     );
   }
+ 
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
     final isWeb = size.width > 800;
     final authState = ref.watch(authProvider);
 
-    Widget loginForm = Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        if (!isWeb) const SizedBox(height: 40),
-        if (!isWeb) Row(
-          children: [
-            IconButton(
-              icon: const Icon(Icons.close),
-              onPressed: () => Navigator.pop(context),
-            ),
-            const Expanded(
-              child: Center(
-                child: Text(
-                  'Log in',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w500,
+    Widget loginForm = Form(
+      key: _formKey,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (!isWeb) const SizedBox(height: 40),
+          if (!isWeb) Row(
+            children: [
+              IconButton(
+                icon: const Icon(Icons.close),
+                onPressed: () => Navigator.pop(context),
+              ),
+              const Expanded(
+                child: Center(
+                  child: Text(
+                    'Log in',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w500,
+                    ),
                   ),
                 ),
               ),
-            ),
-            const SizedBox(width: 48), // Balance for close button
-          ],
-        ),
-        if (!isWeb) const SizedBox(height: 20),
-        CustomButton(
-          text: 'Continue with Apple',
-          isLoading: false,
-          onPressed: () {/* Implement Apple sign in */},
-        ),
-        const SizedBox(height: 12),
-        CustomButton(
-          text: 'Continue with Google',
-          isLoading: false,
-          onPressed: () {_signWithGoogle();},
-        ),
-        const SizedBox(height: 24),
-        const Center(child: Text('OR')),
-        const SizedBox(height: 24),
-        CustomTextField(
-          controller: _emailController,
-          label: 'Email Address',
-          hint: 'Enter your email',
-          decoration: InputDecoration(
-            filled: true,
-            fillColor: Colors.grey[100],
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-              borderSide: const BorderSide(width: 1),
-            ),
+              const SizedBox(width: 48), // Balance for close button
+            ],
           ),
-        ),
-        const SizedBox(height: 12),
-        CustomTextField(
-          controller: _passwordController,
-          label: 'Password',
-          hint: 'Enter your password',
-          obscureText: _obscurePassword,
-          decoration: InputDecoration(
-            filled: true,
-            fillColor: Colors.grey[100],
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-              borderSide: const BorderSide(width: 1),
-            ),
-            suffixIcon: IconButton(
-              icon: Icon(_obscurePassword ? Icons.visibility : Icons.visibility_off),
-              onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
+          if (!isWeb) const SizedBox(height: 20),
+          CustomButton(
+            text: 'Continue with Apple',
+            isLoading: false,
+            onPressed: () {/* Implement Apple sign in */},
+          ),
+          const SizedBox(height: 12),
+          CustomButton(
+            text: 'Continue with Google',
+            isLoading: false,
+            onPressed: () {_signWithGoogle();},
+          ),
+          const SizedBox(height: 24),
+          const Center(child: Text('OR')),
+          const SizedBox(height: 24),
+          CustomTextField(
+            controller: _emailController,
+            label: 'Email Address',
+            hint: 'Enter your email',
+            decoration: InputDecoration(
+              filled: true,
+              fillColor: Colors.grey[100],
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: const BorderSide(width: 1),
+              ),
             ),
           ),
-        ),
-        const SizedBox(height: 24),
-        CustomButton(
-          text: 'Log In',
-          isLoading: authState.isLoading,
-          onPressed: () {_handleSubmit(false);},
-        ),
-        const SizedBox(height: 16),
-        Center(
-          child: TextButton(
-            onPressed: () {_handleSubmit(true);},
-            child: const Text('Dont have an account? Register Here!'),
-          ),
-        ),
-        const SizedBox(height: 2),
-        Center(
-          child: TextButton(
-            onPressed: () {_onForgotPasswordTapped();},
-            child: const Text('Forgotten your password?'),
-          ),
-        ),
-        if (!isWeb) const SizedBox(height: 16),
-        if (!isWeb) Center(
-          child: RichText(
-            text: TextSpan(
-              style: const TextStyle(color: Colors.black87),
-              children: [
-                const TextSpan(text: 'By continuing, you agree to Haniel '),
-                TextSpan(
-                  text: 'Terms of Service',
-                  style: TextStyle(color: Theme.of(context).primaryColor),
-                ),
-                const TextSpan(text: ' and '),
-                TextSpan(
-                  text: 'Privacy Policy',
-                  style: TextStyle(color: Theme.of(context).primaryColor),
-                ),
-              ],
+          const SizedBox(height: 12),
+          CustomTextField(
+            controller: _passwordController,
+            label: 'Password',
+            hint: 'Enter your password',
+            obscureText: _obscurePassword,
+            decoration: InputDecoration(
+              filled: true,
+              fillColor: Colors.grey[100],
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: const BorderSide(width: 1),
+              ),
+              suffixIcon: IconButton(
+                icon: Icon(_obscurePassword ? Icons.visibility : Icons.visibility_off),
+                onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
+              ),
             ),
           ),
-        ),
-      ],
+          const SizedBox(height: 24),
+          CustomButton(
+            text: 'Log In',
+            isLoading: authState.isLoading,
+            onPressed: () {_handleSubmit(false);},
+          ),
+          const SizedBox(height: 16),
+          Center(
+            child: TextButton(
+              onPressed: () {_handleSubmit(true);},
+              child: const Text('Dont have an account? Register Here!'),
+            ),
+          ),
+          const SizedBox(height: 2),
+          Center(
+            child: TextButton(
+              onPressed: () {_onForgotPasswordTapped();},
+              child: const Text('Forgotten your password?'),
+            ),
+          ),
+          if (!isWeb) const SizedBox(height: 16),
+          if (!isWeb) Center(
+            child: RichText(
+              text: TextSpan(
+                style: const TextStyle(color: Colors.black87),
+                children: [
+                  const TextSpan(text: 'By continuing, you agree to Haniel '),
+                  TextSpan(
+                    text: 'Terms of Service',
+                    style: TextStyle(color: Theme.of(context).primaryColor),
+                  ),
+                  const TextSpan(text: ' and '),
+                  TextSpan(
+                    text: 'Privacy Policy',
+                    style: TextStyle(color: Theme.of(context).primaryColor),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
     );
 
     if (isWeb) {
