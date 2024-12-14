@@ -14,14 +14,15 @@ class LoginScreen extends ConsumerStatefulWidget {
 class _LoginScreenState extends ConsumerState<LoginScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
-  final _passwordFocusNode = FocusNode(); // Add this
+ 
   static final   _formKey = GlobalKey<FormState>();
   bool _obscurePassword = true;
 
   @override
   void dispose() {
     _emailController.dispose();
-    //_passwordController.dispose();
+    _passwordController.dispose();
+
     super.dispose();
   }
 

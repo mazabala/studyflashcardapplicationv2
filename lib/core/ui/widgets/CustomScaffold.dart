@@ -16,28 +16,32 @@ class CustomScaffold extends ConsumerWidget {
     super.key,
   });
 
+
+
   void _navigateWithoutAnimation(BuildContext context, String route) {
-  if (ModalRoute.of(context)?.settings.name != route) {
-    if (Platform.isAndroid || Platform.isIOS) {
-      // Use animation for mobile platforms
-      Navigator.of(context).pushReplacementNamed(
-        route,
-        arguments: RouteSettings(name: route),
-      );
-    } else {
-      // No animation for other platforms
-      Navigator.of(context).pushReplacementNamed(
-        route,
-        arguments: RouteSettings(name: route),
-      );
+    if (!context.mounted) return;
+    if (ModalRoute.of(context)?.settings.name != route) {
+      if (Platform.isAndroid || Platform.isIOS) {
+        // Use animation for mobile platforms
+        Navigator.of(context).pushReplacementNamed(
+          route,
+          arguments: RouteSettings(name: route),
+        );
+      } else {
+        // No animation for other platforms
+        Navigator.of(context).pushReplacementNamed(
+          route,
+          arguments: RouteSettings(name: route),
+        );
+      }
     }
   }
-}
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final ThemeData theme = Theme.of(context);
     final authState = ref.watch(authProvider);
+    final authNotifier = ref.watch(authProvider.notifier);
     final bool isLoggedIn = authState.isAuthenticated;
     final bool isSmallScreen = MediaQuery.of(context).size.width < 600;
 
@@ -65,7 +69,7 @@ class CustomScaffold extends ConsumerWidget {
               ),
               child: isSmallScreen 
                 ? _buildMobileHeader(context,isLoggedIn)
-                : _buildWebHeader(context, isLoggedIn),
+                : _buildWebHeader(context, isLoggedIn, authNotifier),
             ),
 
             // Content Area
@@ -82,11 +86,11 @@ class CustomScaffold extends ConsumerWidget {
           ],
         ),
       ),
-      endDrawer: isSmallScreen ? _buildDrawer(context, isLoggedIn) : null,
+      endDrawer: isSmallScreen ? _buildDrawer(context, isLoggedIn, authNotifier) : null,
     );
   }
 
-  Widget _buildWebHeader(BuildContext context, bool isLoggedIn) {
+  Widget _buildWebHeader(BuildContext context, bool isLoggedIn, AuthNotifier authNotifier) {
     return Row(
       children: [
         // Logo
@@ -101,15 +105,20 @@ class CustomScaffold extends ConsumerWidget {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
-              _buildNavLink(context, 'Home', '/'),
-              _buildNavLink(context, 'Decks & Flashcards', '/deck'),
-              _buildNavLink(context, 'Pricing', '/prices'),
+              _buildNavLink(context, 'Home', '/', authNotifier),
+              _buildNavLink(context, 'Decks & Flashcards', '/deck', authNotifier),
+              _buildNavLink(context, 'Pricing', '/prices', authNotifier),
              //TODO: Maybe move this to the profile page?  _buildNavLink(context, 'Contact Us', '/contactUs'),
              //TODO: Maybe move this to the profile page? _buildNavLink(context, 'About Us', '/aboutUs'),
-              if (isLoggedIn)
-                _buildNavLink(context, 'My Decks', '/myDecks')
-              else
-                _buildNavLink(context, 'Login', '/login'),
+              if (isLoggedIn)...[
+                _buildNavLink(context, 'My Decks', '/myDecks', authNotifier),
+                _buildNavLink(context, 'Logout', null, authNotifier)
+              ]
+                
+              else ...[
+                _buildNavLink(context, 'Login', '/login', authNotifier),
+              ]
+                
             ],
           ),
         ),
@@ -139,7 +148,7 @@ class CustomScaffold extends ConsumerWidget {
     );
   }
 
-  Widget _buildDrawer(BuildContext context, bool isLoggedIn) {
+  Widget _buildDrawer(BuildContext context, bool isLoggedIn, AuthNotifier auth) {
     return Drawer(
       child: ListView(
         padding: EdgeInsets.zero,
@@ -156,25 +165,33 @@ class CustomScaffold extends ConsumerWidget {
               ),
             ),
           ),
-          _buildDrawerItem(context, 'Home', '/', Icons.home),
-          _buildDrawerItem(context, 'Decks & Flashcards', '/deck', Icons.library_books),
-          _buildDrawerItem(context, 'Pricing', '/prices', Icons.monetization_on),
-          _buildDrawerItem(context, 'Contact Us', '/contactUs', Icons.phone),
-          _buildDrawerItem(context, 'About Us', '/aboutUs', Icons.info),
-          if (isLoggedIn)
-            _buildDrawerItem(context, 'My Decks', '/myDecks', Icons.folder)
-          else
-            _buildDrawerItem(context, 'Login', '/login', Icons.login),
+          _buildDrawerItem(context, 'Home', '/', Icons.home, auth),
+          _buildDrawerItem(context, 'Decks & Flashcards', '/deck', Icons.library_books, auth),
+          _buildDrawerItem(context, 'Pricing', '/prices', Icons.monetization_on, auth),
+          _buildDrawerItem(context, 'Contact Us', '/contactUs', Icons.phone, auth),
+          _buildDrawerItem(context, 'About Us', '/aboutUs', Icons.info, auth),
+          if (isLoggedIn) ...[
+            _buildDrawerItem(context, 'My Decks', '/myDecks', Icons.folder, auth),
+            _buildDrawerItem(context, 'Logout', null, Icons.logout, auth),
+          ] else ...[
+            _buildDrawerItem(context, 'Login', '/login', Icons.login, auth),
+        ],
         ],
       ),
     );
   }
 
-  Widget _buildNavLink(BuildContext context, String label, String route) {
+  Widget _buildNavLink(BuildContext context, String label, String? route, AuthNotifier auth) {
     final bool isSelected = currentRoute == route;
     
     return TextButton(
-      onPressed: () => _navigateWithoutAnimation(context, route),
+      onPressed: () {
+        if (route != null) {
+          _navigateWithoutAnimation(context, route);
+        } else {
+          auth.signOut();
+        }
+      },
       style: TextButton.styleFrom(
         foregroundColor: isSelected ? Colors.black : Colors.black54,
         padding: const EdgeInsets.symmetric(horizontal: 8),
@@ -183,14 +200,30 @@ class CustomScaffold extends ConsumerWidget {
     );
   }
 
-  Widget _buildDrawerItem(BuildContext context, String label, String route, IconData icon) {
+  Widget _buildDrawerItem(BuildContext context, String label, String? route, IconData icon, AuthNotifier? auth) {
     return ListTile(
       leading: Icon(icon),
       title: Text(label),
       selected: currentRoute == route,
-      onTap: () {
-        Navigator.pop(context); // Close drawer
-        _navigateWithoutAnimation(context, route);
+      onTap: () async {
+        // Close drawer first
+        Navigator.of(context).pop();
+        
+        // Add a small delay before performing navigation or logout
+        await Future.delayed(const Duration(milliseconds: 100));
+        
+        if (route != null) {
+          if (context.mounted) {
+            _navigateWithoutAnimation(context, route);
+          }
+        } else {
+          if (label == 'Logout') {
+            await auth?.signOut();
+            if (context.mounted) {
+              _navigateWithoutAnimation(context, '/');
+            }
+          }
+        }
       },
     );
   }

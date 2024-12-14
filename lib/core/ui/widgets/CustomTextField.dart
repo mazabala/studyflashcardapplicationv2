@@ -9,7 +9,7 @@ class CustomTextField extends StatelessWidget {
   final FormFieldValidator<String>? validator;
   final Widget? suffixIcon;
   final InputDecoration? decoration;
-  final FocusNode? focusNode;
+ 
   final TextInputAction? textInputAction;
   final Function(String)? onFieldSubmitted;
   final TextInputType? keyboardType;
@@ -24,7 +24,7 @@ class CustomTextField extends StatelessWidget {
     this.validator,
     this.suffixIcon,
     this.decoration,
-    this.focusNode,
+   
     this.textInputAction,
     this.onFieldSubmitted,
     this.keyboardType,
@@ -35,7 +35,7 @@ class CustomTextField extends StatelessWidget {
     return TextFormField(
       autovalidateMode: AutovalidateMode.onUserInteraction,
       controller: controller,
-      focusNode: focusNode,
+
       decoration: decoration?.copyWith(
         labelText: label,
         hintText: hint,
@@ -52,11 +52,7 @@ class CustomTextField extends StatelessWidget {
       onFieldSubmitted: onFieldSubmitted,
       keyboardType: keyboardType,
       // Maintain focus when validation errors occur
-      onTap: () {
-        if (focusNode != null && !focusNode!.hasFocus) {
-          FocusScope.of(context).requestFocus(focusNode);
-        }
-      },
+
     );
   }
 }
