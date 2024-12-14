@@ -1,3 +1,4 @@
+import 'package:flashcardstudyapplication/core/constants/responsive_constants.dart';
 import 'package:flutter/material.dart';
 
 class DeckButtonsWidget extends StatelessWidget {
@@ -14,43 +15,61 @@ class DeckButtonsWidget extends StatelessWidget {
     required this.isSearchingNewDecks,
   }) : super(key: key);
 
-  @override
+   @override
   Widget build(BuildContext context) {
-    
     return Padding(
-      
-      padding: const EdgeInsets.all(8.0),
-      child: Row(  //TODO: this is overflowing on the phone. 
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      padding: const EdgeInsets.all(ResponsiveConstants.defaultPadding),
+      child: Wrap(
+        spacing: ResponsiveConstants.defaultPadding,
+        runSpacing: ResponsiveConstants.defaultPadding,
+        alignment: WrapAlignment.spaceBetween,
         children: [
-          ElevatedButton(
-            onPressed: onCreateDeck,
-            child: const Row(
-              children: [Icon(Icons.add), Text('Create Deck')],
+          ConstrainedBox(
+            constraints: const BoxConstraints(
+              maxWidth: ResponsiveConstants.maxButtonWidth,
+              minWidth: ResponsiveConstants.minButtonWidth,
+            ),
+            child: ElevatedButton(
+              onPressed: onCreateDeck,
+              child: const Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(Icons.add),
+                  SizedBox(width: ResponsiveConstants.smallPadding),
+                  const Flexible(
+                    child: Text(
+                      'Create Deck',
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
-ElevatedButton(
-  onPressed: isSearchingNewDecks ? onSeachNewDecks : onSeachNewDecks,
-  child: Row(
-    children: [
-      
-      Icon(isSearchingNewDecks ? Icons.arrow_back :Icons.search ),
-      Text(isSearchingNewDecks ? 'My Decks' : 'Search New Decks'),
-    ],
-  ),
-),
-
-
-          ElevatedButton(
-            onPressed: onSignOut,
-            child: const Row(
-              children: [Icon(Icons.exit_to_app), Text('Logout')],
+          ConstrainedBox(
+            constraints: const BoxConstraints(
+              maxWidth: ResponsiveConstants.maxButtonWidth,
+              minWidth: ResponsiveConstants.minButtonWidth,
+            ),
+            child: ElevatedButton(
+              onPressed: isSearchingNewDecks ? onSeachNewDecks : onSeachNewDecks,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(isSearchingNewDecks ? Icons.arrow_back : Icons.search),
+                  const SizedBox(width: ResponsiveConstants.smallPadding),
+                  Flexible(
+                    child: Text(
+                      isSearchingNewDecks ? 'My Decks' : 'Search New Decks',
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ],
       ),
     );
   }
-
-
 }

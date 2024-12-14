@@ -200,67 +200,6 @@ TextEditingController _cardCountController = TextEditingController();
     );
   }
 
-//  // Show system deck creation dialog
-//  void _showSystemDeckDialog() async {
-//   final deckDifficulty = await _getDeckDifficulty();
-//   final categories = await _getDeckCategory();
-
-//   // Map to store description controllers dynamically
-//   final descriptionControllers = <String, TextEditingController>{};
-
-//   showDialog(
-//     context: context,
-//     builder: (context) => SystemDeckDialog(
-//       categories: categories,
-//       difficulties: deckDifficulty,
-//       selectedCategories: _selectedCategories ?? [],
-//       selectedDifficulty: _selectedDifficulty,
-//       cardCountController: _cardCountController,
-//       descriptionControllers: descriptionControllers,
-//       onCategoryToggle: (category) {
-//         setState(() {
-//           if (_selectedCategories?.contains(category) ?? false) {
-//             _selectedCategories?.remove(category);
-//             descriptionControllers.remove(category);
-//           } else {
-//             _selectedCategories?.add(category);
-//             descriptionControllers[category] = TextEditingController();
-//           }
-//         });
-//       },
-//       onAddCategory: (newCategory) async {
-//         await ref.read(deckProvider.notifier).addDeckCategory(newCategory);
-//         final updatedCategories = await _getDeckCategory(); // Ensure updated list
-
-//         setState(() {
-//           categories.clear();
-//           categories.addAll(updatedCategories);
-//           if (!categories.contains(newCategory)) {
-//             categories.add(newCategory);
-//           }
-//         });
-//       },
-//       onDifficultyChanged: (difficulty) {
-//         setState(() {
-//           _selectedDifficulty = difficulty;
-//         });
-//       },
-//       onConfirm: () async { 
-
-//         // Extract descriptions
-//       List<String> descriptions = descriptionControllers.values
-//           .map((controller) => controller.text)
-//           .toList();
-
-//         print('$_selectedCategories and: $descriptions');
-//          _createSystemDecks(_selectedCategories!,descriptions);
-//          }
-//     ),
-//   );
-// }
-
-
-
 
  
 
