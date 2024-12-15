@@ -66,7 +66,7 @@ class MyApp extends StatelessWidget {
         theme: AppTheme.lightTheme,
         darkTheme: AppTheme.darkTheme,
         themeMode: ThemeMode.system,
-        initialRoute: '/mydecks',  // Set initial route if needed
+        initialRoute: '/',  // Set initial route if needed
         onGenerateRoute: RouteManager.generateRoute,  // Use the route manager
         debugShowCheckedModeBanner: false,
       ),

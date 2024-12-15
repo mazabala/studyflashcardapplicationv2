@@ -1,11 +1,16 @@
 // lib/core/models/user.dart
 
+import 'package:flashcardstudyapplication/core/models/deck.dart';
+
 class User {
   final String id;
   final String email;
   final String name;
   final String subscriptionPlan;
   final DateTime subscriptionExpiry;
+  final String isAdmin;
+  final List<Deck> decks;
+  
   
   User({
     required this.id,
@@ -13,6 +18,8 @@ class User {
     required this.name,
     required this.subscriptionPlan,
     required this.subscriptionExpiry,
+    required this.isAdmin,
+    required this.decks,
   });
 
   // Factory constructor to create a User from a map (e.g., API response)
@@ -23,6 +30,8 @@ class User {
       name: map['name'] as String,
       subscriptionPlan: map['subscription_plan'] as String,
       subscriptionExpiry: DateTime.parse(map['subscription_expiry'] as String),
+      isAdmin: map['is_admin'] as String,
+      decks: (map['decks'] as List<dynamic>).map((deck) => Deck.fromJson(deck)).toList(),
     );
   }
 
@@ -34,6 +43,8 @@ class User {
       'name': name,
       'subscription_plan': subscriptionPlan,
       'subscription_expiry': subscriptionExpiry.toIso8601String(),
+      'is_admin': isAdmin,
+      'decks': decks.map((deck) => deck.toJson()).toList(),
     };
   }
 }

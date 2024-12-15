@@ -7,7 +7,7 @@ class CustomScaffold extends ConsumerWidget {
   final String currentRoute;
   final Widget body;
   final bool useScroll;
-  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   CustomScaffold({
     required this.currentRoute,
@@ -45,6 +45,7 @@ class CustomScaffold extends ConsumerWidget {
     final bool isLoggedIn = authState.isAuthenticated;
     final bool isSmallScreen = MediaQuery.of(context).size.width < 600;
 
+  print('user is :$isLoggedIn');
     return Scaffold(
       key: _scaffoldKey,
       backgroundColor: theme.scaffoldBackgroundColor,
