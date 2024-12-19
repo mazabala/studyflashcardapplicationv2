@@ -1,10 +1,20 @@
+import 'package:flashcardstudyapplication/core/providers/subscription_provider.dart';
 import 'package:flashcardstudyapplication/core/themes/colors.dart';
 import 'package:flashcardstudyapplication/core/ui/widgets/CustomScaffold.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class PricingScreen extends StatelessWidget {
-  const PricingScreen({Key? key}) : super(key: key);
+class PricingScreen extends ConsumerStatefulWidget {
+  @override
+  _PricingScreenState createState() => _PricingScreenState();
+}
+
+class _PricingScreenState extends ConsumerState<PricingScreen> {
+  @override
+  void initState() {
+    super.initState();
+    //ref.read(subscriptionProvider.notifier).loadPackages();
+  }
 
   @override
   Widget build(BuildContext context) {

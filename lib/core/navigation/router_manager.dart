@@ -39,7 +39,7 @@ class RouteManager {
       case '/userProfile':
         return _noAnimationRoute (UserProfileScreen());
       case '/prices':
-        return _noAnimationRoute (const PricingScreen());
+        return _noAnimationRoute ( PricingScreen());
       case '/login':
         return _noAnimationRoute (LoginScreen());
       case '/myDecks':
