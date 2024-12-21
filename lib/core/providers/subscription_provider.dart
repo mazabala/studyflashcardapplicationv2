@@ -12,7 +12,7 @@ class SubscriptionState {
   final bool isLoading;
   final bool isExpired;
   final String errorMessage;
-  final List<Package>? availablePackages;  
+  final List<Package>? availablePackages;
 
   SubscriptionState({
     this.isLoading = false,
@@ -20,6 +20,7 @@ class SubscriptionState {
     this.errorMessage = '',
     this.availablePackages = const [],
   });
+
 
   SubscriptionState copyWith({
     bool? isLoading,
@@ -113,18 +114,22 @@ class SubscriptionNotifier extends StateNotifier<SubscriptionState> {
 }
 
 
+
 final subscriptionServiceProvider = Provider<SubscriptionService>((ref) {
   final supabaseClient = ref.read(supabaseClientProvider);
   final userService = ref.read(userServiceProvider);
   final apiClient = ref.read(apiClientProvider);
-  
-  // Create RevenueCatService directly
-  final revenueCatService = RevenueCatService(
+
+   final revenueCatService = RevenueCatService(
     revenueCatApiKey: apiClient.getRevenueCatApiKey(),
     userService: userService,
   );
   
-  return SubscriptionService(supabaseClient, userService, revenueCatService);
+  return SubscriptionService(
+    supabaseClient,
+    userService,
+    revenueCatService,
+  );
 });
 
 final subscriptionProvider = StateNotifierProvider<SubscriptionNotifier, SubscriptionState>((ref) {

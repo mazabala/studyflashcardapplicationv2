@@ -10,37 +10,78 @@ class SubscriptionService implements ISubscriptionService {
   final SupabaseClient _supabaseClient;
   final UserService _userService;
   final RevenueCatService _revenueCatService;
+  
+  bool _isInitialized = false;
+  
 
   SubscriptionService(
     this._supabaseClient, 
     this._userService,
     this._revenueCatService,
+    
   );
 
-  @override
-  Future<void> updateSubscription(String userId, String subscriptionTier) async {
+
+ Future<void> initialize() async {
+    if (_isInitialized) return;
+
     try {
-      // First verify with RevenueCat that subscription is active
-      final hasActiveSubscription = await _revenueCatService.hasActiveSubscription();
-      
-      if (!hasActiveSubscription) {
-        throw ErrorHandler.handle(
-          Exception('No active subscription found'), 
-          message: 'Subscription not found',
-          specificType: ErrorType.subscription
-        );
+      if (kIsWeb) {
+        _isInitialized = true;
+        return;
       }
 
-      // Update subscription in database
-      await _updateSubscriptionInDatabase(userId: userId, subscriptionTier: subscriptionTier);
+      final userId = _userService.getCurrentUserId();
+      if (userId == null) throw Exception('User not found');
+
+      final configuration = PurchasesConfiguration(_revenueCatService.revenueCatApiKey);
+      configuration.appUserID = userId;
+      await Purchases.configure(configuration);
+      _isInitialized = true;
     } catch (e) {
       throw ErrorHandler.handle(e, 
-        message: 'Failed to update subscription',
+        message: 'Failed to initialize subscription service',
         specificType: ErrorType.subscription
       );
     }
   }
 
+  Future<bool> _checkRevenueCatSubscription() async {
+    if (kIsWeb) return true; // Web platform handling
+
+    try {
+      final CustomerInfo customerInfo = await Purchases.getCustomerInfo();
+      return customerInfo.entitlements.active.isNotEmpty;
+    } catch (e) {
+      print("Error checking subscription status: $e");
+      return false;
+    }
+  }
+  @override
+  Future<void> updateSubscription(String userId, String subscriptionTier) async {
+    if (!_isInitialized) await initialize();
+
+    try {
+      final hasActiveSubscription = await _checkRevenueCatSubscription();
+      if (!hasActiveSubscription) {
+        throw ErrorHandler.handle(
+          Exception('No active subscription found'),
+          message: 'Subscription not found',
+          specificType: ErrorType.subscription
+        );
+      }
+
+      await _updateSubscriptionInDatabase(
+        userId: userId,
+        subscriptionTier: subscriptionTier,
+      );
+    } catch (e) {
+      throw ErrorHandler.handle(e,
+        message: 'Failed to update subscription',
+        specificType: ErrorType.subscription
+      );
+    }
+  }
   Future<void> _updateSubscriptionInDatabase({required String userId, required String subscriptionTier}) async {
       // Update subscription in database
     final response = await _supabaseClient

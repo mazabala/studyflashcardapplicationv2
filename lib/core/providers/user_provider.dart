@@ -7,19 +7,22 @@ class UserState {
   final String? subscriptionPlan;
   final bool? isExpired;
   final String? errorMessage;
+  final String? userId;
 
-  UserState({this.subscriptionPlan, this.isExpired, this.errorMessage});
+  UserState({this.subscriptionPlan, this.isExpired, this.errorMessage, this.userId});
 
   // Create a new state with updated values
   UserState copyWith({
     String? subscriptionPlan,
     bool? isExpired,
     String? errorMessage,
+    String? userId,
   }) {
     return UserState(
       subscriptionPlan: subscriptionPlan ?? this.subscriptionPlan,
       isExpired: isExpired ?? this.isExpired,
       errorMessage: errorMessage ?? this.errorMessage,
+      userId: userId ?? this.userId,
     );
   }
 }
@@ -43,12 +46,14 @@ class UserNotifier extends StateNotifier<UserState> {
       final isExpired = expiryDate != null 
         ? await userService.isUserExpired(expiryDate) 
         : false;
-
+        
+      final userId = userService.getCurrentUserId();
       // Update the state with the fetched data
       state = state.copyWith(
         subscriptionPlan: subscriptionPlan,
         isExpired: isExpired,
         errorMessage: null,
+        userId: userId,
       );
     } catch (e) {
       // Handle any errors that occur during fetching
