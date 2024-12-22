@@ -13,9 +13,11 @@ class PricingScreen extends ConsumerStatefulWidget {
 class _PricingScreenState extends ConsumerState<PricingScreen> {
   @override
   void initState() {
+    
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(subscriptionProvider.notifier).loadPackages();
+      
     });
   }
 

@@ -6,6 +6,8 @@ import 'package:yaml/yaml.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:flashcardstudyapplication/core/error/error_handler.dart';
 
+
+//TODO: Is this used at all or is supabase being used instead?
 class ApiClient implements IApiService {
   late final String _baseUrl;
   late final String _baseKey;

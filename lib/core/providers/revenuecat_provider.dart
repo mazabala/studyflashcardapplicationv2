@@ -13,6 +13,7 @@ final revenueCatClientProvider = Provider<RevenueCatService>((ref) {
 
   // Initialize the RevenueCat_Client using the API key fetched from ApiClient
   final revKey = apiClient.getRevenueCatApiKey();
+  print("revenueCatApiKey: $revKey");
   
   // Return an instance of RevenueCat_Client which is initialized once
   return RevenueCatService(revenueCatApiKey: revKey, userService: ref.read(userServiceProvider));

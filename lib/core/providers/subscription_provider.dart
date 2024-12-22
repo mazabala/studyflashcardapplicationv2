@@ -125,6 +125,8 @@ final subscriptionServiceProvider = Provider<SubscriptionService>((ref) {
     userService: userService,
   );
   
+
+ 
   return SubscriptionService(
     supabaseClient,
     userService,
