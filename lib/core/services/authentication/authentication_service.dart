@@ -17,6 +17,12 @@ class AuthService implements IAuthService {
   AuthService(this._supabaseClient);
 
 
+Future<void> inviteUser(String email) async{
+
+   await _supabaseClient.auth.admin.inviteUserByEmail(email);
+
+}
+
 Future<void>  forgotPassword(String email) async{
 
       final response = await Supabase.instance.client.auth

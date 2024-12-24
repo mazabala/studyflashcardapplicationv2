@@ -1,5 +1,6 @@
 // lib/core/providers/subscription_provider.dart
 
+import 'package:flashcardstudyapplication/core/providers/auth_provider.dart';
 import 'package:flashcardstudyapplication/core/providers/user_provider.dart';
 import 'package:flashcardstudyapplication/core/services/api/api_client.dart';
 import 'package:flashcardstudyapplication/core/services/revenuecat/revenuecat_service.dart';

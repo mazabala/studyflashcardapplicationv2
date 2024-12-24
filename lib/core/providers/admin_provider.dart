@@ -1,3 +1,5 @@
+import 'package:flashcardstudyapplication/core/providers/auth_provider.dart';
+import 'package:flashcardstudyapplication/core/services/authentication/authentication_service.dart';
 import 'package:flashcardstudyapplication/core/services/deck/deck_service.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flashcardstudyapplication/core/services/admin/admin_service.dart';
@@ -81,7 +83,7 @@ class AdminNotifier extends StateNotifier<AdminState> {
   Future<void> inviteUser(String email, {String? role, String? message}) async {
     try {
       state = state.copyWith(isLoading: true);
-      await _adminService.inviteUser(email, role: role, message: message);
+      await _adminService.inviteUser(email);
 
     } catch (e) {
       state = state.copyWith(error: e.toString());
@@ -151,8 +153,8 @@ class AdminNotifier extends StateNotifier<AdminState> {
 // Provider for AdminService
 final adminServiceProvider = Provider<AdminService>((ref) {
   final supabaseClient = ref.read(supabaseClientProvider);
-  final apiClient = ref.read(apiClientProvider);
-  return AdminService(supabaseClient, apiClient);
+  final authService = ref.read(authServiceProvider);
+  return AdminService(supabaseClient, authService as AuthService);
 });
 
 // StateNotifierProvider for AdminNotifier

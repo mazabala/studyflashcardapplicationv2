@@ -26,10 +26,10 @@ abstract class IAdminService {
   /// User deletion and data management
   Future<void> deleteUserAccount(String userId);
   Future<void> deleteUserData(String userId);
-  Future<void> archiveUserData(String userId);
+
 
   /// User invitation management
-  Future<void> inviteUser(String email, {String? role, String? message});
+  Future<void> inviteUser(String email);
   
   
 }

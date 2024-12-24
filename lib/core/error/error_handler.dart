@@ -11,7 +11,12 @@ enum ErrorType {
   api,
   unknown,
   subscription,  // Added for subscription-related errors
-  userProfile    // Added for user profile-related errors
+  userProfile,    // Added for user profile-related errors
+  authorization,     // Was missing but used in handleUnauthorized()
+  deckManagement,    // Was missing but used in handleDeckManagementError()
+  contentModeration,  // Was missing but used in handleContentModerationError()
+  userManagement,
+  paymentProcessing
 }
 
 class ApiException implements Exception {
@@ -65,6 +70,18 @@ class ServiceError implements Exception {
       case ErrorType.userProfile:
         return 'Profile update error: $message';
       case ErrorType.unknown:
+        return 'An unexpected error occurred. Please try again.';
+      case ErrorType.authorization:
+        return 'Unauthorized access';
+      case ErrorType.deckManagement:
+        return 'Deck management error: $message';
+      case ErrorType.contentModeration:
+        return 'Content moderation error: $message';
+      case ErrorType.userManagement:
+        return 'User management error: $message';
+      case ErrorType.paymentProcessing:
+        return 'Payment processing error: $message';
+      default:
         return 'An unexpected error occurred. Please try again.';
     }
   }
@@ -156,6 +173,30 @@ class ErrorHandler {
     return ServiceError(
       message: message,
       type: ErrorType.userProfile,
+      originalError: error,
+    );
+  }
+
+  static ServiceError handleUnauthorized() {
+    return ServiceError(
+      message: 'Unauthorized access',
+      type: ErrorType.authorization,
+      code: 'UNAUTHORIZED',
+    );
+  }
+
+  static ServiceError handleDeckManagementError(dynamic error, String message) {
+    return ServiceError(
+      message: message,
+      type: ErrorType.deckManagement,
+      originalError: error,
+    );
+  }
+
+  static ServiceError handleContentModerationError(dynamic error, String message) {
+    return ServiceError(
+      message: message,
+      type: ErrorType.contentModeration,
       originalError: error,
     );
   }

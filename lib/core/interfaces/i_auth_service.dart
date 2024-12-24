@@ -14,4 +14,5 @@ abstract class IAuthService {
 
    Future<void> signInWithGoogle();
    Future<void> signInWithApple();
+   Future<void> inviteUser(String email);
 }

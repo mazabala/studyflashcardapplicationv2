@@ -162,6 +162,12 @@ Future<void> googleSignin() async {
 
  }
 
+
+Future<void> InviteUser(String email, String message) async{
+
+  await _authService.inviteUser(email);
+
+}
 }
 
 // Provider for Supabase client

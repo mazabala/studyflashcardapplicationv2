@@ -1,14 +1,16 @@
+import 'package:flashcardstudyapplication/core/services/authentication/authentication_service.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flashcardstudyapplication/core/interfaces/i_admin_service.dart';
-import 'package:flashcardstudyapplication/core/interfaces/i_api_service.dart';
+
 import 'package:flashcardstudyapplication/core/error/error_handler.dart';
 import 'package:flashcardstudyapplication/core/services/deck/deck_service.dart';
 
 class AdminService implements IAdminService {
   final SupabaseClient _supabaseClient;
-  final IApiService _apiService;
+  final AuthService _authService;
 
-  AdminService(this._supabaseClient, this._apiService);
+
+  AdminService(this._supabaseClient, this._authService);
 
   @override
   Future<bool> isSystemAdmin() async {
@@ -42,7 +44,7 @@ class AdminService implements IAdminService {
 
       for (var config in configs) {
         await _supabaseClient.from('decks').insert({
-          'title': config.title,
+          
           'category': config.category,
           'difficulty_level': config.difficultyLevel,
           'is_system': true,
@@ -83,7 +85,7 @@ class AdminService implements IAdminService {
           .from('deck_categories')
           .select('name');
 
-      return (result.data as List).map((e) => e['name'] as String).toList();
+      return (result as List).map((e) => e['name'] as String).toList();
     } catch (e) {
       throw ErrorHandler.handle(e, 
         message: 'Failed to get deck categories',
@@ -145,7 +147,7 @@ class AdminService implements IAdminService {
           .eq('reviewed', false);
           
 
-      return (result.data as List).map((e) => e['content_id'] as String).toList();
+      return (result as List).map((e) => e['content_id'] as String).toList();
     } catch (e) {
       throw ErrorHandler.handle(e, 
         message: 'Failed to get flagged content',
@@ -208,7 +210,7 @@ class AdminService implements IAdminService {
           .eq('role', role);
           
 
-      return (result.data as List).map((e) => e['user_id'] as String).toList();
+      return (result as List).map((e) => e['user_id'] as String).toList();
     } catch (e) {
       throw ErrorHandler.handle(e, 
         message: 'Failed to get users by role',
@@ -224,8 +226,7 @@ class AdminService implements IAdminService {
         throw ErrorHandler.handleUnauthorized();
       }
 
-      // First archive the data
-      await archiveUserData(userId);
+
       
       // Then delete from auth
       await _supabaseClient.auth.admin.deleteUser(userId);
@@ -259,52 +260,18 @@ class AdminService implements IAdminService {
     }
   }
 
+
   @override
-  Future<void> archiveUserData(String userId) async {
+  Future<void> inviteUser(String email ) async {
     try {
       if (!await isSystemAdmin()) {
         throw ErrorHandler.handleUnauthorized();
       }
 
-      // Get user's data
-      final userData = await _supabaseClient
-          .from('users')
-          .select()
-          .eq('id', userId)
-          .single();
 
-      // Archive it
-      await _supabaseClient.from('archived_users').insert({
-        ...userData,
-        'archived_at': DateTime.now().toIso8601String(),
-        'archived_by': _supabaseClient.auth.currentUser?.id,
-      });
-    } catch (e) {
-      throw ErrorHandler.handle(e, 
-        message: 'Failed to archive user data',
-        specificType: ErrorType.userManagement
-      );
-    }
-  }
-
-  @override
-  Future<void> inviteUser(String email, {String? role, String? message}) async {
-    try {
-      if (!await isSystemAdmin()) {
-        throw ErrorHandler.handleUnauthorized();
-      }
-
-      await _supabaseClient.from('user_invites').insert({
-        'email': email,
-        'role': role,
-        'message': message,
-        'invited_by': _supabaseClient.auth.currentUser?.id,
-        'invited_at': DateTime.now().toIso8601String(),
-        'status': 'pending'
-      });
 
       // You might want to add email sending logic here using your API service
-      await _apiService.sendInviteEmail(email, message); //TODO: Implement this - change to match the current documentation
+      await _authService.inviteUser(email); 
     } catch (e) {
       throw ErrorHandler.handle(e, 
         message: 'Failed to invite user',

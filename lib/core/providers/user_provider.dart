@@ -1,3 +1,4 @@
+import 'package:flashcardstudyapplication/core/providers/auth_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flashcardstudyapplication/core/services/api/api_client.dart';
@@ -117,11 +118,7 @@ final userProvider = StateNotifierProvider<UserNotifier, UserState>((ref) {
   return UserNotifier(userService);
 });
 
-// Define a provider for Supabase client
-final supabaseClientProvider = Provider<SupabaseClient>((ref) {
-  final supabaseClient = Supabase.instance.client;
-  return supabaseClient;
-});
+
 
 // Define a provider for UserService
 final userServiceProvider = Provider<UserService>((ref) {
