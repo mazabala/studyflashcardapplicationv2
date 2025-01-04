@@ -80,7 +80,7 @@ class AdminNotifier extends StateNotifier<AdminState> {
     }
   }
 
-  Future<void> inviteUser(String email, {String? role, String? message}) async {
+  Future<void> inviteUser(String email) async {
     try {
       state = state.copyWith(isLoading: true);
       await _adminService.inviteUser(email);

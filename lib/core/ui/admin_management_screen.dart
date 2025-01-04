@@ -54,7 +54,7 @@ class _AdminManagementScreenState extends ConsumerState<AdminManagementScreen> {
                   children: [
                     Container(
                       color: Theme.of(context).scaffoldBackgroundColor,
-                      child:  UserManagementPage(),
+                      child:  const UserManagementPage(),
                     ),
                     Container(
                       color: Theme.of(context).scaffoldBackgroundColor,

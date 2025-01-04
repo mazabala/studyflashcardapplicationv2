@@ -17,10 +17,14 @@ class AuthService implements IAuthService {
   AuthService(this._supabaseClient);
 
 
-Future<void> inviteUser(String email) async{
-
+@override
+  Future<void> inviteUser(String email) async{
+    try{
+      print('======= sending invite =====');
    await _supabaseClient.auth.admin.inviteUserByEmail(email);
-
+    }
+    catch (e)
+    {print ('Error: on auth service: $e');}
 }
 
 Future<void>  forgotPassword(String email) async{

@@ -1,4 +1,5 @@
 // user_management_page.dart
+import 'package:flashcardstudyapplication/core/providers/admin_provider.dart';
 import 'package:flashcardstudyapplication/core/providers/user_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -23,7 +24,7 @@ class UserManagementPage extends ConsumerWidget {
               padding: const EdgeInsets.all(8.0),
               child: Text(
                 userState.errorMessage!,
-                style: TextStyle(color: Colors.red),
+                style: const TextStyle(color: Colors.red),
               ),
             ),
           Expanded(child: UserListView()),
@@ -49,7 +50,7 @@ class UserActions extends ConsumerWidget {
                 _navigateTo(context, CreateUserPage());
               } else {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('Only admins can create users')),
+                  const SnackBar(content: Text('Only admins can create users')),
                 );
               }
             },
@@ -57,7 +58,7 @@ class UserActions extends ConsumerWidget {
           ),
           ElevatedButton(
             onPressed: () => _navigateTo(context, ReviewMembershipPage()),
-            child: Text('Review Membership'),
+            child: const Text('Review Membership'),
           ),
         ],
       ),
@@ -106,7 +107,7 @@ class _UserListViewState extends ConsumerState<UserListView> {
             style: Theme.of(context).textTheme.bodySmall,
           ),
           trailing: userState.isExpired == true
-            ? Icon(Icons.warning, color: Colors.red)
+            ? const Icon(Icons.warning, color: Colors.red)
             : null,
           onTap: () => _navigateToDetails(context, index),
         );
@@ -146,24 +147,24 @@ class UserDetailsView extends ConsumerWidget {
               'User Details',
               style: Theme.of(context).textTheme.titleLarge,
             ),
-            SizedBox(height: 16),
+           const  SizedBox(height: 16),
             Text(
               'Subscription Plan: ${userState.subscriptionPlan ?? "None"}',
               style: Theme.of(context).textTheme.bodyLarge,
             ),
-            SizedBox(height: 8),
+             const SizedBox(height: 8),
             if (userState.isExpired == true)
-              Text(
+              const Text(
                 'Subscription Expired',
                 style: TextStyle(color: Colors.red),
               ),
-            SizedBox(height: 16),
+            const SizedBox(height: 16),
             ElevatedButton(
               onPressed: () {
                 // Implement upgrade subscription logic
                 ref.read(userProvider.notifier).upgradeSubscription('premium');
               },
-              child: Text('Upgrade Subscription'),
+              child: const Text('Upgrade Subscription'),
             ),
           ],
         ),
@@ -211,9 +212,11 @@ class ReviewMembershipPage extends ConsumerWidget {
 }
 
 class CreateUserPage extends ConsumerWidget {
+  const CreateUserPage({super.key});
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final TextEditingController nameController = TextEditingController();
+
     final TextEditingController emailController = TextEditingController();
 
     return Scaffold(
@@ -224,21 +227,17 @@ class CreateUserPage extends ConsumerWidget {
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
-            TextField(
-              controller: nameController,
-              decoration: InputDecoration(labelText: 'Name'),
-            ),
-            SizedBox(height: 16),
+            const SizedBox(height: 16),
             TextField(
               controller: emailController,
-              decoration: InputDecoration(labelText: 'Email'),
+              decoration: const InputDecoration(labelText: 'Email'),
             ),
-            SizedBox(height: 24),
+            const SizedBox(height: 24),
             ElevatedButton(
               onPressed: () async {
                 try {
-                  await ref.read(userProvider.notifier)
-                      .updateUserProfile(nameController.text, emailController.text);
+                  await ref.read(adminProvider.notifier)
+                      .inviteUser(emailController.text);
                   Navigator.pop(context);
                 } catch (e) {
                   ScaffoldMessenger.of(context).showSnackBar(
@@ -246,7 +245,7 @@ class CreateUserPage extends ConsumerWidget {
                   );
                 }
               },
-              child: Text('Create User'),
+              child: const Text('Invite User'),
             ),
           ],
         ),

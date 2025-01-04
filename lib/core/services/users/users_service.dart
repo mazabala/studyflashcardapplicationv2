@@ -46,7 +46,7 @@ Future<bool> isSystemAdmin() async{
 Future<bool> isUserExpired(DateTime expiryDate) async {
   try {
     // Parse the expiryDate string into a DateTime object
-    
+    print("=====Expiry date: $expiryDate======"); //TODO: Is this working?
 
     // Compare with the current date and time
     if (expiryDate.isBefore(DateTime.now())) {

@@ -82,6 +82,7 @@ class SubscriptionService implements ISubscriptionService {
       );
     }
   }
+ 
   Future<void> _updateSubscriptionInDatabase({required String userId, required String subscriptionTier}) async {
       // Update subscription in database
     final response = await _supabaseClient
@@ -174,8 +175,8 @@ class SubscriptionService implements ISubscriptionService {
   Future<bool> checkIfExpired() async {
     try {
       // First check with RevenueCat
-      final hasActiveSubscription = await _revenueCatService.hasActiveSubscription();
-      if (!hasActiveSubscription) return true;
+     // final hasActiveSubscription = await _revenueCatService.hasActiveSubscription();  //TODO: THIS IS NEEDS TO BE FIXED AND ENABLED WHEN REVENUECAT IS WORKING.
+     // if (!hasActiveSubscription) return true;
 
       // Then verify with local database
       final expiryDate = await _userService.getSubscriptionExpiry();
