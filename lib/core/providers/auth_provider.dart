@@ -65,10 +65,10 @@ Future<void> googleSignin() async {
       );
         
       // If the user is logged in, fetch their subscription status
-      if (user != null) {
-        print('updating status');
-        await _subscriptionNotifier.fetchSubscriptionStatus(user.id); // Fetch subscription status
-      }
+      // if (user != null) {
+      //   print('updating status');
+      //   await _subscriptionNotifier.fetchSubscriptionStatus(user.id); // Fetch subscription status
+      // }
 
     } catch (e) {
       state = state.copyWith(
@@ -95,9 +95,9 @@ Future<void> googleSignin() async {
       );
 
       // Fetch the subscription status for the user
-      if (user != null) {
-        await _subscriptionNotifier.fetchSubscriptionStatus(user.id);
-      }
+      // if (user != null) {
+      //   await _subscriptionNotifier.fetchSubscriptionStatus(user.id);
+      // }
 
     } catch (e) {
       state = state.copyWith(

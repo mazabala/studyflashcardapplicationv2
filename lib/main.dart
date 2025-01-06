@@ -1,4 +1,5 @@
 
+import 'package:flashcardstudyapplication/core/providers/revenuecat_provider.dart';
 import 'package:flashcardstudyapplication/core/services/revenuecat/revenuecat_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flashcardstudyapplication/core/services/api/api_client.dart'; // Import ApiClient and the provider
@@ -6,6 +7,7 @@ import 'package:flashcardstudyapplication/core/themes/app_theme.dart';
 import 'package:flashcardstudyapplication/core/navigation/router_manager.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -34,6 +36,14 @@ void main() async {
   );
 
   final supabaseClient = Supabase.instance.client;
+
+    // Setup providers
+  final container = ProviderContainer(
+    overrides: [
+      apiClientProvider.overrideWithValue(apiClient),
+    ],
+  );
+  await container.read(revenueCatClientProvider).initialize();
 
   // Initialize RevenueCat using the provider (this should happen automatically when the app starts)
  // final revenueCatClient = RevenueCat_Client(rev_key: apiClient.getRevenueCatApiKey());

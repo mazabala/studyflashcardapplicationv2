@@ -43,25 +43,25 @@ abstract class ISubscriptionService {
   /// Throws an error if restoration fails.
   Future<void> restoreSubscription(String userId);
 
-  /// Gets the available subscription packages from RevenueCat.
-  /// 
-  /// Throws an error if unable to fetch packages.
-  Future<List<Package>> getAvailablePackages();
+  // /// Gets the available subscription packages from RevenueCat.
+  // /// 
+  // /// Throws an error if unable to fetch packages.
+  // Future<List<Package>> getAvailablePackages();
 
-  /// Attempts to purchase a subscription package.
-  /// 
-  /// [userId] The ID of the user making the purchase.
-  /// [package] The RevenueCat package to purchase.
-  /// 
-  /// Returns `true` if purchase was successful, `false` otherwise.
-  /// Throws an error if the purchase process fails.
-  Future<bool> purchasePackage(String userId, Package package);
+  // /// Attempts to purchase a subscription package.
+  // /// 
+  // /// [userId] The ID of the user making the purchase.
+  // /// [package] The RevenueCat package to purchase.
+  // /// 
+  // /// Returns `true` if purchase was successful, `false` otherwise.
+  // /// Throws an error if the purchase process fails.
+  // Future<bool> purchasePackage(String userId, Package package);
 
-  /// Validates whether a subscription is currently active.
-  /// This performs checks with both RevenueCat and the local database.
-  /// 
-  /// [userId] The ID of the user whose subscription is being validated.
-  /// 
-  /// Returns `true` if subscription is valid and active, `false` otherwise.
-  Future<bool> validateSubscription(String userId);
+  // /// Validates whether a subscription is currently active.
+  // /// This performs checks with both RevenueCat and the local database.
+  // /// 
+  // /// [userId] The ID of the user whose subscription is being validated.
+  // /// 
+  // /// Returns `true` if subscription is valid and active, `false` otherwise.
+  // Future<bool> validateSubscription(String userId);
 }

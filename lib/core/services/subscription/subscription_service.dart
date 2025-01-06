@@ -107,15 +107,15 @@ class SubscriptionService implements ISubscriptionService {
   Future<void> renewSubscription(String userId) async {
     try {
       // First verify with RevenueCat
-      final hasActiveSubscription = await _revenueCatService.hasActiveSubscription();
+    //  final hasActiveSubscription = await _revenueCatService.hasActiveSubscription();
       
-      if (!hasActiveSubscription) {
-        throw ErrorHandler.handle(
-          Exception('No active subscription to renew'), 
-          message: 'No active subscription',
-          specificType: ErrorType.subscription
-        );
-      }
+      // if (!hasActiveSubscription) {
+      //   throw ErrorHandler.handle(
+      //     Exception('No active subscription to renew'), 
+      //     message: 'No active subscription',
+      //     specificType: ErrorType.subscription
+      //   );
+      // }
 
       final currentTier = await _getCurrentSubscriptionTier(userId);
       
@@ -146,7 +146,7 @@ class SubscriptionService implements ISubscriptionService {
   Future<void> cancelSubscription(String userId) async {
     try {
       // Handle cancellation through RevenueCat
-      await _revenueCatService.cancelSubscription();
+      //await _revenueCatService.cancelSubscription();
 
       // Update local database
       final response = await _supabaseClient
@@ -231,14 +231,14 @@ class SubscriptionService implements ISubscriptionService {
   // Helper method to handle subscription restoration
   Future<void> restoreSubscription(String userId) async {
     try {
-      await _revenueCatService.restorePurchases();
+      //await _revenueCatService.restorePurchases();
       
       // Check if restoration was successful
-      final hasActiveSubscription = await _revenueCatService.hasActiveSubscription();
-      if (hasActiveSubscription) {
-        // Update local database with restored subscription
-        await renewSubscription(userId);
-      }
+      //final hasActiveSubscription = await _revenueCatService.hasActiveSubscription();
+      // if (hasActiveSubscription) {
+      //   // Update local database with restored subscription
+      //   await renewSubscription(userId);
+      // }
     } catch (e) {
       throw ErrorHandler.handle(e,
         message: 'Failed to restore subscription',
@@ -250,8 +250,8 @@ class SubscriptionService implements ISubscriptionService {
   // Helper method to validate subscription
   Future<bool> _validateSubscription(String userId) async {
     try {
-      final hasActiveSubscription = await _revenueCatService.hasActiveSubscription();
-      if (!hasActiveSubscription) return false;
+     // final hasActiveSubscription = await _revenueCatService.hasActiveSubscription();
+     // if (!hasActiveSubscription) return false;
 
       final response = await _supabaseClient
           .from('user_subscriptions')
@@ -266,156 +266,156 @@ class SubscriptionService implements ISubscriptionService {
     }
   }
   
-  @override
-  Future<List<Package>> getAvailablePackages() async {
-    try {
-      if (kIsWeb) {
-        // Return web-specific packages
-        return await _getWebPackages();
-      }
+  // @override
+  // Future<List<Package>> getAvailablePackages() async {
+  //   try {
+  //     if (kIsWeb) {
+  //       // Return web-specific packages
+  //       return await _getWebPackages();
+  //     }
 
-      // Get offerings through RevenueCat service
-      final offerings = await _revenueCatService.getOfferings();
+  //     // Get offerings through RevenueCat service
+  //     final offerings = await _revenueCatService.getOfferings();
       
-      if (offerings.isEmpty) {
-        throw ErrorHandler.handle(
-          Exception('No offerings available'),
-          message: 'No subscription packages found',
-          specificType: ErrorType.subscription
-        );
-      }
+  //     if (offerings.isEmpty) {
+  //       throw ErrorHandler.handle(
+  //         Exception('No offerings available'),
+  //         message: 'No subscription packages found',
+  //         specificType: ErrorType.subscription
+  //       );
+  //     }
       
-      // Get all available packages from all offerings
-      final List<Package> allPackages = [];
-      for (final offering in offerings) {
-        allPackages.addAll(offering.availablePackages);
-      }
+  //     // Get all available packages from all offerings
+  //     final List<Package> allPackages = [];
+  //     for (final offering in offerings) {
+  //       allPackages.addAll(offering.availablePackages);
+  //     }
 
-      // Filter out any invalid packages and sort by price
-      final validPackages = allPackages.where((package) => 
-        package.storeProduct.price > 0 && 
-        package.storeProduct.identifier.isNotEmpty
-      ).toList()
-        ..sort((a, b) => a.storeProduct.price.compareTo(b.storeProduct.price));
+  //     // Filter out any invalid packages and sort by price
+  //     final validPackages = allPackages.where((package) => 
+  //       package.storeProduct.price > 0 && 
+  //       package.storeProduct.identifier.isNotEmpty
+  //     ).toList()
+  //       ..sort((a, b) => a.storeProduct.price.compareTo(b.storeProduct.price));
 
-      return validPackages;
-    } catch (e) {
-      throw ErrorHandler.handle(
-        e,
-        message: 'Failed to get available packages',
-        specificType: ErrorType.subscription
-      );
-    }
-  }
+  //     return validPackages;
+  //   } catch (e) {
+  //     throw ErrorHandler.handle(
+  //       e,
+  //       message: 'Failed to get available packages',
+  //       specificType: ErrorType.subscription
+  //     );
+  //   }
+  // }
 
   
-@override
-  Future<bool> purchasePackage(String userId, Package package) async {
-    try {
-      if (kIsWeb) {
-        return await _handleWebPurchase(userId, package);
-      }
+// @override
+//   Future<bool> purchasePackage(String userId, Package package) async {
+//     try {
+//       if (kIsWeb) {
+//         return await _handleWebPurchase(userId, package);
+//       }
 
-      // Verify user exists
-      final userExists = await _userService.getCurrentUserId() == userId;
-      if (!userExists) {
-        throw ErrorHandler.handle(
-          Exception('Invalid user'),
-          message: 'User not found',
-          specificType: ErrorType.subscription
-        );
-      }
+//       // Verify user exists
+//       final userExists = await _userService.getCurrentUserId() == userId;
+//       if (!userExists) {
+//         throw ErrorHandler.handle(
+//           Exception('Invalid user'),
+//           message: 'User not found',
+//           specificType: ErrorType.subscription
+//         );
+//       }
 
-      // Attempt purchase through RevenueCat
-      final success = await _revenueCatService.purchasePackage(package);
+//       // Attempt purchase through RevenueCat
+//       //final success = await _revenueCatService.purchasePackage(package);
       
-      if (success) {
-        // Update local database with new subscription
-        await _updateSubscriptionInDatabase(
-          userId: userId,
-          subscriptionTier: package.identifier,
+//       if (success) {
+//         // Update local database with new subscription
+//         await _updateSubscriptionInDatabase(
+//           userId: userId,
+//           subscriptionTier: package.identifier,
 
-        );
+//         );
 
-        // Verify purchase was successful
-        final isValid = await validateSubscription(userId);
-        if (!isValid) {
-          throw ErrorHandler.handle(
-            Exception('Purchase validation failed'),
-            message: 'Could not validate purchase',
-            specificType: ErrorType.subscription
-          );
-        }
-      }
+//         // Verify purchase was successful
+//         final isValid = await validateSubscription(userId);
+//         if (!isValid) {
+//           throw ErrorHandler.handle(
+//             Exception('Purchase validation failed'),
+//             message: 'Could not validate purchase',
+//             specificType: ErrorType.subscription
+//           );
+//         }
+//       }
 
-      return success;
-    } catch (e) {
-      // Handle specific RevenueCat errors
-      if (e is PurchasesErrorCode) {
-        switch (e) {
-          case PurchasesErrorCode.purchaseCancelledError:
-            return false;
-          case PurchasesErrorCode.paymentPendingError:
-            throw ErrorHandler.handle(
-              e,
-              message: 'Payment is pending',
-              specificType: ErrorType.subscription
-            );
-          default:
-            throw ErrorHandler.handle(
-              e,
-              message: 'Purchase failed',
-              specificType: ErrorType.subscription
-            );
-        }
-      }
+//       return success;
+//     } catch (e) {
+//       // Handle specific RevenueCat errors
+//       if (e is PurchasesErrorCode) {
+//         switch (e) {
+//           case PurchasesErrorCode.purchaseCancelledError:
+//             return false;
+//           case PurchasesErrorCode.paymentPendingError:
+//             throw ErrorHandler.handle(
+//               e,
+//               message: 'Payment is pending',
+//               specificType: ErrorType.subscription
+//             );
+//           default:
+//             throw ErrorHandler.handle(
+//               e,
+//               message: 'Purchase failed',
+//               specificType: ErrorType.subscription
+//             );
+//         }
+//       }
       
-      throw ErrorHandler.handle(
-        e,
-        message: 'Failed to purchase package',
-        specificType: ErrorType.subscription
-      );
-    }
-  }
+//       throw ErrorHandler.handle(
+//         e,
+//         message: 'Failed to purchase package',
+//         specificType: ErrorType.subscription
+//       );
+//     }
+//   }
 
   @override
-  Future<bool> validateSubscription(String userId) async {
-    try {
-      // First check RevenueCat status
-      final hasActiveSubscription = await _revenueCatService.hasActiveSubscription();
-      if (!hasActiveSubscription) return false;
+  // Future<bool> validateSubscription(String userId) async {
+  //   try {
+  //     // First check RevenueCat status
+  //    // final hasActiveSubscription = await _revenueCatService.hasActiveSubscription();
+  //    // if (!hasActiveSubscription) return false;
 
-      // Then verify with local database
-      final response = await _supabaseClient
-          .from('user_subscriptions')
-          .select('status, end_date')
-          .eq('user_id', userId)
-          .single();
+  //     // Then verify with local database
+  //     final response = await _supabaseClient
+  //         .from('user_subscriptions')
+  //         .select('status, end_date')
+  //         .eq('user_id', userId)
+  //         .single();
 
-      if (response == null ) {
-        return false;
-      }
+  //     if (response == null ) {
+  //       return false;
+  //     }
 
-      final status = response['status'] as String;
-      final endDate = DateTime.parse(response['end_date'] as String);
+  //     final status = response['status'] as String;
+  //     final endDate = DateTime.parse(response['end_date'] as String);
 
-      // Check if subscription is active and not expired
-      final isValid = status == 'active' && 
-                     endDate.isAfter(DateTime.now());
+  //     // Check if subscription is active and not expired
+  //     final isValid = status == 'active' && 
+  //                    endDate.isAfter(DateTime.now());
 
-      // If there's a mismatch between RevenueCat and local database,
-      // attempt to sync the data
-      if (hasActiveSubscription != isValid) {
-        await _syncSubscriptionStatus(userId);
-      }
+  //     // If there's a mismatch between RevenueCat and local database,
+  //     // attempt to sync the data
+  //    // if (hasActiveSubscription != isValid) {
+  //    //   await _syncSubscriptionStatus(userId);
+  //    // }
 
-      return isValid;
-    } catch (e) {
-      print('Error validating subscription: $e');
-      // In case of error, fall back to RevenueCat status
-      return await _revenueCatService.hasActiveSubscription();
-    }
-  }
+  //     return isValid;
+  //   } catch (e) {
+  //     print('Error validating subscription: $e');
+  //     // In case of error, fall back to RevenueCat status
+  //    return //await _revenueCatService.hasActiveSubscription();
+  //   }
+  // }
   Future<List<Package>> _getWebPackages() async {
   try {
     // Fetch packages/products from Stripe

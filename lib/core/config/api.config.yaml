@@ -7,5 +7,9 @@ api:
     supabase_key: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVrdW10ZWt0bnNvdG50cm13cGltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzAyOTExMDcsImV4cCI6MjA0NTg2NzEwN30.jF18XyQBC_y1lEEUvhnQH8ezkhOf_W7k2eBCWi5bPmw
   revenuecat:
     rev_key: rcb_sb_WvtPzRCyJkMbXweqxIUjjgpLX
-  
+    entitlementID : entl7fa646a34e
+    googleAPI:  goog_jaKddHbmIsiFpZkVsKmQuXVzWjB
+    amazonAPI:  AmazonAPI
+    appleAPI: AppleAPI
+
   
