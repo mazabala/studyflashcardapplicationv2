@@ -19,46 +19,48 @@ class ApiManager {
 
   bool _isInitialized = false;
 
-  ApiManager(this._supabaseClient);
+  ApiManager(this._supabaseClient); //TODO: THIS IS NOT WORKING BECAUSE WE NEED CREDS TO HIT TE DB. needs a workaround
 
 
 
   Future<void> initialize() async {
     try {
       final keys = await _supabaseClient.from('api_resources').select('name,api_key');
+      print('Fetched keys: $keys'); // Debug print
       
       _getRevenueCatApiKey = keys.firstWhere(
         (row) => row['name'] == 'RevenueCat',
-        orElse: () => {'RevenueCat': 'Key not found'}
-      )['RevenueCat'];
+        orElse: () => throw StateError('RevenueCat key not found'),
+      )['api_key'];
 
       _getEntitlementID = keys.firstWhere(
         (row) => row['name'] == 'entitlementID',
-        orElse: () => {'entitlementID': 'Key not found'}
-      )['entitlementID'];
+        orElse: () => throw StateError('entitlementID key not found'),
+      )['api_key'];
 
       _sanbox_Revenecat = keys.firstWhere(
         (row) => row['name'] == 'SandBox_RevenueCat',
-        orElse: () => {'SandBox_RevenueCat': 'Key not found'}
-      )['SandBox_RevenueCat'];
+        orElse: () => throw StateError('SandBox_RevenueCat key not found'),
+      )['api_key'];
 
       _getGoogleAPI = keys.firstWhere(
-        (row) => row['name'] == 'googleAPI', 
-        orElse: () => {'googleAPI': 'Key not found'}
-      )['googleAPI'];
+        (row) => row['name'] == 'googleAPI',
+        orElse: () => throw StateError('googleAPI key not found'),
+      )['api_key'];
 
       _getAppleAPI = keys.firstWhere(
         (row) => row['name'] == 'appleAPI',
-        orElse: () => {'appleAPI': 'Key not found'}
-      )['appleAPI'];
+        orElse: () => throw StateError('appleAPI key not found'),
+      )['api_key'];
 
       _getAmazonAPI = keys.firstWhere(
         (row) => row['name'] == 'amazonAPI',
-        orElse: () => {'amazonAPI': 'Key not found'}
-      )['amazonAPI'];
+        orElse: () => throw StateError('amazonAPI key not found'),
+      )['api_key'];
 
       _isInitialized = true;
     } on Exception catch (e) {
+      print('Error initializing ApiManager: $e');
       throw ErrorHandler.handle(e, message: 'Failed to get keys');
     }
   }
