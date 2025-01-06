@@ -7,17 +7,19 @@ import 'package:flutter/services.dart' show rootBundle;
 import 'package:flashcardstudyapplication/core/error/error_handler.dart';
 
 
+
 //TODO: Is this used at all or is supabase being used instead?
 class ApiClient implements IApiService {
+  
   late final String _baseUrl;
   late final String _baseKey;
   late final String _supabaseUrl;
   late final String _supabaseAnonKey;
-  late final String _getRevenueCatApiKey;
-  late final String _getEntitlementID;
-  late final String _getGoogleAPI;
-  late final String _getAppleAPI;
-  late final String _getAmazonAPI;
+  // late final String _getRevenueCatApiKey;
+  // late final String _getEntitlementID;
+  // late final String _getGoogleAPI;
+  // late final String _getAppleAPI;
+  // late final String _getAmazonAPI;
 
   late final http.Client _client;
   late final Map<String, dynamic> _config;
@@ -47,11 +49,11 @@ class ApiClient implements IApiService {
       }
       
       
-     _getRevenueCatApiKey = _config['revenuecat']['rev_key'];
-     _getEntitlementID =    _config['revenuecat']['entitlementID'];
-     _getGoogleAPI =        _config['revenuecat']['googleAPI'];
-     _getAppleAPI =         _config['revenuecat']['appleAPI'];
-     _getAmazonAPI =        _config['revenuecat']['amazonAPI'];
+    //  _getRevenueCatApiKey = _config['revenuecat']['rev_key'];
+    //  _getEntitlementID =    _config['revenuecat']['entitlementID'];
+    //  _getGoogleAPI =        _config['revenuecat']['googleAPI'];
+    //  _getAppleAPI =         _config['revenuecat']['appleAPI'];
+    //  _getAmazonAPI =        _config['revenuecat']['amazonAPI'];
 
 
       // Set Supabase credentials
@@ -71,17 +73,16 @@ class ApiClient implements IApiService {
   }
 
 
-  String getRevenueCatApiKey() => _getRevenueCatApiKey;
-  
-  String getEntitlementID () => _getEntitlementID;
-  
-  String getGoogleAPI () => _getGoogleAPI;
-  String getAppleAPI () => _getAppleAPI;
-  String getAmazonAPI () => _getAmazonAPI;
-
+  // String getRevenueCatApiKey() => _getRevenueCatApiKey;
+  // String getEntitlementID () => _getEntitlementID;
+  // String getGoogleAPI () => _getGoogleAPI;
+  // String getAppleAPI () => _getAppleAPI;
+  // String getAmazonAPI () => _getAmazonAPI;
   String getSupabaseUrl() => _supabaseUrl;
-
   String getSupabaseAnonKey() => _supabaseAnonKey;
+
+
+
 
   @override
   Future<Map<String, dynamic>> get(String endpoint, {Map<String, dynamic>? queryParams}) async {

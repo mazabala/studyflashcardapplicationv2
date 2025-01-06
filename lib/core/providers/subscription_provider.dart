@@ -47,7 +47,7 @@ class SubscriptionNotifier extends StateNotifier<SubscriptionState> {
   Future<void> loadPackages() async {
     state = state.copyWith(isLoading: true);
     try {
-      //final packages = await _subscriptionService.getAvailablePackages();
+      
       state = state.copyWith(
         availablePackages: null,
         isLoading: false
@@ -60,59 +60,7 @@ class SubscriptionNotifier extends StateNotifier<SubscriptionState> {
     }
   }
 
-  // Future<bool> purchasePackage(String userId, Package package) async {
-  //   state = state.copyWith(isLoading: true);
-  //   try {
-  //     final success = await _subscriptionService.purchasePackage(userId, package);
-  //     await fetchSubscriptionStatus(userId);
-  //     return success;
-  //   } catch (e) {
-  //     state = state.copyWith(errorMessage: e.toString());
-  //     return false;
-  //   } finally {
-  //     state = state.copyWith(isLoading: false);
-  //   }
-  // }
 
-  // Future<void> fetchSubscriptionStatus(String userId) async {
-  //   state = state.copyWith(isLoading: true);
-
-  //   try {
-     
-  //     final isExpired = await _subscriptionService.checkIfExpired();
-      
-  //     state = state.copyWith(isLoading: false, isExpired: isExpired);
-  //   } catch (e) {
-  //     state = state.copyWith(isLoading: false, errorMessage: e.toString());
-  //   }
-  // }
-
-  // Future<void> updateSubscription(String userId, String tier) async {
-  //   try {
-  //     await _subscriptionService.updateSubscription(userId, tier);
-  //     await fetchSubscriptionStatus(userId);
-  //   } catch (e) {
-  //     state = state.copyWith(errorMessage: e.toString());
-  //   }
-  // }
-
-  // // // // Future<void> renewSubscription(String userId) async {
-  // // // //   try {
-  // // // //     await _subscriptionService.renewSubscription(userId);
-  // // // //     await fetchSubscriptionStatus(userId);
-  // // // //   } catch (e) {
-  // // // //     state = state.copyWith(errorMessage: e.toString());
-  // // // //   }
-  // // // // }
-
-  // Future<void> cancelSubscription(String userId) async {
-  //   try {
-  //     await _subscriptionService.cancelSubscription(userId);
-  //     await fetchSubscriptionStatus(userId);
-  //   } catch (e) {
-  //     state = state.copyWith(errorMessage: e.toString());
-  //   }
-  // }
 }
 
 

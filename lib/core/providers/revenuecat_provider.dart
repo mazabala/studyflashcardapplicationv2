@@ -8,6 +8,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:flashcardstudyapplication/core/services/api/api_client.dart';
 import 'package:purchases_ui_flutter/purchases_ui_flutter.dart'; // Import ApiClient
+import 'package:flashcardstudyapplication/core/services/api/api_manager.dart'; // Add this import
 
 
 void presentPaywall() async {
@@ -23,14 +24,14 @@ void presentPaywallIfNeeded() async {
 // Provider to initialize and provide RevenueCat_Client
 final revenueCatClientProvider = Provider<RevenueCatService>((ref) {
   // Get the ApiClient instance from Riverpod (assuming it has been provided elsewhere in the app)
-  final apiClient = ref.watch(apiClientProvider); // Accessing the apiClient
+  final apiManager = ref.watch(apiManagerProvider); // Accessing the apiManager
 
-  // Initialize the RevenueCat_Client using the API key fetched from ApiClient
-  final revKey = apiClient.getRevenueCatApiKey();
-  final entitlementId = apiClient.getEntitlementID();
-  final googleAPI = apiClient.getGoogleAPI();
-  final appleAPI = apiClient.getAppleAPI();
-  final amazonAPI = apiClient.getAmazonAPI();
+  // Initialize the RevenueCat_Client using the API key fetched from ApiManager
+  final revKey = apiManager.getRevenueCatApiKey();
+  final entitlementId = apiManager.getEntitlementID(); 
+  final googleAPI = apiManager.getGoogleAPI();
+  final appleAPI = apiManager.getAppleAPI();
+  final amazonAPI = apiManager.getAmazonAPI();
 
   print("revenueCatApiKey: $revKey");
   
