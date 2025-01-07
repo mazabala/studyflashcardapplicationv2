@@ -261,13 +261,24 @@ TextEditingController _cardCountController = TextEditingController();
     // Regular screen if subscription is not expired
     return CustomScaffold(
       currentRoute: currentRoute,
+
       body: SingleChildScrollView(
         child: Column(
           children: [
+              CustomButton(
+          iconOnly: false,
+          icon: Icons.person,
+          text: 'My Profile',
+          tooltip: 'User Profile',
+          isLoading: false,
+          onPressed: () => Navigator.pushNamed(context, '/userProfile'),
+        ),
+            const SizedBox(height: 16),
             if (isSystemUser) ...[
-              const SizedBox(height: 16),
               CustomButton(
                 text: 'Admin Panel',
+                iconOnly: false,
+                icon: Icons.admin_panel_settings,
                 isLoading: false,
                 onPressed:   ()
                         {    
