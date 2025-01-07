@@ -1,5 +1,5 @@
 import 'package:flashcardstudyapplication/core/providers/revenuecat_provider.dart';
-import 'package:flashcardstudyapplication/core/services/api/api_manager.dart';
+
 import 'package:flashcardstudyapplication/core/services/revenuecat/revenuecat_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flashcardstudyapplication/core/services/api/api_client.dart'; // Import ApiClient and the provider
@@ -10,16 +10,14 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 
 void main() async {
+  // Add this line to initialize Flutter bindings
   WidgetsFlutterBinding.ensureInitialized();
-  
-  // Create a single container instance
-  final container = ProviderContainer();
   
   try {
     // Initialize API client first
     final apiClient = ApiClient();
     await apiClient.initialize();
-    
+    print('API client initialized');
     // Get Supabase credentials
     final supabaseUrl = apiClient.getSupabaseUrl();
     final supabaseAnonKey = apiClient.getSupabaseAnonKey();
@@ -31,18 +29,13 @@ void main() async {
     );
     
     final supabaseClient = Supabase.instance.client;
-    
-    // Initialize ApiManager
-    final apiManager = ApiManager(supabaseClient);
-    await apiManager.initialize();
-    
-    // Initialize RevenueCat last, after ApiManager is ready
-    await container.read(revenueCatClientProvider).initialize();
-    
-    // Run the app with UncontrolledProviderScope
+    print('Supabase initialized');
+    // Add runApp call here
     runApp(
-      UncontrolledProviderScope(
-        container: container,
+      ProviderScope(
+        overrides: [
+          apiClientProvider.overrideWithValue(apiClient),
+        ],
         child: MyApp(
           apiClient: apiClient,
           supabaseClient: supabaseClient,

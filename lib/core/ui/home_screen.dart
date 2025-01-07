@@ -1,5 +1,8 @@
+import 'package:flashcardstudyapplication/core/providers/revenuecat_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flashcardstudyapplication/core/ui/widgets/CustomScaffold.dart';
+
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -9,6 +12,8 @@ class HomeScreen extends StatelessWidget {
     final currentRoute = ModalRoute.of(context)?.settings.name ?? '/';
     final theme = Theme.of(context);
 
+
+    
     return CustomScaffold(
       currentRoute: currentRoute,
       useScroll: false,

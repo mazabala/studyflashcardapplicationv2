@@ -168,5 +168,6 @@ class ApiClient implements IApiService {
 
 // Provider for ApiClient
 final apiClientProvider = Provider<ApiClient>((ref) {
+  
   throw UnimplementedError('ApiClient must be initialized in main');
 });

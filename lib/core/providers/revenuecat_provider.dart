@@ -21,27 +21,39 @@ void presentPaywallIfNeeded() async {
   log('Paywall result: $paywallResult');
 }
 
-// Provider to initialize and provide RevenueCat_Client
-final revenueCatClientProvider = Provider<RevenueCatService>((ref) {
-  // Get the ApiClient instance from Riverpod (assuming it has been provided elsewhere in the app)
-  final apiManager = ref.watch(apiManagerProvider); // Accessing the apiManager
+// Create an AsyncNotifier to handle the RevenueCat initialization
+class RevenueCatNotifier extends AsyncNotifier<RevenueCatService> {
+  @override
+  Future<RevenueCatService> build() async {
+    // Wait for ApiManager to be initialized
+    final apiManagerAsync = ref.watch(apiManagerProvider);
+    
+    return apiManagerAsync.when(
+      loading: () => throw StateError('ApiManager not initialized'),
+      error: (err, stack) => throw err,
+      data: (apiManager) {
+        final revKey = apiManager.getRevenueCatApiKey();
+        final entitlementId = apiManager.getEntitlementID();
+        final googleAPI = apiManager.getGoogleAPI();
+        final appleAPI = apiManager.getAppleAPI();
+        final amazonAPI = apiManager.getAmazonAPI();
 
-  // Initialize the RevenueCat_Client using the API key fetched from ApiManager
-  final revKey = apiManager.getRevenueCatApiKey();
-  final entitlementId = apiManager.getEntitlementID(); 
-  final googleAPI = apiManager.getGoogleAPI();
-  final appleAPI = apiManager.getAppleAPI();
-  final amazonAPI = apiManager.getAmazonAPI();
+        print("revenueCatApiKey: $revKey");
 
-  print("revenueCatApiKey: $revKey");
-  
-  // Return an instance of RevenueCat_Client which is initialized once
-  return RevenueCatService(
-    revenueCatApiKey: revKey,
-    entitlementId: entitlementId,
-    googleAPI: googleAPI,
-    appleAPI: appleAPI,
-    amazonAPI: amazonAPI,
-    userService: ref.read(userServiceProvider)
-  );
-});
+        return RevenueCatService(
+          revenueCatApiKey: revKey,
+          entitlementId: entitlementId,
+          googleAPI: googleAPI,
+          appleAPI: appleAPI,
+          amazonAPI: amazonAPI,
+          userService: ref.read(userServiceProvider)
+        );
+      }
+    );
+  }
+}
+
+// Provider now returns AsyncValue<RevenueCatService>
+final revenueCatClientProvider = AsyncNotifierProvider<RevenueCatNotifier, RevenueCatService>(
+  () => RevenueCatNotifier()
+);

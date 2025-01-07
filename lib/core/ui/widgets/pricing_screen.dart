@@ -1,3 +1,4 @@
+import 'package:flashcardstudyapplication/core/providers/auth_provider.dart';
 import 'package:flashcardstudyapplication/core/providers/revenuecat_provider.dart';
 import 'package:flashcardstudyapplication/core/providers/subscription_provider.dart';
 import 'package:flashcardstudyapplication/core/providers/user_provider.dart';
@@ -27,6 +28,37 @@ class _PricingScreenState extends ConsumerState<PricingScreen> {
 
 
 void presentPaywall() async {
+  // Check authentication state
+  final authState = ref.read(authProvider);
+  
+  if (!authState.isAuthenticated) {
+    if (mounted) {
+      // Show a dialog explaining why login is needed
+      await showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('Login Required'),
+          content: const Text('Please log in to purchase a subscription.'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(); // Close dialog
+                Navigator.pushNamed(context, '/login'); // Navigate to login
+              },
+              child: const Text('Login'),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Cancel'),
+            ),
+          ],
+        ),
+      );
+    }
+    return; // Exit the method if not authenticated
+  }
+
+  // Proceed with paywall if authenticated
   final result = await RevenueCatUI.presentPaywall(displayCloseButton: true);
   if (result == PaywallResult.purchased) {
     if (mounted) {

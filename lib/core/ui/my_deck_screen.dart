@@ -15,6 +15,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flashcardstudyapplication/core/providers/deck_provider.dart';
 import 'package:flashcardstudyapplication/core/providers/user_provider.dart';
 import 'package:flashcardstudyapplication/core/providers/subscription_provider.dart'; // Correct import
+import 'package:flashcardstudyapplication/core/services/api/api_manager.dart';
 
 import 'widgets/deck/deck_search_bar.dart';
 
@@ -45,14 +46,49 @@ TextEditingController _cardCountController = TextEditingController();
    @override
   void initState() {
     super.initState();
-    _checkSystemUser();
+    _initializeServices();
   }
 
+  Future<void> _initializeServices() async {
+    try {
+      // First check if user is authenticated
+      final authState = ref.read(authProvider);
+      if (!authState.isAuthenticated) {
+        // Navigate to login if not authenticated
+        if (mounted) {
+          Navigator.of(context).pushReplacementNamed('/login');
+        }
+        return;
+      }
 
-  // Check if current user is system admin
+      // Then check if user is admin (only if authenticated)
+      await _checkSystemUser();
+      
+      // Finally initialize ApiManager (only if authenticated)
+      await ref.read(apiManagerProvider.notifier).initialize();
+    } catch (e) {
+      print('Failed to initialize services: $e');
+      // Handle error appropriately - maybe show error dialog
+      if (mounted) {
+        showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Text('Error'),
+            content: Text('Failed to initialize: $e'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text('OK'),
+              ),
+            ],
+          ),
+        );
+      }
+    }
+  }
+
+  // Modify _checkSystemUser to only check admin status
   Future<void> _checkSystemUser() async {
-
-    // You would need to implement this method in your UserService
     final isAdmin = await ref.read(userServiceProvider).isSystemAdmin();
     print ('user is : $isAdmin');
     if (mounted) {

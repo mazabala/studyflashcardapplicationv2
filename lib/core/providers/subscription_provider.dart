@@ -3,8 +3,8 @@
 import 'package:flashcardstudyapplication/core/providers/auth_provider.dart';
 import 'package:flashcardstudyapplication/core/providers/revenuecat_provider.dart';
 import 'package:flashcardstudyapplication/core/providers/user_provider.dart';
-import 'package:flashcardstudyapplication/core/services/api/api_client.dart';
-import 'package:flashcardstudyapplication/core/services/revenuecat/revenuecat_service.dart';
+
+
 import 'package:flashcardstudyapplication/core/services/subscription/subscription_service.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flashcardstudyapplication/core/interfaces/i_subscription_service.dart';
@@ -40,44 +40,69 @@ class SubscriptionState {
 }
 
 class SubscriptionNotifier extends StateNotifier<SubscriptionState> {
-  final ISubscriptionService _subscriptionService;
+  final AsyncValue<SubscriptionService> _subscriptionServiceAsync;
 
-  SubscriptionNotifier(this._subscriptionService) : super(SubscriptionState());
+  SubscriptionNotifier(this._subscriptionServiceAsync) 
+      : super(SubscriptionState()) {
+    // Initialize subscription state based on service availability
+    _initializeSubscription();
+  }
+
+  Future<void> _initializeSubscription() async {
+    state = state.copyWith(isLoading: true);
+    
+    _subscriptionServiceAsync.whenData((service) async {
+      try {
+        // Initialize subscription-related tasks here
+        state = state.copyWith(isLoading: false);
+      } catch (e) {
+        state = state.copyWith(
+          errorMessage: e.toString(),
+          isLoading: false,
+        );
+      }
+    });
+  }
 
   Future<void> loadPackages() async {
     state = state.copyWith(isLoading: true);
-    try {
-      
-      state = state.copyWith(
-        availablePackages: null,
-        isLoading: false
-      );
-    } catch (e) {
-      state = state.copyWith(
-        errorMessage: e.toString(),
-        isLoading: false
-      );
-    }
+    
+    _subscriptionServiceAsync.whenData((service) async {
+      try {
+        // Use the service to load packages
+        state = state.copyWith(
+          availablePackages: null,
+          isLoading: false
+        );
+      } catch (e) {
+        state = state.copyWith(
+          errorMessage: e.toString(),
+          isLoading: false
+        );
+      }
+    });
   }
-
-
 }
 
-
-
-final subscriptionServiceProvider = Provider<SubscriptionService>((ref) {
+final subscriptionServiceProvider = Provider<AsyncValue<SubscriptionService>>((ref) {
   final supabaseClient = ref.read(supabaseClientProvider);
   final userService = ref.read(userServiceProvider);
-  final revenueCatService = ref.read(revenueCatClientProvider);
+  final revenueCatServiceAsync = ref.watch(revenueCatClientProvider);
   
-  return SubscriptionService(
-    supabaseClient,
-    userService,
-    revenueCatService,
+  return revenueCatServiceAsync.when(
+    loading: () => const AsyncValue.loading(),
+    error: (err, stack) => AsyncValue.error(err, stack),
+    data: (revenueCatService) => AsyncValue.data(
+      SubscriptionService(
+        supabaseClient,
+        userService,
+        revenueCatService,
+      )
+    ),
   );
 });
 
 final subscriptionProvider = StateNotifierProvider<SubscriptionNotifier, SubscriptionState>((ref) {
-  final subscriptionService = ref.watch(subscriptionServiceProvider);
-  return SubscriptionNotifier(subscriptionService);
+  final subscriptionServiceAsync = ref.watch(subscriptionServiceProvider);
+  return SubscriptionNotifier(subscriptionServiceAsync);
 });
