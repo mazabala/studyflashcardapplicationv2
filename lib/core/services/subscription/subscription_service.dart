@@ -266,47 +266,49 @@ class SubscriptionService implements ISubscriptionService {
     }
   }
   
-  // @override
-  // Future<List<Package>> getAvailablePackages() async {
-  //   try {
-  //     if (kIsWeb) {
-  //       // Return web-specific packages
-  //       return await _getWebPackages();
-  //     }
+ 
+  
+   @override
+  Future<List<Package>> getAvailablePackages() async {
+    try {
+      if (kIsWeb) {
+        // Return web-specific packages
+        return await _getWebPackages();
+      }
 
-  //     // Get offerings through RevenueCat service
-  //     final offerings = await _revenueCatService.getOfferings();
+      // Get offerings through RevenueCat service
+      final offerings = await _revenueCatService.getOfferings();
       
-  //     if (offerings.isEmpty) {
-  //       throw ErrorHandler.handle(
-  //         Exception('No offerings available'),
-  //         message: 'No subscription packages found',
-  //         specificType: ErrorType.subscription
-  //       );
-  //     }
+      if (offerings.isEmpty) {
+        throw ErrorHandler.handle(
+          Exception('No offerings available'),
+          message: 'No subscription packages found',
+          specificType: ErrorType.subscription
+        );
+      }
       
-  //     // Get all available packages from all offerings
-  //     final List<Package> allPackages = [];
-  //     for (final offering in offerings) {
-  //       allPackages.addAll(offering.availablePackages);
-  //     }
+      // Get all available packages from all offerings
+      final List<Package> allPackages = [];
+      for (final offering in offerings) {
+        allPackages.addAll(offering.availablePackages);
+      }
 
-  //     // Filter out any invalid packages and sort by price
-  //     final validPackages = allPackages.where((package) => 
-  //       package.storeProduct.price > 0 && 
-  //       package.storeProduct.identifier.isNotEmpty
-  //     ).toList()
-  //       ..sort((a, b) => a.storeProduct.price.compareTo(b.storeProduct.price));
+      // Filter out any invalid packages and sort by price
+      final validPackages = allPackages.where((package) => 
+        package.storeProduct.price > 0 && 
+        package.storeProduct.identifier.isNotEmpty
+      ).toList()
+        ..sort((a, b) => a.storeProduct.price.compareTo(b.storeProduct.price));
 
-  //     return validPackages;
-  //   } catch (e) {
-  //     throw ErrorHandler.handle(
-  //       e,
-  //       message: 'Failed to get available packages',
-  //       specificType: ErrorType.subscription
-  //     );
-  //   }
-  // }
+      return validPackages;
+    } catch (e) {
+      throw ErrorHandler.handle(
+        e,
+        message: 'Failed to get available packages',
+        specificType: ErrorType.subscription
+      );
+    }
+  }
 
   
 // @override
@@ -378,7 +380,7 @@ class SubscriptionService implements ISubscriptionService {
 //     }
 //   }
 
-  @override
+  
   // Future<bool> validateSubscription(String userId) async {
   //   try {
   //     // First check RevenueCat status

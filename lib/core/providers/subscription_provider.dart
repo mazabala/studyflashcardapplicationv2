@@ -40,47 +40,55 @@ class SubscriptionState {
 }
 
 class SubscriptionNotifier extends StateNotifier<SubscriptionState> {
-  final AsyncValue<SubscriptionService> _subscriptionServiceAsync;
+  final ISubscriptionService _subscriptionService;
 
-  SubscriptionNotifier(this._subscriptionServiceAsync) 
-      : super(SubscriptionState()) {
-    // Initialize subscription state based on service availability
+  SubscriptionNotifier(this._subscriptionService) : super(SubscriptionState()) {
+    // Initialize subscription state
     _initializeSubscription();
   }
 
   Future<void> _initializeSubscription() async {
     state = state.copyWith(isLoading: true);
-    
-    _subscriptionServiceAsync.whenData((service) async {
-      try {
-        // Initialize subscription-related tasks here
-        state = state.copyWith(isLoading: false);
-      } catch (e) {
-        state = state.copyWith(
-          errorMessage: e.toString(),
-          isLoading: false,
-        );
-      }
-    });
+    try {
+      // Initialize subscription-related tasks here
+      state = state.copyWith(isLoading: false);
+    } catch (e) {
+      state = state.copyWith(
+        errorMessage: e.toString(),
+        isLoading: false,
+      );
+    }
+  }
+
+  Future<void> fetchSubscriptionStatus(String userId) async {
+    try {
+      final subscriptionStatus = await _subscriptionService.getSubscriptionStatus(userId);
+      state = state.copyWith(
+        isExpired: !subscriptionStatus, // Assuming getSubscriptionStatus returns bool
+        isLoading: false,
+      );
+    } catch (e) {
+      state = state.copyWith(
+        errorMessage: e.toString(),
+        isLoading: false,
+      );
+    }
   }
 
   Future<void> loadPackages() async {
     state = state.copyWith(isLoading: true);
-    
-    _subscriptionServiceAsync.whenData((service) async {
-      try {
-        // Use the service to load packages
-        state = state.copyWith(
-          availablePackages: null,
-          isLoading: false
-        );
-      } catch (e) {
-        state = state.copyWith(
-          errorMessage: e.toString(),
-          isLoading: false
-        );
-      }
-    });
+    try {
+      final packages = await _subscriptionService.getAvailablePackages();
+      state = state.copyWith(
+        availablePackages: packages,
+        isLoading: false
+      );
+    } catch (e) {
+      state = state.copyWith(
+        errorMessage: e.toString(),
+        isLoading: false
+      );
+    }
   }
 }
 
@@ -104,5 +112,9 @@ final subscriptionServiceProvider = Provider<AsyncValue<SubscriptionService>>((r
 
 final subscriptionProvider = StateNotifierProvider<SubscriptionNotifier, SubscriptionState>((ref) {
   final subscriptionServiceAsync = ref.watch(subscriptionServiceProvider);
-  return SubscriptionNotifier(subscriptionServiceAsync);
+  return subscriptionServiceAsync.when(
+    data: (service) => SubscriptionNotifier(service),
+    loading: () => throw Exception('Subscription service not ready'),
+    error: (err, stack) => throw Exception('Failed to initialize subscription service: $err'),
+  );
 });
