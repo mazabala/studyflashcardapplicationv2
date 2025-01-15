@@ -38,44 +38,63 @@ class AuthState {
 // StateNotifier to manage authentication state
 class AuthNotifier extends StateNotifier<AuthState> {
   final IAuthService _authService;
-  final SubscriptionNotifier _subscriptionNotifier; // Inject SubscriptionNotifier
+  final SubscriptionNotifier _subscriptionNotifier;
 
-  AuthNotifier(this._authService, this._subscriptionNotifier) : super(const AuthState());
+  AuthNotifier(this._authService, this._subscriptionNotifier) : super(const AuthState()) {
+    // Listen to auth state changes from Supabase
+    Supabase.instance.client.auth.onAuthStateChange.listen((data) {
+      _handleAuthStateChange(data.event, data.session);
+    });
+  }
 
-Future<void> googleSignin() async {
+  void _handleAuthStateChange(AuthChangeEvent event, Session? session) {
+    switch (event) {
+      case AuthChangeEvent.signedIn:
+      case AuthChangeEvent.tokenRefreshed:
+        if (session?.user != null) {
+          state = state.copyWith(
+            user: session!.user,
+            isAuthenticated: true,
+            isLoading: false,
+          );
+        }
+        break;
+      case AuthChangeEvent.signedOut:
+      case AuthChangeEvent.userDeleted:
+        state = const AuthState();
+        break;
+      default:
+        break;
+    }
+  }
 
-  await _authService.signInWithGoogle();
-
-
-}
+  Future<void> googleSignin() async {
+    await _authService.signInWithGoogle();
+  }
 
   Future<void> signIn(String email, String password) async {
     state = state.copyWith(isLoading: true, errorMessage: null);
     
     try {
-      // Sign the user in
       await _authService.signIn(email, password);
       final user = await _authService.getCurrentUser();
       
-      // Update the authentication state
       state = state.copyWith(
         user: user,
         isAuthenticated: true,
         isLoading: false,
       );
         
-      // If the user is logged in, fetch their subscription status
-      // if (user != null) {
-      //   print('updating status');
-      //   await _subscriptionNotifier.fetchSubscriptionStatus(user.id); // Fetch subscription status
-      // }
-
+      // Initialize user details after successful sign in
+      if (user != null) {
+        await _subscriptionNotifier.fetchSubscriptionStatus(user.id);
+      }
     } catch (e) {
       state = state.copyWith(
         errorMessage: e.toString(),
         isLoading: false,
       );
-      rethrow; // Allow UI to handle the error if needed
+      rethrow;
     }
   }
 
@@ -156,18 +175,38 @@ Future<void> googleSignin() async {
     }
   }
 
- Future<void> resetPassword (String email) async{
-
+  Future<void> resetPassword(String email) async {
     await _authService.forgotPassword(email);
+  }
 
- }
+  Future<void> InviteUser(String email, String message) async {
+    await _authService.inviteUser(email);
+  }
 
-
-Future<void> InviteUser(String email, String message) async{
-
-  await _authService.inviteUser(email);
-
-}
+  Future<void> initializeAuth() async {
+    state = state.copyWith(isLoading: true);
+    try {
+      final user = await _authService.getCurrentUser();
+      
+      if (user != null) {
+        state = state.copyWith(
+          user: user,
+          isAuthenticated: true,
+          isLoading: false,
+        );
+        
+        // Initialize subscription and user details
+        await _subscriptionNotifier.fetchSubscriptionStatus(user.id);
+      } else {
+        state = state.copyWith(isLoading: false);
+      }
+    } catch (e) {
+      state = state.copyWith(
+        errorMessage: e.toString(),
+        isLoading: false,
+      );
+    }
+  }
 }
 
 // Provider for Supabase client
@@ -180,8 +219,6 @@ final authServiceProvider = Provider<IAuthService>((ref) {
   final supabaseClient = ref.watch(supabaseClientProvider);
   return AuthService(supabaseClient);
 });
-
-
 
 // The main auth provider that will be used by the UI
 final authProvider = StateNotifierProvider<AuthNotifier, AuthState>((ref) {

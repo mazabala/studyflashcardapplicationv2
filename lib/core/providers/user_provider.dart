@@ -32,24 +32,35 @@ class UserState {
 // UserNotifier to manage user-related state
 class UserNotifier extends StateNotifier<UserState> {
   final UserService userService;
+  final Ref ref;  // Add Ref to access other providers
 
-  UserNotifier(this.userService) : super(UserState());
+  UserNotifier(this.userService, this.ref) : super(UserState()) {
+    // Initialize user details when UserNotifier is created
+    initializeUser();
+  }
 
-  // Fetch user details including subscription and expiry status
+  Future<void> initializeUser() async {
+    final authState = ref.read(authProvider);
+    if (authState.isAuthenticated) {
+      await fetchUserDetails();
+    }
+  }
+
+  // Update fetchUserDetails to handle cases where user isn't authenticated
   Future<void> fetchUserDetails() async {
     try {
-      // Fetch subscription plan
-      final subscriptionPlan = await userService.getUserSubscriptionPlan();
-      
-      // Fetch subscription expiry date
-      final expiryDate = await userService.getSubscriptionExpiry();
-
-      final isExpired = expiryDate != null 
-        ? await userService.isUserExpired(expiryDate) 
-        : false;
-        
       final userId = userService.getCurrentUserId();
-      // Update the state with the fetched data
+      if (userId == null) {
+        state = UserState(); // Reset state if no user
+        return;
+      }
+
+      final subscriptionPlan = await userService.getUserSubscriptionPlan();
+      final expiryDate = await userService.getSubscriptionExpiry();
+      final isExpired = expiryDate != null 
+          ? await userService.isUserExpired(expiryDate) 
+          : false;
+
       state = state.copyWith(
         subscriptionPlan: subscriptionPlan,
         isExpired: isExpired,
@@ -57,7 +68,6 @@ class UserNotifier extends StateNotifier<UserState> {
         userId: userId,
       );
     } catch (e) {
-      // Handle any errors that occur during fetching
       state = state.copyWith(errorMessage: e.toString());
     }
   }
@@ -115,7 +125,7 @@ Future<bool> isUserAdmin () async{
 // Define the Riverpod provider for the user
 final userProvider = StateNotifierProvider<UserNotifier, UserState>((ref) {
   final userService = ref.read(userServiceProvider);
-  return UserNotifier(userService);
+  return UserNotifier(userService, ref);
 });
 
 

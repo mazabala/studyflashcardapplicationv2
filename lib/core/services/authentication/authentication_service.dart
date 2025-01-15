@@ -14,7 +14,12 @@ class AuthService implements IAuthService {
   final SupabaseClient _supabaseClient;
 
   // Constructor that takes SupabaseClient
-  AuthService(this._supabaseClient);
+  AuthService(this._supabaseClient) {
+    // Initialize session persistence
+    _supabaseClient.auth.onAuthStateChange.listen((data) {
+      // Handle auth state changes if needed
+    });
+  }
 
 
 @override
@@ -77,8 +82,8 @@ Future<void>  forgotPassword(String email) async{
 
   @override
   Future<User?> getCurrentUser() async {
-    final user = _supabaseClient.auth.currentUser;
-    return user; // Return current authenticated user
+    // This will now return the persisted user if available
+    return _supabaseClient.auth.currentUser;
   }
 
 Future<void> signInWithGoogle() async {

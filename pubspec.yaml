@@ -14,7 +14,6 @@ dependencies:
   cupertino_icons: ^1.0.2
   supabase_flutter: ^2.8.0
   provider: ^6.1.1
-  flutter_secure_storage: ^9.0.0
   shared_preferences: ^2.2.2
   intl: ^0.18.1
   timeago: ^3.6.0
@@ -49,7 +48,7 @@ flutter:
   
   assets:
     - assets/images/medical_bg.jpg
-    - lib\core\config\api.config.yaml
+    - lib/core/config/api.config.yaml
     - 'assets/images/logo.png'
     
   # Add custom fonts if needed
