@@ -149,22 +149,22 @@ Future<void> initPlatformState() async {
  
  }
 
-//   Future<List<Offering>> getOfferings() async {
-//     if (!_isInitialized) await initialize();
+  Future<List<Offering>> getOfferings() async {
+    if (!_isInitialized) await initialize();
 
-//     try {
-//       if (kIsWeb) {
-//         // Return mock offerings for web
-//         return _getMockOfferings();
-//       }
+    try {
+      if (kIsWeb) {
+        // Return mock offerings for web
+        return _getMockOfferings();
+      }
       
-//       final offerings = await Purchases.getOfferings();
-//       return offerings.all.values.toList();
-//     } catch (e) {
-//       print("Error fetching offerings: $e");
-//       rethrow;
-//     }
-//   }
+      final offerings = await Purchases.getOfferings();
+      return offerings.all.values.toList();
+    } catch (e) {
+      print("Error fetching offerings: $e");
+      rethrow;
+    }
+  }
 
   List<Offering> _getMockOfferings() {
     // Create mock offerings for web platform

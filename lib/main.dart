@@ -1,3 +1,4 @@
+import 'package:flashcardstudyapplication/core/providers/auth_provider.dart';
 import 'package:flashcardstudyapplication/core/providers/revenuecat_provider.dart';
 
 import 'package:flashcardstudyapplication/core/services/revenuecat/revenuecat_service.dart';
@@ -22,10 +23,14 @@ void main() async {
     final supabaseUrl = apiClient.getSupabaseUrl();
     final supabaseAnonKey = apiClient.getSupabaseAnonKey();
     
-    // Initialize Supabase
+    // Initialize Supabase with session persistence
     await Supabase.initialize(
       url: supabaseUrl,
       anonKey: supabaseAnonKey,
+      authOptions: const AuthOptions(
+        persistSession: true, // Enable session persistence
+        autoRefreshToken: true, // Enable automatic token refresh
+      ),
     );
     
     final supabaseClient = Supabase.instance.client;
@@ -49,23 +54,40 @@ void main() async {
   }
 }
 
-class MyApp extends StatelessWidget {
-  final ApiClient apiClient;
-  final SupabaseClient supabaseClient;
+class MyApp extends ConsumerStatefulWidget {
+  const MyApp({super.key});
 
-  const MyApp({super.key, 
-    required this.apiClient,
-    required this.supabaseClient,
-  });
+  @override
+  ConsumerState<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends ConsumerState<MyApp> {
+  @override
+  void initState() {
+    super.initState();
+    _initializeApp();
+  }
+
+  Future<void> _initializeApp() async {
+    try {
+      // Initialize auth state when app starts
+      await ref.read(authProvider.notifier).initializeAuth();
+    } catch (e) {
+      print('Error initializing app: $e');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
+    // Listen to auth state changes
+    final authState = ref.watch(authProvider);
+
     return MaterialApp(
       title: 'Flashcard Study App',
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,
       themeMode: ThemeMode.system,
-      initialRoute: '/',
+      initialRoute: authState.isAuthenticated ? '/home' : '/', // Adjust initial route based on auth state
       onGenerateRoute: RouteManager.generateRoute,
       debugShowCheckedModeBanner: false,
     );
