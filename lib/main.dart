@@ -1,17 +1,15 @@
 import 'package:flashcardstudyapplication/core/providers/auth_provider.dart';
 import 'package:flashcardstudyapplication/core/providers/revenuecat_provider.dart';
-
-import 'package:flashcardstudyapplication/core/services/revenuecat/revenuecat_service.dart';
+import 'package:flashcardstudyapplication/core/providers/subscription_provider.dart';
+import 'package:flashcardstudyapplication/core/providers/supabase_provider.dart';
 import 'package:flutter/material.dart';
-import 'package:flashcardstudyapplication/core/services/api/api_client.dart'; // Import ApiClient and the provider
+import 'package:flashcardstudyapplication/core/services/api/api_client.dart';
 import 'package:flashcardstudyapplication/core/themes/app_theme.dart';
 import 'package:flashcardstudyapplication/core/navigation/router_manager.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-
 void main() async {
-  // Add this line to initialize Flutter bindings
   WidgetsFlutterBinding.ensureInitialized();
   
   try {
@@ -19,6 +17,7 @@ void main() async {
     final apiClient = ApiClient();
     await apiClient.initialize();
     print('API client initialized');
+    
     // Get Supabase credentials
     final supabaseUrl = apiClient.getSupabaseUrl();
     final supabaseAnonKey = apiClient.getSupabaseAnonKey();
@@ -31,16 +30,14 @@ void main() async {
     
     final supabaseClient = Supabase.instance.client;
     print('Supabase initialized');
-    // Add runApp call here
+    
     runApp(
       ProviderScope(
         overrides: [
           apiClientProvider.overrideWithValue(apiClient),
+          supabaseClientProvider.overrideWithValue(supabaseClient),
         ],
-        child: MyApp(
-          apiClient: apiClient,
-          supabaseClient: supabaseClient,
-        ),
+        child: const MyApp(),
       ),
     );
     
@@ -51,14 +48,7 @@ void main() async {
 }
 
 class MyApp extends ConsumerStatefulWidget {
-  final ApiClient apiClient;
-  final SupabaseClient supabaseClient;
-
-  const MyApp({
-    super.key, 
-    required this.apiClient, 
-    required this.supabaseClient,
-  });
+  const MyApp({super.key});
 
   @override
   ConsumerState<MyApp> createState() => _MyAppState();
@@ -73,8 +63,22 @@ class _MyAppState extends ConsumerState<MyApp> {
 
   Future<void> _initializeApp() async {
     try {
-      // Initialize auth state when app starts
+      // 1. Make sure API client is ready
+      final apiClient = ref.read(apiClientProvider);
+      await apiClient.initialize();
+      print('API client initialized');
+
+      // 2. Initialize auth state
       await ref.read(authProvider.notifier).initializeAuth();
+      
+      // 3. Initialize RevenueCat
+      final revenueCatService = await ref.read(revenueCatClientProvider.future);
+      await revenueCatService.initialize();
+      print('RevenueCat initialized');
+      
+      // 4. Finally initialize subscription service
+      await ref.read(subscriptionProvider.notifier).initialize();
+      print('Subscription service initialized');
     } catch (e) {
       print('Error initializing app: $e');
     }
@@ -82,7 +86,6 @@ class _MyAppState extends ConsumerState<MyApp> {
 
   @override
   Widget build(BuildContext context) {
-    // Listen to auth state changes
     final authState = ref.watch(authProvider);
 
     return MaterialApp(
@@ -90,7 +93,7 @@ class _MyAppState extends ConsumerState<MyApp> {
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,
       themeMode: ThemeMode.system,
-      initialRoute: authState.isAuthenticated ? '/home' : '/', // Adjust initial route based on auth state
+      initialRoute: authState.isAuthenticated ? '/home' : '/',
       onGenerateRoute: RouteManager.generateRoute,
       debugShowCheckedModeBanner: false,
     );

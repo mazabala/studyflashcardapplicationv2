@@ -206,6 +206,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
         isLoading: false,
       );
     }
+    print('=====init completed==== auth state: ${state.isAuthenticated}');
   }
 }
 

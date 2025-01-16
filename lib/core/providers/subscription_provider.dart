@@ -15,12 +15,14 @@ class SubscriptionState {
   final bool isExpired;
   final String errorMessage;
   final List<Package>? availablePackages;
+  final bool isInitialized;
 
   SubscriptionState({
     this.isLoading = false,
     this.isExpired = false,
     this.errorMessage = '',
     this.availablePackages = const [],
+    this.isInitialized = false,
   });
 
 
@@ -29,12 +31,14 @@ class SubscriptionState {
     bool? isExpired,
     String? errorMessage,
     List<Package>? availablePackages,
+    bool? isInitialized,
   }) {
     return SubscriptionState(
       isLoading: isLoading ?? this.isLoading,
       isExpired: isExpired ?? this.isExpired,
       errorMessage: errorMessage ?? this.errorMessage,
       availablePackages: availablePackages ?? this.availablePackages,
+      isInitialized: isInitialized ?? this.isInitialized,
     );
   }
 }
@@ -42,20 +46,26 @@ class SubscriptionState {
 class SubscriptionNotifier extends StateNotifier<SubscriptionState> {
   final ISubscriptionService _subscriptionService;
 
-  SubscriptionNotifier(this._subscriptionService) : super(SubscriptionState()) {
-    // Initialize subscription state
-    _initializeSubscription();
+  SubscriptionNotifier(this._subscriptionService) : super(SubscriptionState());
+
+  Future<void> initialize() async {
+    if (state.isInitialized) return;
+    await _initializeSubscription();
   }
 
   Future<void> _initializeSubscription() async {
     state = state.copyWith(isLoading: true);
     try {
-      // Initialize subscription-related tasks here
-      state = state.copyWith(isLoading: false);
+      await (_subscriptionService as SubscriptionService).initialize();
+      state = state.copyWith(
+        isLoading: false,
+        isInitialized: true,
+      );
     } catch (e) {
       state = state.copyWith(
         errorMessage: e.toString(),
         isLoading: false,
+        isInitialized: false,
       );
     }
   }
@@ -112,9 +122,12 @@ final subscriptionServiceProvider = Provider<AsyncValue<SubscriptionService>>((r
 
 final subscriptionProvider = StateNotifierProvider<SubscriptionNotifier, SubscriptionState>((ref) {
   final subscriptionServiceAsync = ref.watch(subscriptionServiceProvider);
+  
   return subscriptionServiceAsync.when(
     data: (service) => SubscriptionNotifier(service),
-    loading: () => throw Exception('Subscription service not ready'),
+    loading: () => SubscriptionNotifier(
+      throw UnimplementedError('Subscription service not ready'),
+    ),
     error: (err, stack) => throw Exception('Failed to initialize subscription service: $err'),
   );
 });
