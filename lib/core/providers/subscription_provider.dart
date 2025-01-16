@@ -64,7 +64,7 @@ class SubscriptionNotifier extends StateNotifier<SubscriptionState> {
     try {
       final subscriptionStatus = await _subscriptionService.getSubscriptionStatus(userId);
       state = state.copyWith(
-        isExpired: !subscriptionStatus, // Assuming getSubscriptionStatus returns bool
+        isExpired: subscriptionStatus == 'expired' , 
         isLoading: false,
       );
     } catch (e) {

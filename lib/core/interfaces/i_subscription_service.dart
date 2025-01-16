@@ -65,5 +65,5 @@ abstract class ISubscriptionService {
   /// Returns `true` if subscription is valid and active, `false` otherwise.
   Future<bool> validateSubscription(String userId);
 
-  Future<bool> getSubscriptionStatus(String userId);
+  Future<String> getSubscriptionStatus(String userId);
 }
