@@ -27,10 +27,6 @@ void main() async {
     await Supabase.initialize(
       url: supabaseUrl,
       anonKey: supabaseAnonKey,
-      authOptions: const AuthOptions(
-        persistSession: true, // Enable session persistence
-        autoRefreshToken: true, // Enable automatic token refresh
-      ),
     );
     
     final supabaseClient = Supabase.instance.client;
@@ -55,7 +51,14 @@ void main() async {
 }
 
 class MyApp extends ConsumerStatefulWidget {
-  const MyApp({super.key});
+  final ApiClient apiClient;
+  final SupabaseClient supabaseClient;
+
+  const MyApp({
+    super.key, 
+    required this.apiClient, 
+    required this.supabaseClient,
+  });
 
   @override
   ConsumerState<MyApp> createState() => _MyAppState();

@@ -523,5 +523,94 @@ String _mapStripeStatus(String stripeStatus) {
   }
 }
 
-  // 
+@override
+Future<String> getSubscriptionStatus(String userId) async {
+  try {
+    final userId = _userService.getCurrentUserId();
+    if (userId == null) throw Exception('User not found');
+
+    final response = await _supabaseClient
+        .from('user_subscriptions')
+        .select('end_date')
+        .eq('user_id', userId)
+        .single();
+
+
+    if (response['end_date'] < DateTime.now()) {
+      return 'Active';
+    }
+    else {return 'Expired';
+    }
+   
+  } catch (e) {
+    throw ErrorHandler.handle(
+      e,
+      message: 'Failed to get subscription status',
+      specificType: ErrorType.subscription
+    );
+  }
+}
+
+@override
+Future<bool> purchasePackage(String userId, Package package) async {
+  try {
+    final userId = _userService.getCurrentUserId();
+    if (userId == null) throw Exception('User not found');
+
+    if (kIsWeb) {
+      return await _handleWebPurchase(userId, package);
+    }
+
+    // Attempt purchase through RevenueCat
+    final customerInfo = await Purchases.purchasePackage(package);
+    final success = customerInfo.entitlements.active.isNotEmpty;
+
+    if (success) {
+      await _updateSubscriptionInDatabase(
+        userId: userId,
+        subscriptionTier: package.identifier,
+      );
+    }
+
+    return success;
+  } catch (e) {
+    throw ErrorHandler.handle(
+      e,
+      message: 'Failed to purchase package',
+      specificType: ErrorType.subscription
+    );
+  }
+}
+
+@override
+Future<bool> validateSubscription(String userId) async {
+  try {
+    final userId = _userService.getCurrentUserId();
+    if (userId == null) throw Exception('User not found');
+
+    if (kIsWeb) {
+      final response = await _supabaseClient
+          .from('user_subscriptions')
+          .select('status, end_date')
+          .eq('user_id', userId)
+          .single();
+
+      if (response == null) return false;
+
+      final status = response['status'] as String;
+      final endDate = DateTime.parse(response['end_date'] as String);
+
+      return status == 'active' && endDate.isAfter(DateTime.now());
+    }
+
+    final customerInfo = await Purchases.getCustomerInfo();
+    return customerInfo.entitlements.active.isNotEmpty;
+  } catch (e) {
+    throw ErrorHandler.handle(
+      e,
+      message: 'Failed to validate subscription',
+      specificType: ErrorType.subscription
+    );
+  }
+}
 }
