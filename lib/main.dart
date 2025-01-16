@@ -63,22 +63,21 @@ class _MyAppState extends ConsumerState<MyApp> {
 
   Future<void> _initializeApp() async {
     try {
-      // 1. Make sure API client is ready
-      final apiClient = ref.read(apiClientProvider);
-      await apiClient.initialize();
-      print('API client initialized');
-
       // 2. Initialize auth state
       await ref.read(authProvider.notifier).initializeAuth();
       
       // 3. Initialize RevenueCat
-      final revenueCatService = await ref.read(revenueCatClientProvider.future);
-      await revenueCatService.initialize();
-      print('RevenueCat initialized');
-      
-      // 4. Finally initialize subscription service
-      await ref.read(subscriptionProvider.notifier).initialize();
-      print('Subscription service initialized');
+      final authState = ref.read(authProvider);
+      if (authState.isAuthenticated) {
+        print('user is authenticated');
+          final revenueCatService = await ref.read(revenueCatClientProvider.future);
+          await revenueCatService.initialize();
+          print('RevenueCat initialized');
+          
+          // 4. Finally initialize subscription service
+          await ref.read(subscriptionProvider.notifier).initialize();
+          print('Subscription service initialized');
+      }
     } catch (e) {
       print('Error initializing app: $e');
     }
@@ -86,14 +85,14 @@ class _MyAppState extends ConsumerState<MyApp> {
 
   @override
   Widget build(BuildContext context) {
-    final authState = ref.watch(authProvider);
+    //final authState = ref.watch(authProvider);
 
     return MaterialApp(
       title: 'Flashcard Study App',
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,
       themeMode: ThemeMode.system,
-      initialRoute: authState.isAuthenticated ? '/home' : '/',
+      initialRoute:  '/',
       onGenerateRoute: RouteManager.generateRoute,
       debugShowCheckedModeBanner: false,
     );

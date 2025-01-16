@@ -41,6 +41,8 @@ class ApiClient implements IApiService {
       final yamlMap = loadYaml(yamlString);
       _config = Map<String, dynamic>.from(yamlMap['api']);
 
+      print('API config: $_config');
+
       // Validate the required fields exist
       if (!_config.containsKey('openai') || 
           !_config['openai'].containsKey('base_url') ||

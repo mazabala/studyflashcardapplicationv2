@@ -48,12 +48,8 @@ class SubscriptionNotifier extends StateNotifier<SubscriptionState> {
 
   SubscriptionNotifier(this._subscriptionService) : super(SubscriptionState());
 
-  Future<void> initialize() async {
-    if (state.isInitialized) return;
-    await _initializeSubscription();
-  }
 
-  Future<void> _initializeSubscription() async {
+  Future<void> initialize() async {
     state = state.copyWith(isLoading: true);
     try {
       await (_subscriptionService as SubscriptionService).initialize();
@@ -130,4 +126,14 @@ final subscriptionProvider = StateNotifierProvider<SubscriptionNotifier, Subscri
     ),
     error: (err, stack) => throw Exception('Failed to initialize subscription service: $err'),
   );
+});
+
+final safeSubscriptionProvider = Provider<SubscriptionState>((ref) {
+  final authState = ref.watch(authProvider);
+  
+  if (!authState.isAuthenticated) {
+    return SubscriptionState(); // Return default state
+  }
+  
+  return ref.watch(subscriptionProvider);
 });
