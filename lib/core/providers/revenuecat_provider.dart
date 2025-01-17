@@ -7,53 +7,62 @@ import 'package:flashcardstudyapplication/core/services/revenuecat/revenuecat_se
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:flashcardstudyapplication/core/services/api/api_client.dart';
+import 'package:purchases_flutter/models/offering_wrapper.dart';
 import 'package:purchases_ui_flutter/purchases_ui_flutter.dart'; // Import ApiClient
 import 'package:flashcardstudyapplication/core/services/api/api_manager.dart'; // Add this import
 
+final revenueCatClientProvider = StateNotifierProvider<RevenueCatNotifier, RevenueCatService?>((ref) {
+  return RevenueCatNotifier(ref);
+});
+class RevenueCatNotifier extends StateNotifier<RevenueCatService?> {
+  final Ref ref;
 
-void presentPaywall() async {
-  final paywallResult = await RevenueCatUI.presentPaywall();
-  log('Paywall result: $paywallResult');
-}
+  RevenueCatNotifier(this.ref) : super(null);
 
-void presentPaywallIfNeeded() async {
-  final paywallResult = await RevenueCatUI.presentPaywallIfNeeded("basic");
-  log('Paywall result: $paywallResult');
-}
+  Future<void> initialize() async {
+    try {
+      final apiManager = ref.read(apiManagerProvider);
+      final revKey = apiManager.getRevenueCatApiKey();
+      
+      state = RevenueCatService(
+        revenueCatApiKey: revKey,
+      );
 
-// Create an AsyncNotifier to handle the RevenueCat initialization
-class RevenueCatNotifier extends AsyncNotifier<RevenueCatService> {
-  @override
-  Future<RevenueCatService> build() async {
-    // Wait for ApiManager to be initialized
-    final apiManagerAsync = ref.watch(apiManagerProvider);
-    
-    return apiManagerAsync.when(
-      loading: () => throw StateError('ApiManager not initialized'),
-      error: (err, stack) => throw err,
-      data: (apiManager) {
-        final revKey = apiManager.getRevenueCatApiKey();
-        final entitlementId = apiManager.getEntitlementID();
-        final googleAPI = apiManager.getGoogleAPI();
-        final appleAPI = apiManager.getAppleAPI();
-        final amazonAPI = apiManager.getAmazonAPI();
-
-        print("revenueCatApiKey: $revKey");
-
-        return RevenueCatService(
-          revenueCatApiKey: revKey,
-          entitlementId: entitlementId,
-          googleAPI: googleAPI,
-          appleAPI: appleAPI,
-          amazonAPI: amazonAPI,
-          userService: ref.read(userServiceProvider)
-        );
-      }
-    );
+      await state?.initialize();
+    } catch (e) {
+      print('RevenueCat initialization error: $e');
+      rethrow;
+    }
   }
+
+Future<void> restorePurchases() async {
+  await state?.restorePurchases();
 }
 
-// Provider now returns AsyncValue<RevenueCatService>
-final revenueCatClientProvider = AsyncNotifierProvider<RevenueCatNotifier, RevenueCatService>(
-  () => RevenueCatNotifier()
-);
+Future<void> checkSubscriptionStatus(String entitlement) async {
+  await state?.checkSubscriptionStatus(entitlement);
+} 
+
+Future<void> showPaywall() async {
+  await state?.showPaywall();
+}
+
+Future<void> showPaywallIfNeeded(String entitlement) async {
+  await state?.showPaywallIfNeeded(entitlement);
+}
+
+Future<void> getCustomerInfo() async {
+  await state?.getCustomerInfo();
+}
+
+Future<List<Offering>> getOfferings() async {
+  return await state?.getOfferings() ?? [];
+}
+
+
+
+
+
+
+
+}

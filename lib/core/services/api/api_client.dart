@@ -1,3 +1,5 @@
+// lib/core/services/api/api_client.dart
+
 import 'dart:convert';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:http/http.dart' as http;
@@ -6,42 +8,40 @@ import 'package:yaml/yaml.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:flashcardstudyapplication/core/error/error_handler.dart';
 
-
-
-//TODO: Is this used at all or is supabase being used instead?
 class ApiClient implements IApiService {
+  // Private constructor
+  ApiClient._();
+
+  // Singleton instance
+  static ApiClient? _instance;
+
+  // Factory constructor to get instance
+  factory ApiClient() {
+    _instance ??= ApiClient._();
+    return _instance!;
+  }
   
   late final String _baseUrl;
   late final String _baseKey;
   late final String _supabaseUrl;
   late final String _supabaseAnonKey;
-  // late final String _getRevenueCatApiKey;
-  // late final String _getEntitlementID;
-  // late final String _getGoogleAPI;
-  // late final String _getAppleAPI;
-  // late final String _getAmazonAPI;
-
   late final http.Client _client;
   late final Map<String, dynamic> _config;
 
   bool _initialized = false; 
-
-  ApiClient() {
-    print('New ApiClient instance created');
-    _client = http.Client();
-  }
-
-    bool get isInitialized => _initialized;
+  bool get isInitialized => _initialized;
 
   @override
   Future<void> initialize() async {
+    if (_initialized) return;
+    
+    _client = http.Client();
+    
     try {
       // Load and parse YAML config
       final yamlString = await rootBundle.loadString('lib/core/config/api.config.yaml');
       final yamlMap = loadYaml(yamlString);
       _config = Map<String, dynamic>.from(yamlMap['api']);
-
-      print('API config: $_config');
 
       // Validate the required fields exist
       if (!_config.containsKey('openai') || 
@@ -49,14 +49,6 @@ class ApiClient implements IApiService {
           !_config['openai'].containsKey('openai_key')) {
         throw Exception('Missing required OpenAI configuration');
       }
-      
-      
-    //  _getRevenueCatApiKey = _config['revenuecat']['rev_key'];
-    //  _getEntitlementID =    _config['revenuecat']['entitlementID'];
-    //  _getGoogleAPI =        _config['revenuecat']['googleAPI'];
-    //  _getAppleAPI =         _config['revenuecat']['appleAPI'];
-    //  _getAmazonAPI =        _config['revenuecat']['amazonAPI'];
-
 
       // Set Supabase credentials
       _supabaseUrl = _config['supabase']['supabase_url'];
@@ -64,9 +56,10 @@ class ApiClient implements IApiService {
 
       // Set base URL (e.g., for OpenAI API)
       _baseUrl = _config['openai']['base_url'];
-      _baseKey= _config['openai']['openai_key'];
+      _baseKey = _config['openai']['openai_key'];
 
       _initialized = true;
+      print('ApiClient initialized successfully');
 
     } catch (e) {
       print('Error initializing ApiClient: $e');
@@ -74,17 +67,8 @@ class ApiClient implements IApiService {
     }
   }
 
-
-  // String getRevenueCatApiKey() => _getRevenueCatApiKey;
-  // String getEntitlementID () => _getEntitlementID;
-  // String getGoogleAPI () => _getGoogleAPI;
-  // String getAppleAPI () => _getAppleAPI;
-  // String getAmazonAPI () => _getAmazonAPI;
   String getSupabaseUrl() => _supabaseUrl;
   String getSupabaseAnonKey() => _supabaseAnonKey;
-
-
-
 
   @override
   Future<Map<String, dynamic>> get(String endpoint, {Map<String, dynamic>? queryParams}) async {
@@ -102,11 +86,10 @@ class ApiClient implements IApiService {
     try {
       final uri = Uri.parse(_baseUrl);
       final header = await _getHeaders();
-
-      final response = await _client.post(uri, headers:  header, body: body);
+      final response = await _client.post(uri, headers: header, body: body);
       return await _handleResponse(response);
     } catch (e) {
-      print (e);
+      print(e);
       throw ErrorHandler.handle(e, message: 'POST request failed');
     }
   }
@@ -133,7 +116,6 @@ class ApiClient implements IApiService {
     }
   }
 
-  // Utility to handle response and parse it
   Future<Map<String, dynamic>> _handleResponse(http.Response response) async {
     if (response.statusCode >= 200 && response.statusCode < 300) {
       return jsonDecode(response.body);
@@ -143,33 +125,23 @@ class ApiClient implements IApiService {
     }
   }
 
-  // Utility to get headers
   Future<Map<String, String>> _getHeaders() async {
-
-
-    final apiKey =  _getApiKey();
-   
+    final apiKey = _getApiKey();
     return {
       'Content-Type': 'application/json',
       'Authorization': 'Bearer $_baseKey',
     };
   }
 
-  // Utility to get API key
-  String _getApiKey()  {
-
-    if(_baseKey.isEmpty){
-
-      throw Exception ('key not found');
+  String _getApiKey() {
+    if(_baseKey.isEmpty) {
+      throw Exception('key not found');
     }
-    else{
     return _baseKey;
-    }
   }
 }
 
-// Provider for ApiClient
+// Provider for ApiClient singleton
 final apiClientProvider = Provider<ApiClient>((ref) {
-  
-  throw UnimplementedError('ApiClient must be initialized in main');
+  return ApiClient();
 });

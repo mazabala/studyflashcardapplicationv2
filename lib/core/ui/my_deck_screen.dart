@@ -65,7 +65,7 @@ TextEditingController _cardCountController = TextEditingController();
       await _checkSystemUser();
       
       // Finally initialize ApiManager (only if authenticated)
-      await ref.read(apiManagerProvider.notifier).initialize();
+      await ref.read(apiManagerProvider);
     } catch (e) {
       print('Failed to initialize services: $e');
       // Handle error appropriately - maybe show error dialog

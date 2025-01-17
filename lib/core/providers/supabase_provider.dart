@@ -3,15 +3,20 @@
 import 'package:riverpod/riverpod.dart';
 import 'package:flashcardstudyapplication/core/services/supabase/supabase_service.dart';
 import 'package:flashcardstudyapplication/core/interfaces/i_supabase_service.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 
-// Define a FutureProvider for the SupabaseService
-final supabaseServiceProvider = FutureProvider<ISupabaseService>((ref) async {
-  final supabaseService = SupabaseService();
-  
-  // Initialize the Supabase service asynchronously
-  await supabaseService.initialize();
-  
-  // Return the SupabaseService instance after initialization
-  return supabaseService;
+
+// Singleton instance of SupabaseService
+SupabaseService? _instance;
+
+// Define a Provider for SupabaseClient
+final supabaseClientProvider = Provider<SupabaseClient>((ref) {
+  return Supabase.instance.client;
+});
+
+// Define a Provider for SupabaseService that maintains a singleton instance
+final supabaseServiceProvider = Provider<ISupabaseService>((ref) {
+  _instance ??= SupabaseService();
+  return _instance!;
 });

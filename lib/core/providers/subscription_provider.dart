@@ -1,7 +1,8 @@
 // lib/core/providers/subscription_provider.dart
 
 import 'package:flashcardstudyapplication/core/providers/auth_provider.dart';
-import 'package:flashcardstudyapplication/core/providers/revenuecat_provider.dart';
+import 'package:flashcardstudyapplication/core/providers/supabase_provider.dart';
+
 import 'package:flashcardstudyapplication/core/providers/user_provider.dart';
 
 
@@ -14,7 +15,7 @@ class SubscriptionState {
   final bool isLoading;
   final bool isExpired;
   final String errorMessage;
-  final List<Package>? availablePackages;
+  final List<String>? availablePackages;
   final bool isInitialized;
 
   SubscriptionState({
@@ -30,7 +31,7 @@ class SubscriptionState {
     bool? isLoading,
     bool? isExpired,
     String? errorMessage,
-    List<Package>? availablePackages,
+    List<String>? availablePackages,
     bool? isInitialized,
   }) {
     return SubscriptionState(
@@ -98,34 +99,19 @@ class SubscriptionNotifier extends StateNotifier<SubscriptionState> {
   }
 }
 
-final subscriptionServiceProvider = Provider<AsyncValue<SubscriptionService>>((ref) {
-  final supabaseClient = ref.read(supabaseClientProvider);
+final subscriptionServiceProvider = Provider<SubscriptionService>((ref) {
+  final supabaseClient = ref.read(supabaseServiceProvider);
   final userService = ref.read(userServiceProvider);
-  final revenueCatServiceAsync = ref.watch(revenueCatClientProvider);
-  
-  return revenueCatServiceAsync.when(
-    loading: () => const AsyncValue.loading(),
-    error: (err, stack) => AsyncValue.error(err, stack),
-    data: (revenueCatService) => AsyncValue.data(
-      SubscriptionService(
-        supabaseClient,
-        userService,
-        revenueCatService,
-      )
-    ),
+
+  return SubscriptionService(
+    supabaseClient.client,
+    userService,
   );
 });
 
 final subscriptionProvider = StateNotifierProvider<SubscriptionNotifier, SubscriptionState>((ref) {
-  final subscriptionServiceAsync = ref.watch(subscriptionServiceProvider);
-  
-  return subscriptionServiceAsync.when(
-    data: (service) => SubscriptionNotifier(service),
-    loading: () => SubscriptionNotifier(
-      throw UnimplementedError('Subscription service not ready'),
-    ),
-    error: (err, stack) => throw Exception('Failed to initialize subscription service: $err'),
-  );
+  final subscriptionService = ref.watch(subscriptionServiceProvider);
+  return SubscriptionNotifier(subscriptionService);
 });
 
 final safeSubscriptionProvider = Provider<SubscriptionState>((ref) {

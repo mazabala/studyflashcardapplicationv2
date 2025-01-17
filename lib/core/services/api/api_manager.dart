@@ -1,53 +1,36 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
 import 'package:flashcardstudyapplication/core/error/error_handler.dart';
 
-final apiManagerProvider = StateNotifierProvider<ApiManagerNotifier, AsyncValue<ApiManager>>((ref) {
+// Changed to a simple Provider instead of StateNotifierProvider
+final apiManagerProvider = Provider.autoDispose<ApiManager>((ref) {
   final supabase = Supabase.instance.client;
-  return ApiManagerNotifier(supabase);
+  final manager = ApiManager._(supabase);
+  // Initialize synchronously to ensure data is loaded
+  manager._loadKeysSync();
+  manager._loadRevEntitlementsSync();
+  return manager;
 });
-
-class ApiManagerNotifier extends StateNotifier<AsyncValue<ApiManager>> {
-  final SupabaseClient _supabase;
-  
-  ApiManagerNotifier(this._supabase) : super(const AsyncValue.loading());
-  
-  Future<void> initialize() async {
-    state = const AsyncValue.loading();
-    try {
-      final manager = await ApiManager.initialize(_supabase);
-      state = AsyncValue.data(manager);
-    } catch (e, stack) {
-      state = AsyncValue.error(e, stack);
-    }
-  }
-}
 
 class ApiManager {
   final SupabaseClient _supabaseClient;
-  static ApiManager? _instance;
+
   
-  Map<String, String>? _apiKeys;
+  Map<String, String> _apiKeys = {};
+  Map<String, String> _RevEntitlements = {};
+
   bool _isInitialized = false;
 
   ApiManager._(this._supabaseClient);
 
-  static Future<ApiManager> initialize(SupabaseClient supabaseClient) async {
-    if (_instance == null) {
-      _instance = ApiManager._(supabaseClient);
-      await _instance!._loadKeys();
-    }
-    return _instance!;
-  }
-
-  Future<void> _loadKeys() async {
+  Future<void> _loadKeysSync() async {
     try {
       print('Api_Manager Initialize started');
-      final keys = await _supabaseClient.from('api_resources').select('name,api_key');
+      final response = await _supabaseClient.from('api_resources')
+          .select('name,api_key');
       
       _apiKeys = Map.fromEntries(
-        keys.map<MapEntry<String, String>>((row) => 
+        response.map<MapEntry<String, String>>((row) => 
           MapEntry(row['name'] as String, row['api_key'] as String)
         )
       );
@@ -57,6 +40,26 @@ class ApiManager {
       print('Error initializing ApiManager: $e');
       throw ErrorHandler.handle(e, message: 'Failed to get keys');
     }
+  }
+
+  Future<void> _loadRevEntitlementsSync() async {
+    final response = await _supabaseClient.from('revenuecat_entitlements')
+        .select('name,Entitlements_ID');
+
+
+    _RevEntitlements = Map.fromEntries(
+      response.map<MapEntry<String, String>>((row) => 
+        MapEntry(row['name'] as String, row['Entitlement_ID'] as String)
+      )
+    );
+  }
+
+  String _getRevEntitlementID(String entitlementName) {
+    final entitlement = _RevEntitlements?[entitlementName];
+    if (entitlement == null) {
+      throw StateError('$entitlementName entitlement not found');
+    }
+    return entitlement;
   }
 
   String _getKey(String keyName) {
@@ -75,4 +78,6 @@ class ApiManager {
   String getGoogleAPI() => _getKey('googleAPI');
   String getAppleAPI() => _getKey('appleAPI');
   String getAmazonAPI() => _getKey('amazonAPI');
+
+  String getEntitlementName(String entitlementName) => _getRevEntitlementID(entitlementName);
 }

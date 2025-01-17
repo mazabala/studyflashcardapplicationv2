@@ -186,38 +186,38 @@ class AuthNotifier extends StateNotifier<AuthState> {
   Future<void> initializeAuth() async {
     state = state.copyWith(isLoading: true);
     try {
-      final user = await _authService.getCurrentUser();
+      // final user = await _authService.getCurrentUser();
       
-      if (user != null) {
-        state = state.copyWith(
-          user: user,
-          isAuthenticated: true,
-          isLoading: false,
-        );
+      // if (user != null) {
+      //   state = state.copyWith(
+      //     user: user,
+      //     isAuthenticated: true,
+      //     isLoading: false,
+      //   );
         
-        // Initialize subscription and user details
-        await _subscriptionNotifier.fetchSubscriptionStatus(user.id);
-      } else {
-        state = state.copyWith(isLoading: false);
-      }
+      //   // Initialize subscription and user details
+      //   await _subscriptionNotifier.fetchSubscriptionStatus(user.id);
+      // } else {
+      //   state = state.copyWith(isLoading: false);
+      // }
     } catch (e) {
       state = state.copyWith(
         errorMessage: e.toString(),
         isLoading: false,
       );
     }
-    print('=====init completed==== auth state: ${state.isAuthenticated}');
+    print('=====Auth Provider Initialization completed==== ');
   }
 }
 
 // Provider for Supabase client
-final supabaseClientProvider = Provider<SupabaseClient>((ref) {
+final supabaseProviderClient = Provider<SupabaseClient>((ref) {
   return Supabase.instance.client;
 });
 
 // Provider for AuthService
 final authServiceProvider = Provider<IAuthService>((ref) {
-  final supabaseClient = ref.watch(supabaseClientProvider);
+  final supabaseClient = ref.watch(supabaseProviderClient);
   return AuthService(supabaseClient);
 });
 

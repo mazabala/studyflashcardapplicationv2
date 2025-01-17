@@ -1,4 +1,5 @@
 import 'package:flashcardstudyapplication/core/providers/auth_provider.dart';
+import 'package:flashcardstudyapplication/core/providers/supabase_provider.dart';
 import 'package:flashcardstudyapplication/core/services/authentication/authentication_service.dart';
 import 'package:flashcardstudyapplication/core/services/deck/deck_service.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -152,9 +153,9 @@ class AdminNotifier extends StateNotifier<AdminState> {
 
 // Provider for AdminService
 final adminServiceProvider = Provider<AdminService>((ref) {
-  final supabaseClient = ref.read(supabaseClientProvider);
+  final supabaseClient = ref.read(supabaseServiceProvider);
   final authService = ref.read(authServiceProvider);
-  return AdminService(supabaseClient, authService as AuthService);
+  return AdminService(supabaseClient.client, authService as AuthService);
 });
 
 // StateNotifierProvider for AdminNotifier
