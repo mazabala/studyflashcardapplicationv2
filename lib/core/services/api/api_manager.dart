@@ -44,7 +44,7 @@ class ApiManager {
 
   Future<void> _loadRevEntitlementsSync() async {
     final response = await _supabaseClient.from('revenuecat_entitlements')
-        .select('name,Entitlements_ID');
+        .select('identifier');
 
 
     _RevEntitlements = Map.fromEntries(

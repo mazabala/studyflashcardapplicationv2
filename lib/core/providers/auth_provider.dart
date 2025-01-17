@@ -186,20 +186,8 @@ class AuthNotifier extends StateNotifier<AuthState> {
   Future<void> initializeAuth() async {
     state = state.copyWith(isLoading: true);
     try {
-      // final user = await _authService.getCurrentUser();
-      
-      // if (user != null) {
-      //   state = state.copyWith(
-      //     user: user,
-      //     isAuthenticated: true,
-      //     isLoading: false,
-      //   );
-        
-      //   // Initialize subscription and user details
-      //   await _subscriptionNotifier.fetchSubscriptionStatus(user.id);
-      // } else {
-      //   state = state.copyWith(isLoading: false);
-      // }
+        print('init started');
+        state = state.copyWith(isLoading: false);
     } catch (e) {
       state = state.copyWith(
         errorMessage: e.toString(),
@@ -207,6 +195,8 @@ class AuthNotifier extends StateNotifier<AuthState> {
       );
     }
     print('=====Auth Provider Initialization completed==== ');
+      
+       print ('State: ${state.isLoading}');
   }
 }
 

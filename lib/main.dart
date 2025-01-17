@@ -102,24 +102,14 @@ class _MyAppState extends ConsumerState<MyApp> {
     }
 
     return MaterialApp(
+      onGenerateRoute: RouteManager.generateRoute,
       title: 'Flashcard Study App',
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,
       themeMode: ThemeMode.system,
       debugShowCheckedModeBanner: false,
       home: _initializing
-          ? const Scaffold(
-              body: Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    CircularProgressIndicator(),
-                    SizedBox(height: 16),
-                    Text('Loading...'),
-                  ],
-                ),
-              ),
-            )
+          ? Text('Loading...')
           : const HomeScreen(),
     );
   }
