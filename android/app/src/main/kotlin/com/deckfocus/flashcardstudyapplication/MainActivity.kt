@@ -1,4 +1,4 @@
-package com.example.flashcardstudyapplication
+package com.deckfocus.flashcardstudyapplication
 
 import io.flutter.embedding.android.FlutterFragmentActivity
 
