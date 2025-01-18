@@ -1,3 +1,4 @@
+import 'package:flashcardstudyapplication/core/providers/CatSub_Manager.dart';
 import 'package:flashcardstudyapplication/core/providers/user_provider.dart';
 import 'package:flashcardstudyapplication/core/services/subscription/subscription_service.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -39,8 +40,9 @@ class AuthState {
 class AuthNotifier extends StateNotifier<AuthState> {
   final IAuthService _authService;
   final SubscriptionNotifier _subscriptionNotifier;
+  final Ref ref;
 
-  AuthNotifier(this._authService, this._subscriptionNotifier) : super(const AuthState()) {
+  AuthNotifier(this._authService, this._subscriptionNotifier, this.ref) : super(const AuthState()) {
     // Listen to auth state changes from Supabase
     Supabase.instance.client.auth.onAuthStateChange.listen((data) {
       _handleAuthStateChange(data.event, data.session);
@@ -70,6 +72,16 @@ class AuthNotifier extends StateNotifier<AuthState> {
 
   Future<void> googleSignin() async {
     await _authService.signInWithGoogle();
+    final user = await _authService.getCurrentUser();
+    state = state.copyWith(
+      user: user,
+      isAuthenticated: true,
+      isLoading: false,
+    );
+
+          if(state.isAuthenticated == true){
+        await ref.read(catSubManagerProvider.notifier).initialize(user!.id);
+      }
   }
 
   Future<void> signIn(String email, String password) async {
@@ -84,6 +96,10 @@ class AuthNotifier extends StateNotifier<AuthState> {
         isAuthenticated: true,
         isLoading: false,
       );
+
+      if(state.isAuthenticated == true){
+        await ref.read(catSubManagerProvider.notifier).initialize(user!.id);
+      }
         
       // Initialize user details after successful sign in
       if (user != null) {
@@ -215,5 +231,5 @@ final authServiceProvider = Provider<IAuthService>((ref) {
 final authProvider = StateNotifierProvider<AuthNotifier, AuthState>((ref) {
   final authService = ref.watch(authServiceProvider);
   final subscriptionNotifier = ref.watch(subscriptionProvider.notifier);  // Access the subscription provider
-  return AuthNotifier(authService, subscriptionNotifier);
+  return AuthNotifier(authService, subscriptionNotifier, ref);
 });

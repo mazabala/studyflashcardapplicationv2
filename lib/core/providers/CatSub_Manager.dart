@@ -105,6 +105,11 @@ class CatSubNotifier extends StateNotifier<CatSubState> {
         customerID: customerInfo,
         availablePackages: packages,
       );
+
+      if(state.isInitialized == true){
+        print('CatSubManager initialized');
+      }
+
     } catch (e) {
       state = state.copyWith(
         isInitializing: false,
@@ -144,12 +149,17 @@ class CatSubNotifier extends StateNotifier<CatSubState> {
     }
   }
 
+
+  Future<void> presentPaywall() async {
+    
+    await ref.read(revenueCatClientProvider.notifier).showPaywall();
+  }
 }
 
 final catSubManagerProvider = StateNotifierProvider.autoDispose<CatSubNotifier, CatSubState>((ref) {
   final authState = ref.watch(authProvider);
   final notifier = CatSubNotifier(ref);
-  
+  print('authState: ${authState.isAuthenticated} from cat sub manager provider');
   if (authState.isAuthenticated && authState.user != null) {
     Future.microtask(() {
       notifier.initialize(authState.user!.id);

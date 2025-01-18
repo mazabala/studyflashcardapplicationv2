@@ -2,7 +2,7 @@ import 'package:flashcardstudyapplication/core/models/deck.dart';
 import 'package:flashcardstudyapplication/core/ui/about_us.dart';
 import 'package:flashcardstudyapplication/core/ui/admin_management_screen.dart';
 import 'package:flashcardstudyapplication/core/ui/study_screen.dart';
-import 'package:flashcardstudyapplication/core/ui/widgets/pricing_screen.dart';
+import 'package:flashcardstudyapplication/core/ui/pricing_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flashcardstudyapplication/core/ui/deck_screen.dart';
 import 'package:flashcardstudyapplication/core/ui/user_profile_screen.dart';

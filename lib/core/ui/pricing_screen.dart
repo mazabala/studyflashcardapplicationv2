@@ -1,3 +1,4 @@
+import 'package:flashcardstudyapplication/core/providers/CatSub_Manager.dart';
 import 'package:flashcardstudyapplication/core/providers/auth_provider.dart';
 import 'package:flashcardstudyapplication/core/providers/revenuecat_provider.dart';
 import 'package:flashcardstudyapplication/core/providers/subscription_provider.dart';
@@ -58,15 +59,8 @@ void presentPaywall() async {
     return; // Exit the method if not authenticated
   }
 
-  // Proceed with paywall if authenticated
-  final result = await RevenueCatUI.presentPaywall(displayCloseButton: true);
-  if (result == PaywallResult.purchased) {
-    if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Successfully subscribed!')),
-      );
-    }
-  }
+   ref.read(catSubManagerProvider.notifier).presentPaywall();
+
 }
 //  Future<void> _handleSubscription(String planName, double price) async {
 //     final user = ref.read(userProvider);

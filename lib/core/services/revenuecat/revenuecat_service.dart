@@ -30,6 +30,8 @@ Future<void> initialize() async {
     PurchasesConfiguration(revenueCatApiKey) ..appUserID = userId
   );
 
+  _isInitialized = true;
+
 }
 
 Future<void> restorePurchases() async {
@@ -79,6 +81,7 @@ Future<void>getCustomerInfo() async {
 }
 
 Future<void>showPaywall() async {
+  
   final paywallResult = await RevenueCatUI.presentPaywall();
   print('Paywall result: $paywallResult');
 }

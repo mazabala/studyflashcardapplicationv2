@@ -14,6 +14,7 @@ import 'package:flashcardstudyapplication/core/services/api/api_manager.dart'; /
 final revenueCatClientProvider = StateNotifierProvider<RevenueCatNotifier, RevenueCatService?>((ref) {
   return RevenueCatNotifier(ref);
 });
+
 class RevenueCatNotifier extends StateNotifier<RevenueCatService?> {
   final Ref ref;
 
@@ -44,6 +45,7 @@ Future<void> checkSubscriptionStatus(String entitlement) async {
 } 
 
 Future<void> showPaywall() async {
+  print('showing wall from revn cat provider');
   await state?.showPaywall();
 }
 
