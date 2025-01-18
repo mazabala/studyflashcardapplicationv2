@@ -436,9 +436,12 @@ Future<List<Flashcard>> _generateFlashcards({
 
 
 @override
-Future<List<String>> getDeckDifficulty (String subscriptionId) async {
+Future<List<String>> getDeckDifficulty (String? subscriptionId) async {
  try{
    
+   if (subscriptionId == null) {
+    throw Exception('Subscription ID is null');
+   }
   final  subscriptionTypeID = await _supabaseClient
   .from('user_subscriptions')
   .select('subscriptionTypeID')

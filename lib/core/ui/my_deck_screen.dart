@@ -35,6 +35,8 @@ class _MyDeckScreenState extends ConsumerState<MyDeckScreen> {
   bool isSystemUser = false;
   List<String>? _selectedCategories = [];
   Map<String, TextEditingController> _descriptionControllers = {};
+  
+
 
 
 TextEditingController _categoriesController = TextEditingController();
@@ -52,8 +54,8 @@ TextEditingController _cardCountController = TextEditingController();
   Future<void> _initializeServices() async {
     try {
       // First check if user is authenticated
-      final authState = ref.read(authProvider);
-      if (!authState.isAuthenticated) {
+      final userState = ref.read(authProvider);
+      if (!userState.isAuthenticated) {
         // Navigate to login if not authenticated
         if (mounted) {
           Navigator.of(context).pushReplacementNamed('/login');
@@ -89,13 +91,15 @@ TextEditingController _cardCountController = TextEditingController();
 
   // Modify _checkSystemUser to only check admin status
   Future<void> _checkSystemUser() async {
-    final isAdmin = await ref.read(userServiceProvider).isSystemAdmin();
-    print ('user is : $isAdmin');
-    if (mounted) {
-      setState(() {
-        isSystemUser = isAdmin;
-      });
-    }
+    
+    final userService = ref.read(userProvider);
+    if (userService.isAdmin == true) {
+  if (mounted) {
+    setState(() {
+      isSystemUser = true;
+    });
+  }
+}
   }
   // Method to reset the search state and navigate to study screen
   void _resetSearchStateAndNavigate() {
@@ -116,9 +120,10 @@ TextEditingController _cardCountController = TextEditingController();
  
  Future<List<String>> _getDeckDifficulty() async {
     final deckReader = ref.read(deckServiceProvider);
-    final userReader = ref.read(userServiceProvider);
-    final subscriptionId = await userReader.getUserSubscriptionPlan();
-    return await deckReader.getDeckDifficulty(subscriptionId);
+
+    final userService = ref.read(userProvider);
+
+    return await deckReader.getDeckDifficulty(userService.subscriptionPlanID);
   }
 
 
@@ -166,13 +171,15 @@ TextEditingController _cardCountController = TextEditingController();
   void _createDeck() async {
     final deckCategory = await _getDeckCategory();
     final deckDifficulty = await _getDeckDifficulty();
+    final userService = ref.read(userProvider);
+    
 
     showDialog(
       context: context,
       builder: (context) {
         return CreateDeckDialog(
           onSubmit: (String title, String description, String category, String difficultyLevel, int cardCount) async {
-            final userId = ref.read(userServiceProvider).getCurrentUserId();
+            final userId = userService.userId;
             if (userId != null) {
               await ref.read(deckProvider.notifier).createDeck(title, category, description, difficultyLevel, userId, cardCount);
 
@@ -190,7 +197,8 @@ TextEditingController _cardCountController = TextEditingController();
 
   // Function to load user decks from the service
   Future<void> _loadUserDecks() async {
-    final userId = ref.read(userServiceProvider).getCurrentUserId();
+    final userService = ref.read(userProvider);
+    final userId = userService.userId;
 
     if (userId != null) {
 

@@ -9,57 +9,52 @@ class UserService implements IUserService {
 
   UserService(this._supabaseClient, this._apiService);
 
-  String? getCurrentUserId() {
-    final user = _supabaseClient.auth.currentUser;
-    return user?.id;
-  }
+@override
+Future<Map<String, dynamic>?> getCurrentUserInfo() async {
+  final user = _supabaseClient.auth.currentUser;
 
-Future<bool> isSystemAdmin() async{
-    try{
-      final userid = getCurrentUserId();
-      if(userid == null)
-      {
-        return false;
-      }
+  if (user != null) {
+    // Get the user info from our users table
+    final userInfo = await _fetchUser(user.id);
+    
+    
+    if (userInfo != null) {
+      // Create a new map that combines auth user data and our custom user data
+      return {
+        'id': user.id,
+        'email': user.email,
+        'created_at': userInfo['created_at'],
+        'first_name': userInfo['firstname'],
+        'last_name': userInfo['lastname'],
+        'subscription_name': userInfo['subscriptiontype_name'],
+        'subscription_status': userInfo['subscription_status'],
+        'expiry_date': userInfo['subscription_expiry_date'],
+        'subscription_planID': userInfo['subscription_id'],
 
-      final userRole = await _supabaseClient  
-          .from('user_roles')
-          .select('role')
-          .eq('user_id', userid)
-          .maybeSingle();
-
-
-      if(userRole?['role'] == 'superAdmin')
-      {return true;}
-      else return false;
-      
+        'user_status': userInfo['user_is_active'],
+        'role': userInfo['role'],
+         if(userInfo['role'] == 'superAdmin') 'is_admin': true else 'is_admin':false,
+        // Add any other fields you need from either user or userInfo
+      };
     }
-    catch (e){
-
-          print(e);
-          rethrow;
-           }
-
+  }
+  
+  return null; // Return null if no user is logged in or if user data isn't found
 }
 
 @override
-Future<bool> isUserExpired(DateTime expiryDate) async {
-  try {
-    // Parse the expiryDate string into a DateTime object
-    print("=====Expiry date: $expiryDate======"); //TODO: Is this working?
-
-    // Compare with the current date and time
-    if (expiryDate.isBefore(DateTime.now())) {
-      return true; // Expired
-    } else {
-      return false; // Not expired
-    }
-  } catch (e) {
-    // Handle parsing errors
-    print("Error parsing expiry date: $e");
-    return false; // Return false or handle the error appropriately
-  }
+Future<Map<String, dynamic>?> _fetchUser(String userid) async {
+  final user = await _supabaseClient
+      .from('users_view')
+      .select('*')
+      .eq('id', userid)
+      .maybeSingle();
+  return user;
 }
+
+
+
+
 
   @override
   Future<String?> getCurrentUserEmail() async {
@@ -68,18 +63,18 @@ Future<bool> isUserExpired(DateTime expiryDate) async {
   }
 
   @override
-  Future<void> updateUserProfile(String name, String email) async {
+  Future<void> updateUserProfile(String firstname, String ?lastname) async {
     final user = _supabaseClient.auth.currentUser;
     if (user == null) {
       throw ErrorHandler.handleUserNotFound();
     }
 
     try {
-      final result = await _supabaseClient.from('users').upsert({
-        'id': user.id,
-        'name': name,
-        'email': email,
-      });
+      final result = await _supabaseClient.from('users').update({
+        'first_name': firstname,
+        'last_name': lastname,
+      })
+      .eq('id', user.id);
 
       if (result == null) {
         throw ErrorHandler.handleProfileUpdateError(
@@ -132,6 +127,18 @@ Future<bool> isUserExpired(DateTime expiryDate) async {
     }
   }
 
+DateTime _getExpiryDateForPlan(String planType) {
+    final now = DateTime.now();
+    switch (planType.toLowerCase()) {
+      case 'basic':
+        return now.add(const Duration(days: 30));
+      case 'advanced':
+        return now.add(const Duration(days: 30));
+      default:
+        return now.add(const Duration(days: 3));
+    }
+  }
+
   @override
   Future<void> downgradeSubscription(String planType) async {
     final user = _supabaseClient.auth.currentUser;
@@ -165,87 +172,8 @@ Future<bool> isUserExpired(DateTime expiryDate) async {
     }
   }
 
-  @override
-  Future<String> getUserSubscriptionPlan() async {
-    final user = _supabaseClient.auth.currentUser;
-    if (user == null) {
-      throw ErrorHandler.handleUserNotFound();
-    }
-    else {
-          print(user.id);}
+  
 
-    try {
-      final result = await _supabaseClient  
-          .from('user_subscriptions')
-          .select('subscriptionID')
-          .eq('user_id', user.id)
-          .maybeSingle();
+  
 
-
-      if (result == null) {
-        throw ErrorHandler.handleSubscriptionError(
-          null,
-          'No subscription found'
-        );
-      }
-
-      return result['subscriptionID'] as String;
-    } on PostgrestException catch (e) {
-      throw ErrorHandler.handleDatabaseError(e, specificType: ErrorType.subscription);
-    } on AuthException catch (e) {
-      throw ErrorHandler.handleAuthError(e);
-    } catch (e) {
-      throw ErrorHandler.handle(e, 
-        message: 'Failed to retrieve subscription plan',
-        specificType: ErrorType.subscription
-      );
-    }
-  }
-
-  @override
-  Future<DateTime?> getSubscriptionExpiry() async {
-    final user = _supabaseClient.auth.currentUser;
-    if (user == null) {
-      throw ErrorHandler.handleUserNotFound();
-    }
-
-    try {
-      final result = await _supabaseClient
-          .from('user_subscriptions')
-          .select('end_date')
-          .eq('user_id', user.id)
-          .single();
-
-      if (result == null) {
-        throw ErrorHandler.handleSubscriptionError(
-          null,
-          'No subscription found'
-        );
-      }
-      
-      final expiryDate = result['end_date'] as String?;
-      return expiryDate != null ? DateTime.tryParse(expiryDate) : null;
-    } on PostgrestException catch (e) {
-      throw ErrorHandler.handleDatabaseError(e, specificType: ErrorType.subscription);
-    } on AuthException catch (e) {
-      throw ErrorHandler.handleAuthError(e);
-    } catch (e) {
-      throw ErrorHandler.handle(e, 
-        message: 'Failed to retrieve subscription expiry',
-        specificType: ErrorType.subscription
-      );
-    }
-  }
-
-  DateTime _getExpiryDateForPlan(String planType) {
-    final now = DateTime.now();
-    switch (planType.toLowerCase()) {
-      case 'basic':
-        return now.add(const Duration(days: 30));
-      case 'advanced':
-        return now.add(const Duration(days: 30));
-      default:
-        return now.add(const Duration(days: 3));
-    }
-  }
 }

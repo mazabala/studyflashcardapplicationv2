@@ -10,8 +10,14 @@ class UserState {
   final bool? isExpired;
   final String? errorMessage;
   final String? userId;
+  final String? firstName;
+  final String? lastName;
+  final String? userStatus;
+  final String? role;
+  final bool? isAdmin;
+  late final String? subscriptionPlanID;
 
-  UserState({this.subscriptionPlan, this.isExpired, this.errorMessage, this.userId});
+  UserState({this.subscriptionPlan, this.isExpired, this.errorMessage, this.userId, this.firstName, this.lastName, this.userStatus, this.role, this.isAdmin, this.subscriptionPlanID});
 
   // Create a new state with updated values
   UserState copyWith({
@@ -19,12 +25,24 @@ class UserState {
     bool? isExpired,
     String? errorMessage,
     String? userId,
-  }) {
+    String? firstName,
+    String? lastName,
+    String? userStatus,
+    String? role,
+    bool? isAdmin,
+    String? subscriptionPlanID,
+    }) {
     return UserState(
       subscriptionPlan: subscriptionPlan ?? this.subscriptionPlan,
       isExpired: isExpired ?? this.isExpired,
       errorMessage: errorMessage ?? this.errorMessage,
       userId: userId ?? this.userId,
+      firstName: firstName ?? this.firstName,
+      lastName: lastName ?? this.lastName,
+      userStatus: userStatus ?? this.userStatus,
+      role: role ?? this.role,
+      isAdmin: isAdmin ?? this.isAdmin,
+      subscriptionPlanID: subscriptionPlanID ?? this.subscriptionPlanID,
     );
   }
 }
@@ -50,23 +68,27 @@ class UserNotifier extends StateNotifier<UserState> {
   // Update fetchUserDetails to handle cases where user isn't authenticated
   Future<void> fetchUserDetails() async {
     try {
-      final userId = userService.getCurrentUserId();
-      if (userId == null) {
+      final user = await userService.getCurrentUserInfo();
+      if (user == null) {
         state = UserState(); // Reset state if no user
         return;
       }
 
-      final subscriptionPlan = await userService.getUserSubscriptionPlan();
-      final expiryDate = await userService.getSubscriptionExpiry();
-      final isExpired = expiryDate != null 
-          ? await userService.isUserExpired(expiryDate) 
-          : false;
+      final subscriptionPlan = user['subscription_plan'];
+      final expiryDate = user['subscription_expiry_date'];
+      final isExpired = user['subscription_name'];
 
       state = state.copyWith(
         subscriptionPlan: subscriptionPlan,
         isExpired: isExpired,
         errorMessage: null,
-        userId: userId,
+        userId: user['id'],
+        firstName: user['first_name'],
+        lastName: user['last_name'],
+        userStatus: user['user_status'],
+        role: user['role'],
+        isAdmin: user['is_admin'], 
+        subscriptionPlanID: user['subscription_planID'],
       );
     } catch (e) {
       state = state.copyWith(errorMessage: e.toString());
@@ -74,9 +96,9 @@ class UserNotifier extends StateNotifier<UserState> {
   }
 
   // Function to update user profile
-  Future<void> updateUserProfile(String name, String email) async {
+  Future<void> updateUserProfile(String firstname, String lastname) async {
     try {
-      await userService.updateUserProfile(name, email);
+      await userService.updateUserProfile(firstname, lastname);
       // After updating, you may want to refetch or update the user state
       state = state.copyWith(errorMessage: null);
     } catch (e) {
@@ -106,18 +128,7 @@ class UserNotifier extends StateNotifier<UserState> {
     }
   }
 
-Future<bool> isUserAdmin () async{
 
-  try{
-    final userRole =  await userService.isSystemAdmin();
-      return userRole;
-  }
-  catch (e)
-  {
-    print (e);
-    throw e;
-  } 
-}
 
 
 

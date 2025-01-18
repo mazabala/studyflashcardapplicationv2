@@ -1,3 +1,4 @@
+import 'package:flashcardstudyapplication/core/providers/user_provider.dart';
 import 'package:flutter/foundation.dart';
 import 'package:purchases_flutter/purchases_flutter.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -8,7 +9,7 @@ import 'package:flashcardstudyapplication/core/error/error_handler.dart';
 
 class SubscriptionService implements ISubscriptionService {
   final SupabaseClient _supabaseClient;
-  final UserService _userService;
+  final UserState _userService;
 
   bool _isInitialized = false;
 
@@ -26,7 +27,7 @@ class SubscriptionService implements ISubscriptionService {
         return;
       }
 
-      final userId = _userService.getCurrentUserId();
+      final userId = _userService.userId;
       if (userId == null) throw Exception('User not found');
 
       _isInitialized = true;
@@ -99,11 +100,7 @@ class SubscriptionService implements ISubscriptionService {
     try {
 
 
-      // Then verify with local database
-      final expiryDate = await _userService.getSubscriptionExpiry();
-      if (expiryDate == null) return true;
-
-      return await _userService.isUserExpired(expiryDate);
+      return _userService.isExpired ?? true;
     } catch (e) {
       throw ErrorHandler.handle(e,
           message: 'Failed to check subscription status',
@@ -303,7 +300,7 @@ class SubscriptionService implements ISubscriptionService {
   @override
   Future<String> getSubscriptionStatus(String userId) async {
     try {
-      final userId = _userService.getCurrentUserId();
+      final userId = _userService.userId;
       if (userId == null) throw Exception('User not found');
 
       final response = await _supabaseClient
@@ -329,7 +326,7 @@ class SubscriptionService implements ISubscriptionService {
   @override
   Future<bool> validateSubscription(String userId) async {
     try {
-      final userId = _userService.getCurrentUserId();
+      final userId = _userService.userId;
       if (userId == null) throw Exception('User not found');
 
       if (kIsWeb) {

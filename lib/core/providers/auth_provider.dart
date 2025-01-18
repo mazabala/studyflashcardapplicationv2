@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flashcardstudyapplication/core/providers/CatSub_Manager.dart';
 import 'package:flashcardstudyapplication/core/providers/user_provider.dart';
 import 'package:flashcardstudyapplication/core/services/subscription/subscription_service.dart';
@@ -39,12 +41,17 @@ class AuthState {
 // StateNotifier to manage authentication state
 class AuthNotifier extends StateNotifier<AuthState> {
   final IAuthService _authService;
-  final SubscriptionNotifier _subscriptionNotifier;
-  final Ref ref;
 
-  AuthNotifier(this._authService, this._subscriptionNotifier, this.ref) : super(const AuthState()) {
+  final Ref ref;
+  StreamSubscription? _authSubscription;
+
+  AuthNotifier(this._authService,  this.ref) : super(const AuthState()) {
     // Listen to auth state changes from Supabase
-    Supabase.instance.client.auth.onAuthStateChange.listen((data) {
+_setupAuthListener();
+  }
+
+   void _setupAuthListener() {
+    _authSubscription = Supabase.instance.client.auth.onAuthStateChange.listen((data) {
       _handleAuthStateChange(data.event, data.session);
     });
   }
@@ -103,7 +110,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
         
       // Initialize user details after successful sign in
       if (user != null) {
-        await _subscriptionNotifier.fetchSubscriptionStatus(user.id);
+        await ref.read(subscriptionProvider.notifier).fetchSubscriptionStatus(user.id);
       }
     } catch (e) {
       state = state.copyWith(
@@ -202,17 +209,28 @@ class AuthNotifier extends StateNotifier<AuthState> {
   Future<void> initializeAuth() async {
     state = state.copyWith(isLoading: true);
     try {
-        print('init started');
-        state = state.copyWith(isLoading: false);
+      print('auth initialization started');
+     final user = await _authService.getCurrentUser();
+      print('current user: ${user?.id}');
+
+            // If needed, fetch subscription after auth is set
+      if (user != null) {
+        final backuser = await ref.read(subscriptionProvider.notifier).fetchSubscriptionStatus(user.id);
+      }
+      state = state.copyWith(
+        user: user != null ? null : null,
+        isAuthenticated: user != false,
+        isLoading: false,
+      );
+      print('auth initialization completed with user: ${user?.id}');
     } catch (e) {
       state = state.copyWith(
         errorMessage: e.toString(),
         isLoading: false,
       );
     }
-    print('=====Auth Provider Initialization completed==== ');
-      
-       print ('State: ${state.isLoading}');
+    print('=====Auth Provider Initialization completed. Loading state:${state.isLoading}==== ');
+     
   }
 }
 
@@ -229,7 +247,6 @@ final authServiceProvider = Provider<IAuthService>((ref) {
 
 // The main auth provider that will be used by the UI
 final authProvider = StateNotifierProvider<AuthNotifier, AuthState>((ref) {
-  final authService = ref.watch(authServiceProvider);
-  final subscriptionNotifier = ref.watch(subscriptionProvider.notifier);  // Access the subscription provider
-  return AuthNotifier(authService, subscriptionNotifier, ref);
+  final authService = ref.read(authServiceProvider);
+  return AuthNotifier(authService, ref);
 });

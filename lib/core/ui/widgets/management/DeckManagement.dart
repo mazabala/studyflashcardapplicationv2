@@ -36,6 +36,8 @@ class DeckManagementPage extends ConsumerWidget {
 }
 
 class DeckActions extends ConsumerWidget {
+  const DeckActions({super.key});
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return Padding(
@@ -243,7 +245,7 @@ class _CreateDeckPageState extends ConsumerState<CreateDeckPage> {
 
   @override
   Widget build(BuildContext context) {
-    final userSubPlan = ref.read(userServiceProvider).getUserSubscriptionPlan;
+    final userSubPlan = ref.watch(userProvider).subscriptionPlanID;
     
     return Scaffold(
       appBar: AppBar(
@@ -327,7 +329,7 @@ class _CreateDeckPageState extends ConsumerState<CreateDeckPage> {
                   }
                   
                   try {
-                    final userId = ref.read(userServiceProvider).getCurrentUserId();
+                    final userId = ref.watch(userProvider).userId;
                     await ref.read(deckProvider.notifier).createDeck(
                       _titleController.text,
                       _selectedCategory!,

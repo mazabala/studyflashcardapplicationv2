@@ -58,18 +58,21 @@ class _MyAppState extends ConsumerState<MyApp> {
       );
       print('Supabase initialized');
 
+
+   
       // Initialize auth first
       await ref.read(authProvider.notifier).initializeAuth();
-      print('Auth initialized');
+      print('Auth initialized. is loading: ');
       
-      final authState = ref.read(authProvider);
-      if (authState.isAuthenticated) {
-        // Initialize other services only if authenticated
-        await Future.wait([
-          ref.read(subscriptionProvider.notifier).initialize(),
-          ref.read(revenueCatClientProvider.notifier).initialize(),
-        ]);
-      }
+      // final authState = ref.read(authProvider);
+      // print('auth state from main authState: ${authState.isLoading}');
+      // if (authState.isAuthenticated) {
+      //   // Initialize other services only if authenticated
+      //   await Future.wait([
+      //     ref.read(subscriptionProvider.notifier).initialize(),
+      //     ref.read(revenueCatClientProvider.notifier).initialize(),
+      //   ]);
+      // }
       
       // Mark initialization as complete
       if (mounted) {
@@ -109,7 +112,11 @@ class _MyAppState extends ConsumerState<MyApp> {
       themeMode: ThemeMode.system,
       debugShowCheckedModeBanner: false,
       home: _initializing
-          ? Text('Loading...')
+          ? const Scaffold(
+        body: Center(
+          child: CircularProgressIndicator(),
+        ),
+      )
           : const HomeScreen(),
     );
   }

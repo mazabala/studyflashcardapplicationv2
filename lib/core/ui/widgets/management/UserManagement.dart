@@ -45,8 +45,8 @@ class UserActions extends ConsumerWidget {
           ElevatedButton(
             onPressed: () async {
               final userNotifier = ref.read(userProvider.notifier);
-              final isAdmin = await userNotifier.isUserAdmin();
-              if (isAdmin) {
+              final isAdmin = ref.watch(userProvider).isAdmin;
+              if (isAdmin != null && isAdmin) {
                 _navigateTo(context, CreateUserPage());
               } else {
                 ScaffoldMessenger.of(context).showSnackBar(

@@ -58,11 +58,12 @@ class DeckState {
 /// DeckNotifier to manage the state of the deck
 class DeckNotifier extends StateNotifier<DeckState> {
   final DeckService _deckService;
-  final UserService _userService;
+  final UserState _userService;
 
   DeckNotifier(this._deckService, this._userService) : super(const DeckState()) {
 
     _loadUserDecks();
+    
     
   }
 
@@ -109,11 +110,11 @@ Future<List<Flashcard>> getDeckFlashcards (String deckid) async
   Future<void> createDeck(String title,String category, String description, String difficultyLevel, String userid,int cardCount) async {
     state = state.copyWith(isLoading: true, error: '');
     try {
-      final userId = _userService.getCurrentUserId();
+      final userId = _userService.userId;
       if (userId == null) {
         throw Exception("User is not logged in");
       }
-      final userSubscription = _userService.getUserSubscriptionPlan();
+      final userSubscription = _userService.subscriptionPlanID;
 
       await _deckService.createDeck(title, category, description ,difficultyLevel, userid, cardCount);  
       
@@ -134,7 +135,7 @@ Future<List<Flashcard>> getDeckFlashcards (String deckid) async
     print(
           'fetching available decks'
     );
-    final userId = _userService.getCurrentUserId();
+    final userId = _userService.userId;
     if (userId == null) {
       throw Exception("User is not logged in");
     }
@@ -159,7 +160,7 @@ Future<void>addDecktoUser(String deckId) async {
 try{
     state = state.copyWith(isLoading: true, error: '');
     
-    final userId = _userService.getCurrentUserId();
+    final userId = _userService.userId;
     if (userId == null) {
       throw Exception("User is not logged in");
     }
@@ -185,7 +186,7 @@ try{
 
   try {
     
-    final userId = _userService.getCurrentUserId();
+    final userId = _userService.userId;
     if (userId == null) {
       throw Exception("User is not logged in");
     }
@@ -212,7 +213,7 @@ try{
   Future<void> updateDeck(String deckId, String title, String difficultyLevel) async {
     state = state.copyWith(isLoading: true, error: '');
     try {
-      final userId = _userService.getCurrentUserId();
+      final userId = _userService.userId;
       if (userId == null) {
         throw Exception("User is not logged in");
       }
@@ -230,7 +231,7 @@ try{
   Future<void> deleteDeck(String deckId) async {
     state = state.copyWith(isLoading: true, error: '');
     try {
-      final userId = _userService.getCurrentUserId();
+      final userId = _userService.userId;
       if (userId == null) {
         throw Exception("User is not logged in");
       }
@@ -279,7 +280,7 @@ try{
 Future<void> systemCreateDecks(List<SystemDeckConfig> configs) async {
   state = state.copyWith(isLoading: true, error: '');
   try {
-    final userId = _userService.getCurrentUserId();
+    final userId = _userService.userId;
     if (userId == null) {
       throw Exception("System user is not logged in");
     }
@@ -304,7 +305,7 @@ Future<void> systemCreateDecks(List<SystemDeckConfig> configs) async {
 /// Provider for DeckNotifier that ties together DeckService and UserService
 final deckProvider = StateNotifierProvider<DeckNotifier, DeckState>((ref) {
   final deckService = ref.watch(deckServiceProvider);
-  final userService = ref.watch(userServiceProvider);
+  final userService = ref.watch(userProvider);
  
   return DeckNotifier(deckService, userService);
 });

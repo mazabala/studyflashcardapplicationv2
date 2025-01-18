@@ -101,7 +101,7 @@ class SubscriptionNotifier extends StateNotifier<SubscriptionState> {
 
 final subscriptionServiceProvider = Provider<SubscriptionService>((ref) {
   final supabaseClient = ref.read(supabaseServiceProvider);
-  final userService = ref.read(userServiceProvider);
+  final userService = ref.read(userProvider);
 
   return SubscriptionService(
     supabaseClient.client,

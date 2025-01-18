@@ -49,7 +49,7 @@ class _CreateDeckDialogState extends ConsumerState<CreateDeckDialog> {
     try {
       final deckReader = ref.read(deckServiceProvider);
       final userReader = ref.read(userServiceProvider);
-      final subscriptionId = await userReader.getUserSubscriptionPlan();
+      final subscriptionId = ref.watch(userProvider).subscriptionPlanID;
       final deckDifficulty = await deckReader.getDeckDifficulty(subscriptionId);
 
       if (mounted) {

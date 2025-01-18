@@ -52,7 +52,8 @@ class _SystemDeckScreenState extends ConsumerState<SystemDeckScreen> {
   Future<List<String>> _getDeckDifficulty() async {
     final deckReader = ref.read(deckServiceProvider);
     final userReader = ref.read(userServiceProvider);
-    final subscriptionId = await userReader.getUserSubscriptionPlan();
+    final userService = ref.read(userProvider);
+    final subscriptionId = userService.subscriptionPlanID;
     return await deckReader.getDeckDifficulty(subscriptionId);
   }
 

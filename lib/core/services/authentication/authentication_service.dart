@@ -83,7 +83,10 @@ Future<void>  forgotPassword(String email) async{
   @override
   Future<User?> getCurrentUser() async {
     // This will now return the persisted user if available
-    return _supabaseClient.auth.currentUser;
+    
+    final user = _supabaseClient.auth.currentUser;
+    
+    return user;
   }
 
 Future<void> signInWithGoogle() async {
