@@ -2,30 +2,55 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flashcardstudyapplication/core/error/error_handler.dart';
 
-// Changed to a simple Provider instead of StateNotifierProvider
-final apiManagerProvider = Provider.autoDispose<ApiManager>((ref) {
-  final supabase = Supabase.instance.client;
-  final manager = ApiManager._(supabase);
-  // Initialize synchronously to ensure data is loaded
-  manager._loadKeysSync();
-  manager._loadRevEntitlementsSync();
-  return manager;
+// Use a provider to expose the singleton instance
+final apiManagerProvider = Provider<ApiManager>((ref) {
+  return ApiManager.instance;
 });
 
 class ApiManager {
   final SupabaseClient _supabaseClient;
-
   
   Map<String, String> _apiKeys = {};
   Map<String, String> _RevEntitlements = {};
 
   bool _isInitialized = false;
 
+  // Private constructor to prevent external instantiation
   ApiManager._(this._supabaseClient);
 
+  // Static variable to hold the single instance
+  static ApiManager? _instance;
+
+  // Factory method to get the singleton instance
+  static ApiManager get instance {
+    if (_instance == null) {
+      // This assumes `Supabase` is already initialized when this is accessed.
+      final supabaseClient = Supabase.instance.client;
+      _instance = ApiManager._(supabaseClient);
+    }
+    return _instance!;
+  }
+
+
+Future<void> initialize() async {
+  try {
+  final apiManager = ApiManager.instance;
+  await apiManager._loadKeysSync();
+  await apiManager._loadRevEntitlementsSync();
+  
+  print('Api_Manager Initialize finished');
+  print('api keys: ${apiManager._apiKeys}');
+  print('revenuecat entitlements: ${apiManager._RevEntitlements}');
+  
+} on Exception catch (e) {
+  throw ErrorHandler.handle(e, message: 'Failed to initialize ApiManager');
+}
+}
+
+  // Synchronous initialization methods (if needed)
   Future<void> _loadKeysSync() async {
     try {
-      print('Api_Manager Initialize started');
+
       final response = await _supabaseClient.from('api_resources')
           .select('name,api_key');
       
@@ -34,10 +59,12 @@ class ApiManager {
           MapEntry(row['name'] as String, row['api_key'] as String)
         )
       );
+
+      print('api keys: ${_apiKeys}');
       
       _isInitialized = true;
     } catch (e) {
-      print('Error initializing ApiManager: $e');
+
       throw ErrorHandler.handle(e, message: 'Failed to get keys');
     }
   }
@@ -46,7 +73,6 @@ class ApiManager {
     final response = await _supabaseClient.from('revenuecat_entitlements')
         .select('identifier');
 
-
     _RevEntitlements = Map.fromEntries(
       response.map<MapEntry<String, String>>((row) => 
         MapEntry(row['name'] as String, row['Entitlement_ID'] as String)
@@ -54,6 +80,7 @@ class ApiManager {
     );
   }
 
+  // Utility methods to get keys and entitlement IDs
   String _getRevEntitlementID(String entitlementName) {
     final entitlement = _RevEntitlements?[entitlementName];
     if (entitlement == null) {

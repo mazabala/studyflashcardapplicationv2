@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flashcardstudyapplication/core/providers/auth_provider.dart';
@@ -35,9 +37,9 @@ class _CustomScaffoldState extends ConsumerState<CustomScaffold> {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
-    final authState = ref.watch(authProvider);
+    
     final authNotifier = ref.watch(authProvider.notifier);
-    final bool isLoggedIn = authState.isAuthenticated;
+    final bool isLoggedIn = ref.watch(authProvider).isAuthenticated;
     final bool isSmallScreen = MediaQuery.of(context).size.width < 600;
 
     return Scaffold(
@@ -121,6 +123,7 @@ class _CustomScaffoldState extends ConsumerState<CustomScaffold> {
               _buildNavLink('Decks & Flashcards', '/deck'),
               _buildNavLink('Pricing', '/prices'),
               if (isLoggedIn) ...[
+               
                 _buildNavLink('My Decks', '/myDecks'),
                 _buildNavButton('Logout', null, authNotifier),
               ] else ...[

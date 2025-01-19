@@ -11,13 +11,17 @@ class UserService implements IUserService {
 
 @override
 Future<Map<String, dynamic>?> getCurrentUserInfo() async {
-  final user = _supabaseClient.auth.currentUser;
+  print('in the user service, getCurrentUserInfo');
+  
+  try {
+  final user = await _supabaseClient.auth.currentUser;
+  
 
   if (user != null) {
     // Get the user info from our users table
     final userInfo = await _fetchUser(user.id);
     
-    
+    print('userInfo: $user.email');
     if (userInfo != null) {
       // Create a new map that combines auth user data and our custom user data
       return {
@@ -37,7 +41,9 @@ Future<Map<String, dynamic>?> getCurrentUserInfo() async {
         // Add any other fields you need from either user or userInfo
       };
     }
-  }
+  }} on Exception catch (e) {
+  print('service user error: $e');
+}
   
   return null; // Return null if no user is logged in or if user data isn't found
 }

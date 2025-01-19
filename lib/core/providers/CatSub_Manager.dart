@@ -56,23 +56,22 @@ class CatSubNotifier extends StateNotifier<CatSubState> {
 
 
   Future<void> initialize(String userId) async {
-    if (state.isInitializing || state.isInitialized) return;
-
+    
     state = state.copyWith(isInitializing: true);
-
-    final apiManager = await ref.read(apiManagerProvider);
+    
 
 
     try {
+      print('in the catsubmanager');
       if (Platform.isIOS) {
         StoreConfig(
             store: Stores.appleStore,
-            apiKey: apiManager.getAppleAPI(),
+            apiKey: ApiManager.instance.getAppleAPI(),
         );
       } else if (Platform.isAndroid) {
         StoreConfig(
             store: Stores.googlePlay,
-            apiKey: apiManager.getGoogleAPI(),
+            apiKey: ApiManager.instance.getGoogleAPI(),
         );
       }
 
@@ -80,13 +79,8 @@ class CatSubNotifier extends StateNotifier<CatSubState> {
 
 
       await ref.read(revenueCatClientProvider.notifier).initialize();
-
-  
-     
-     
       // Initialize both services
       await ref.read(subscriptionProvider.notifier).initialize();
-      
 
       // Fetch subscription status and packages
       await Future.wait([
@@ -115,7 +109,10 @@ class CatSubNotifier extends StateNotifier<CatSubState> {
         isInitializing: false,
         isInitialized: false,
         errorMessage: e.toString(),
+
+        
       );
+      throw Exception(e);
     }
   }
 
@@ -156,15 +153,15 @@ class CatSubNotifier extends StateNotifier<CatSubState> {
   }
 }
 
-final catSubManagerProvider = StateNotifierProvider.autoDispose<CatSubNotifier, CatSubState>((ref) {
-  final authState = ref.watch(authProvider);
+final catSubManagerProvider = StateNotifierProvider<CatSubNotifier, CatSubState>((ref) {
   final notifier = CatSubNotifier(ref);
-  print('authState: ${authState.isAuthenticated} from cat sub manager provider');
-  if (authState.isAuthenticated && authState.user != null) {
-    Future.microtask(() {
-      notifier.initialize(authState.user!.id);
-    });
-  }
   
+  // Watch authState and trigger initialization when necessary.
+  ref.listen<AuthState>(authProvider, (previous, next) {
+    if (next.isAuthenticated && next.user != null) {
+      notifier.initialize(next.user!.id);
+    }
+  });
+
   return notifier;
-}); 
+});

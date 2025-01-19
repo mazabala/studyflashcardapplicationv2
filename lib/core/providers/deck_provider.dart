@@ -1,4 +1,5 @@
 import 'package:flashcardstudyapplication/core/models/flashcard.dart';
+import 'package:flashcardstudyapplication/core/providers/auth_provider.dart' as app_auth;
 import 'package:flashcardstudyapplication/core/providers/user_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -21,12 +22,7 @@ final deckServiceProvider = Provider<DeckService>((ref) {
   return DeckService(supabaseClient, apiClient);
 });
 
-/// UserService provider (Assuming it's already implemented)
-//final userServiceProvider = Provider<UserService>((ref) {
-//  final supabaseClient = ref.watch(supabaseClientProvider);
-//  final apiClient = ref.watch(apiClientProvider);
-//  return UserService(supabaseClient,apiClient);  // Initialize UserService instance (you can change logic as needed)
-//});
+
 
 /// DeckState class to hold the current state of the decks
 class DeckState {
@@ -59,19 +55,33 @@ class DeckState {
 class DeckNotifier extends StateNotifier<DeckState> {
   final DeckService _deckService;
   final UserState _userService;
+  final Ref ref;
 
-  DeckNotifier(this._deckService, this._userService) : super(const DeckState()) {
+  DeckNotifier(this._deckService, this._userService, this.ref) : super(const DeckState()) {
+    // Listen to auth state changes
+    ref.listen<app_auth.AuthState>(app_auth.authProvider, (previous, next) {
+      if (next?.isAuthenticated == true && next?.user != null) {
+        _loadUserDecks(next!.user!.id);
+      }
+    });
+  }   
 
-    _loadUserDecks();
-    
-    
-  }
 
 
-
-  Future<void> _loadUserDecks() async {
+  Future<void> _loadUserDecks(String ?userId) async {
     // Call loadUserDecks to load the decks as soon as the provider is initialized
-    await loadUserDecks();
+
+    if (userId == null) {
+      final usernewId = _userService.userId;
+      print('usernewId: $usernewId');
+      if (usernewId == null) {
+        throw Exception("User is not logged in");
+      }
+      else {
+        userId = usernewId;
+      }
+    }
+    await loadUserDecks(userId);
   }
 
 Future<void> flagCard(String flashcardId) async{
@@ -181,14 +191,21 @@ try{
 
 }
 
- Future<List<Deck>> loadUserDecks() async {
+ Future<List<Deck>> loadUserDecks(String ?userId) async {
   state = state.copyWith(isLoading: true, error: '');
 
   try {
     
-    final userId = _userService.userId;
+    
     if (userId == null) {
-      throw Exception("User is not logged in");
+
+      final usernewId = _userService.userId;
+      if (usernewId == null) {
+        throw Exception("User is not logged in");
+      }
+      else {
+        userId = usernewId;
+      }
     }
     
     final decks = await _deckService.getUserDecks(userId);
@@ -307,5 +324,5 @@ final deckProvider = StateNotifierProvider<DeckNotifier, DeckState>((ref) {
   final deckService = ref.watch(deckServiceProvider);
   final userService = ref.watch(userProvider);
  
-  return DeckNotifier(deckService, userService);
+  return DeckNotifier(deckService, userService,ref);
 });

@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flashcardstudyapplication/core/providers/CatSub_Manager.dart';
 import 'package:flashcardstudyapplication/core/providers/user_provider.dart';
+import 'package:flashcardstudyapplication/core/services/api/api_manager.dart';
 import 'package:flashcardstudyapplication/core/services/subscription/subscription_service.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -56,24 +57,72 @@ _setupAuthListener();
     });
   }
 
-  void _handleAuthStateChange(AuthChangeEvent event, Session? session) {
-    switch (event) {
-      case AuthChangeEvent.signedIn:
-      case AuthChangeEvent.tokenRefreshed:
-        if (session?.user != null) {
-          state = state.copyWith(
-            user: session!.user,
-            isAuthenticated: true,
-            isLoading: false,
-          );
+  Future<void> setupApiManager() async {
+    final apiManager = ApiManager.instance;
+    await apiManager.initialize();  
+  }
+
+  void _handleAuthStateChange(AuthChangeEvent event, Session? session) async {
+    print('Auth state change event: $event');
+
+
+    // Handle signOut and userDeleted first
+    if (event == AuthChangeEvent.signedOut || event == AuthChangeEvent.userDeleted) {
+      print('User signed out or deleted');
+      state = const AuthState();
+      return;
+    }
+
+    // Skip processing for initial session if there's no user
+    if (event == AuthChangeEvent.initialSession && session?.user == null) {
+      print('Initial session with no user, skipping');
+      state = const AuthState();
+      return;
+    }
+
+    // Only process these events if we have a valid session and user
+    if ((event == AuthChangeEvent.signedIn || 
+         event == AuthChangeEvent.tokenRefreshed) && 
+        session?.user != null) {
+      try {
+        print('Session user exists: ${session!.user.id}');
+        
+        // Initialize API Manager first
+
+        
+        // Update state after API Manager initialization
+        state = state.copyWith(
+          user: session.user,
+          isAuthenticated: true,
+          isLoading: false,
+        );
+        
+        // Only proceed with other initializations if state is properly set
+        if (state.isAuthenticated && state.user != null) {
+          print('Proceeding with user initialization');
+          await ref.read(userProvider.notifier).initializeUser();
+
+          if (state.user != null) {  // Double check user is still valid
+          print('initializing the api manager');
+          await setupApiManager();
+          print('initializing the cat sub manager');
+          await ref.read(catSubManagerProvider.notifier).initialize(state.user!.id);
+            
+           print('API Manager initialized in auth provider');
+          }
         }
-        break;
-      case AuthChangeEvent.signedOut:
-      case AuthChangeEvent.userDeleted:
-        state = const AuthState();
-        break;
-      default:
-        break;
+      } catch (e) {
+        print('Error during auth state change: $e');
+        state = state.copyWith(
+          user: null,
+          isAuthenticated: false,
+          isLoading: false,
+          errorMessage: e.toString(),
+        );
+      }
+    } else {
+     
+      state = const AuthState();
     }
   }
 
@@ -86,9 +135,14 @@ _setupAuthListener();
       isLoading: false,
     );
 
-          if(state.isAuthenticated == true){
-        await ref.read(catSubManagerProvider.notifier).initialize(user!.id);
-      }
+    if(state.isAuthenticated && user != null){
+      // Initialize API Manager first
+     // setupApiManager();
+     // print('API Manager initialized in google signin');
+      
+      //await ref.read(userProvider.notifier).initializeUser();
+      //await ref.read(catSubManagerProvider.notifier).initialize(user.id);
+    }
   }
 
   Future<void> signIn(String email, String password) async {
@@ -104,12 +158,15 @@ _setupAuthListener();
         isLoading: false,
       );
 
-      if(state.isAuthenticated == true){
-        await ref.read(catSubManagerProvider.notifier).initialize(user!.id);
-      }
+      if(state.isAuthenticated && user != null){
+        // Initialize API Manager first
         
-      // Initialize user details after successful sign in
-      if (user != null) {
+        
+        
+       // await ref.read(userProvider.notifier).initializeUser();
+       // await ref.read(catSubManagerProvider.notifier).initialize(user.id);
+        
+        // Initialize user details after successful sign in
         await ref.read(subscriptionProvider.notifier).fetchSubscriptionStatus(user.id);
       }
     } catch (e) {
@@ -207,30 +264,41 @@ _setupAuthListener();
   }
 
   Future<void> initializeAuth() async {
+    print('Starting auth initialization');
     state = state.copyWith(isLoading: true);
     try {
-      print('auth initialization started');
-     final user = await _authService.getCurrentUser();
-      print('current user: ${user?.id}');
-
-            // If needed, fetch subscription after auth is set
+      final user = await _authService.getCurrentUser();
+      print('Current user from initialization: ${user?.id}');
+      
       if (user != null) {
-        final backuser = await ref.read(subscriptionProvider.notifier).fetchSubscriptionStatus(user.id);
+        // Initialize API Manager first if user exists
+       
+        
       }
+
+
+      // Update state
       state = state.copyWith(
-        user: user != null ? null : null,
-        isAuthenticated: user != false,
+        user: user,
+        isAuthenticated: user != null,
         isLoading: false,
       );
-      print('auth initialization completed with user: ${user?.id}');
+
+      // Only proceed with other initializations if authenticated
+      if (state.isAuthenticated && state.user != null) {
+        await ref.read(userProvider.notifier).initializeUser();
+        await ref.read(subscriptionProvider.notifier).fetchSubscriptionStatus(state.user!.id);
+      }
     } catch (e) {
+      print('Error during auth initialization: $e');
       state = state.copyWith(
         errorMessage: e.toString(),
         isLoading: false,
+        isAuthenticated: false,
+        user: null,
       );
     }
-    print('=====Auth Provider Initialization completed. Loading state:${state.isLoading}==== ');
-     
+    print('Auth initialization completed. State: authenticated=${state.isAuthenticated}, user=${state.user?.id}');
   }
 }
 
@@ -250,3 +318,4 @@ final authProvider = StateNotifierProvider<AuthNotifier, AuthState>((ref) {
   final authService = ref.read(authServiceProvider);
   return AuthNotifier(authService, ref);
 });
+

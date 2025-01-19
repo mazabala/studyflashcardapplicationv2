@@ -1,6 +1,4 @@
 import 'package:flashcardstudyapplication/core/providers/auth_provider.dart';
-import 'package:flashcardstudyapplication/core/providers/revenuecat_provider.dart';
-import 'package:flashcardstudyapplication/core/providers/subscription_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flashcardstudyapplication/core/services/api/api_client.dart';
 import 'package:flashcardstudyapplication/core/themes/app_theme.dart';
@@ -51,18 +49,23 @@ class _MyAppState extends ConsumerState<MyApp> {
       final supabaseUrl = apiClient.getSupabaseUrl();
       final supabaseAnonKey = apiClient.getSupabaseAnonKey();
       
+
+      
       // Initialize Supabase with session persistence
       await Supabase.initialize(
         url: supabaseUrl,
         anonKey: supabaseAnonKey,
+   
+        
       );
       print('Supabase initialized');
+      Supabase.instance.client.auth.signOut();
 
 
    
       // Initialize auth first
-      await ref.read(authProvider.notifier).initializeAuth();
-      print('Auth initialized. is loading: ');
+      //await ref.read(authProvider.notifier).initializeAuth();
+      //print('Auth initialized. is loading: ');
       
       // final authState = ref.read(authProvider);
       // print('auth state from main authState: ${authState.isLoading}');
@@ -106,7 +109,7 @@ class _MyAppState extends ConsumerState<MyApp> {
 
     return MaterialApp(
       onGenerateRoute: RouteManager.generateRoute,
-      title: 'Flashcard Study App',
+      title: 'Deck Focus',
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,
       themeMode: ThemeMode.system,

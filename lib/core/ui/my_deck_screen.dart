@@ -35,7 +35,7 @@ class _MyDeckScreenState extends ConsumerState<MyDeckScreen> {
   bool isSystemUser = false;
   List<String>? _selectedCategories = [];
   Map<String, TextEditingController> _descriptionControllers = {};
-  
+  UserState? _userState;
 
 
 
@@ -48,13 +48,21 @@ TextEditingController _cardCountController = TextEditingController();
    @override
   void initState() {
     super.initState();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
     _initializeServices();
   }
 
   Future<void> _initializeServices() async {
     try {
+      print('in the my deck screen ui, initializeServices');
       // First check if user is authenticated
       final userState = ref.read(authProvider);
+      _userState = ref.read(userProvider);
+  
       if (!userState.isAuthenticated) {
         // Navigate to login if not authenticated
         if (mounted) {
@@ -65,9 +73,7 @@ TextEditingController _cardCountController = TextEditingController();
 
       // Then check if user is admin (only if authenticated)
       await _checkSystemUser();
-      
-      // Finally initialize ApiManager (only if authenticated)
-      await ref.read(apiManagerProvider);
+
     } catch (e) {
       print('Failed to initialize services: $e');
       // Handle error appropriately - maybe show error dialog
@@ -113,15 +119,19 @@ TextEditingController _cardCountController = TextEditingController();
   }
 
   Future<List<String>> _getDeckCategory() async {
+    
     final deckReader = ref.read(deckServiceProvider);
     return await deckReader.getDeckCategory();
   }
 
  
  Future<List<String>> _getDeckDifficulty() async {
+
+  
     final deckReader = ref.read(deckServiceProvider);
 
     final userService = ref.read(userProvider);
+    
 
     return await deckReader.getDeckDifficulty(userService.subscriptionPlanID);
   }
@@ -202,7 +212,7 @@ TextEditingController _cardCountController = TextEditingController();
 
     if (userId != null) {
 
-      final decks = await ref.read(deckProvider.notifier).loadUserDecks();
+      final decks = await ref.read(deckProvider.notifier).loadUserDecks(userId);
 
       if (mounted) { // Ensure the widget is still mounted before calling setState
         setState(() {

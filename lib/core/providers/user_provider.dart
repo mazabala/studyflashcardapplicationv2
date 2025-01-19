@@ -1,7 +1,8 @@
 import 'package:flashcardstudyapplication/core/providers/auth_provider.dart';
 import 'package:flashcardstudyapplication/core/providers/supabase_provider.dart';
+import 'package:flashcardstudyapplication/core/services/api/api_manager.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
+
 import 'package:flashcardstudyapplication/core/services/api/api_client.dart';
 import 'package:flashcardstudyapplication/core/services/users/users_service.dart';
 
@@ -51,36 +52,45 @@ class UserState {
 // UserNotifier to manage user-related state
 class UserNotifier extends StateNotifier<UserState> {
   final UserService userService;
-  final Ref ref;  // Add Ref to access other providers
+  final Ref ref;
 
-  UserNotifier(this.userService, this.ref) : super(UserState()) {
-    // Initialize user details when UserNotifier is created
-    initializeUser();
-  }
+  UserNotifier(this.userService, this.ref) : super(UserState());
 
   Future<void> initializeUser() async {
-    final authState = ref.read(authProvider);
-    if (authState.isAuthenticated) {
+    try {
+      print('in the user provider, initialize');
+      final authState = ref.read(authProvider);
+      if (!authState.isAuthenticated) {
+        print('user is not authenticated in the user provider');
+        state = UserState(); // Reset state if not authenticated
+        return;
+      }
+
       await fetchUserDetails();
+    } catch (e) {
+      state = state.copyWith(errorMessage: e.toString());
     }
   }
 
   // Update fetchUserDetails to handle cases where user isn't authenticated
   Future<void> fetchUserDetails() async {
     try {
+
+
+
       final user = await userService.getCurrentUserInfo();
       if (user == null) {
+        
         state = UserState(); // Reset state if no user
-        return;
+        throw Exception('Unable to retrieve the user details from Auth Provider');
       }
 
-      final subscriptionPlan = user['subscription_plan'];
-      final expiryDate = user['subscription_expiry_date'];
-      final isExpired = user['subscription_name'];
+
+ 
 
       state = state.copyWith(
-        subscriptionPlan: subscriptionPlan,
-        isExpired: isExpired,
+        subscriptionPlan: user['subscription_plan'],
+        isExpired: user['subscription_expiry_date'],
         errorMessage: null,
         userId: user['id'],
         firstName: user['first_name'],
