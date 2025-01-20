@@ -41,7 +41,7 @@ Future<void> initialize() async {
   print('Api_Manager Initialize finished');
   print('api keys: ${apiManager._apiKeys}');
   print('revenuecat entitlements: ${apiManager._RevEntitlements}');
-  
+
 } on Exception catch (e) {
   throw ErrorHandler.handle(e, message: 'Failed to initialize ApiManager');
 }
@@ -60,7 +60,7 @@ Future<void> initialize() async {
         )
       );
 
-      print('api keys: ${_apiKeys}');
+      
       
       _isInitialized = true;
     } catch (e) {
@@ -73,9 +73,10 @@ Future<void> initialize() async {
     final response = await _supabaseClient.from('revenuecat_entitlements')
         .select('identifier');
 
+ 
     _RevEntitlements = Map.fromEntries(
       response.map<MapEntry<String, String>>((row) => 
-        MapEntry(row['name'] as String, row['Entitlement_ID'] as String)
+        MapEntry(row['identifier'] as String, row['identifier'] as String)
       )
     );
   }

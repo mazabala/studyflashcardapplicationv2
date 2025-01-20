@@ -30,7 +30,7 @@ class DeckState {
   final String error;
   final List<Deck> decks;
 
-  const DeckState({
+   DeckState({
     this.isLoading = false,
     this.error = '',
     this.decks = const [],
@@ -57,29 +57,20 @@ class DeckNotifier extends StateNotifier<DeckState> {
   final UserState _userService;
   final Ref ref;
 
-  DeckNotifier(this._deckService, this._userService, this.ref) : super(const DeckState()) {
+  DeckNotifier(this._deckService, this._userService, this.ref) : super( DeckState()) {
     // Listen to auth state changes
     ref.listen<app_auth.AuthState>(app_auth.authProvider, (previous, next) {
-      if (next?.isAuthenticated == true && next?.user != null) {
-        _loadUserDecks(next!.user!.id);
-      }
+      
     });
   }   
 
-
-
   Future<void> _loadUserDecks(String ?userId) async {
-    // Call loadUserDecks to load the decks as soon as the provider is initialized
-
     if (userId == null) {
       final usernewId = _userService.userId;
-      print('usernewId: $usernewId');
       if (usernewId == null) {
         throw Exception("User is not logged in");
       }
-      else {
-        userId = usernewId;
-      }
+      userId = usernewId;
     }
     await loadUserDecks(userId);
   }
@@ -192,38 +183,30 @@ try{
 }
 
  Future<List<Deck>> loadUserDecks(String ?userId) async {
-  state = state.copyWith(isLoading: true, error: '');
-
   try {
-    
+    //state = state.copyWith(isLoading: true);
     
     if (userId == null) {
-
       final usernewId = _userService.userId;
       if (usernewId == null) {
-        throw Exception("User is not logged in");
+        state = state.copyWith(error: "User is not logged in", isLoading: false);
+        return [];
       }
-      else {
-        userId = usernewId;
-      }
+      userId = usernewId;
     }
     
     final decks = await _deckService.getUserDecks(userId);
-    if (decks.isEmpty)
-     {      print('decks are null: $decks');
-          return [];
-        }
-        else{
+    // Always update state with the decks, even if empty
+    print('decks: $decks');
+    state = state.copyWith(decks: decks, isLoading: false);
+    return decks;
 
-            state = state.copyWith(decks: decks);
-            return decks; 
-        }
-// Return the list of decks
   } catch (e) {
-    state = state.copyWith(error: e.toString());
-    return []; // Return an empty list in case of error
-  } finally {
-    state = state.copyWith(isLoading: false);
+    print('error in the catch block of Deck Provider loadUserDecks: $e');
+    final errorMsg = e.toString();
+    state = state.copyWith(error: errorMsg, isLoading: false, decks: []);
+    rethrow;
+    
   }
 }
  

@@ -114,6 +114,9 @@ Future<void> _signWithGoogle() async {
         await authNotifier.signIn(email, password);
       }
 
+            // Add a small delay to ensure initialization
+      await Future.delayed(const Duration(milliseconds: 500));
+
       final authState = ref.read(authProvider);
       if (authState.isAuthenticated) {
         if (mounted) {
@@ -171,25 +174,14 @@ void _onForgotPasswordTapped() {
         mainAxisSize: MainAxisSize.min,
         children: [
           if (!isWeb) const SizedBox(height: 40),
-          if (!isWeb) Row(
-            children: [
-              IconButton(
-                icon: const Icon(Icons.close),
-                onPressed: () => Navigator.pop(context),
+          if (!isWeb) const Center(
+            child: Text(
+              'Log in',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w500,
               ),
-              const Expanded(
-                child: Center(
-                  child: Text(
-                    'Log in',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(width: 48), // Balance for close button
-            ],
+            ),
           ),
           if (!isWeb) const SizedBox(height: 20),
           CustomButton(

@@ -85,14 +85,11 @@ _setupAuthListener();
          event == AuthChangeEvent.tokenRefreshed) && 
         session?.user != null) {
       try {
-        print('Session user exists: ${session!.user.id}');
         
-        // Initialize API Manager first
-
         
         // Update state after API Manager initialization
         state = state.copyWith(
-          user: session.user,
+          user: session!.user,
           isAuthenticated: true,
           isLoading: false,
         );
@@ -106,7 +103,7 @@ _setupAuthListener();
           print('initializing the api manager');
           await setupApiManager();
           print('initializing the cat sub manager');
-          await ref.read(catSubManagerProvider.notifier).initialize(state.user!.id);
+          //await ref.read(catSubManagerProvider.notifier).initialize(state.user!.id);
             
            print('API Manager initialized in auth provider');
           }

@@ -35,7 +35,7 @@ class _MyDeckScreenState extends ConsumerState<MyDeckScreen> {
   bool isSystemUser = false;
   List<String>? _selectedCategories = [];
   Map<String, TextEditingController> _descriptionControllers = {};
-  UserState? _userState;
+
 
 
 
@@ -61,8 +61,8 @@ TextEditingController _cardCountController = TextEditingController();
       print('in the my deck screen ui, initializeServices');
       // First check if user is authenticated
       final userState = ref.read(authProvider);
-      _userState = ref.read(userProvider);
-  
+     
+      
       if (!userState.isAuthenticated) {
         // Navigate to login if not authenticated
         if (mounted) {
@@ -70,10 +70,10 @@ TextEditingController _cardCountController = TextEditingController();
         }
         return;
       }
-
+      
       // Then check if user is admin (only if authenticated)
-      await _checkSystemUser();
-
+       _checkSystemUser();
+       await _loadUserDecks();
     } catch (e) {
       print('Failed to initialize services: $e');
       // Handle error appropriately - maybe show error dialog
@@ -95,27 +95,34 @@ TextEditingController _cardCountController = TextEditingController();
     }
   }
 
-  // Modify _checkSystemUser to only check admin status
-  Future<void> _checkSystemUser() async {
-    
-    final userService = ref.read(userProvider);
-    if (userService.isAdmin == true) {
-  if (mounted) {
-    setState(() {
-      isSystemUser = true;
-    });
-  }
-}
+  // Modify _checkSystemUser to watch the provider state
+  void _checkSystemUser() {
+   
+    // Watch the provider instead of just reading it once
+    final userState = ref.watch(userProvider);
+
+    print(userState.isAdmin);
+    // Check both isAdmin and role for superAdmin
+    if (userState.isAdmin == true || userState.role == 'superAdmin') {
+      print('Setting isSystemUser to true - user is an admin');
+      
+      
+          isSystemUser = true;
+       
+      
+    } else {
+      print('User is not an admin - isSystemUser remains $isSystemUser');
+    }
   }
   // Method to reset the search state and navigate to study screen
   void _resetSearchStateAndNavigate() {
-    if (mounted) {
-      setState(() {
+ 
+
         isSearchingNewDecks = false; // Reset search state
-      });
+
       _loadUserDecks();
       Navigator.pushReplacementNamed(context, '/myDecks'); // Navigate to /study
-    }
+    
   }
 
   Future<List<String>> _getDeckCategory() async {
@@ -208,11 +215,14 @@ TextEditingController _cardCountController = TextEditingController();
   // Function to load user decks from the service
   Future<void> _loadUserDecks() async {
     final userService = ref.read(userProvider);
+    
     final userId = userService.userId;
 
     if (userId != null) {
-
-      final decks = await ref.read(deckProvider.notifier).loadUserDecks(userId);
+        print('(inside the if statement) loading users decks with user id: $userId');
+        
+      await ref.read(deckProvider.notifier).loadUserDecks(userId);
+      final decks = ref.read(deckProvider).decks;
 
       if (mounted) { // Ensure the widget is still mounted before calling setState
         setState(() {

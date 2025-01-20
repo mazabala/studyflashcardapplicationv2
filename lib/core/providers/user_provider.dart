@@ -16,9 +16,10 @@ class UserState {
   final String? userStatus;
   final String? role;
   final bool? isAdmin;
+  final String? subscriptionExpiryDate;
   late final String? subscriptionPlanID;
 
-  UserState({this.subscriptionPlan, this.isExpired, this.errorMessage, this.userId, this.firstName, this.lastName, this.userStatus, this.role, this.isAdmin, this.subscriptionPlanID});
+  UserState({this.subscriptionPlan, this.isExpired, this.errorMessage, this.userId, this.firstName, this.lastName, this.userStatus, this.role, this.isAdmin, this.subscriptionPlanID, this.subscriptionExpiryDate});
 
   // Create a new state with updated values
   UserState copyWith({
@@ -32,6 +33,7 @@ class UserState {
     String? role,
     bool? isAdmin,
     String? subscriptionPlanID,
+    String? subscriptionExpiryDate,
     }) {
     return UserState(
       subscriptionPlan: subscriptionPlan ?? this.subscriptionPlan,
@@ -44,6 +46,7 @@ class UserState {
       role: role ?? this.role,
       isAdmin: isAdmin ?? this.isAdmin,
       subscriptionPlanID: subscriptionPlanID ?? this.subscriptionPlanID,
+      subscriptionExpiryDate: subscriptionExpiryDate ?? this.subscriptionExpiryDate,
     );
   }
 }
@@ -85,23 +88,41 @@ class UserNotifier extends StateNotifier<UserState> {
         throw Exception('Unable to retrieve the user details from Auth Provider');
       }
 
-
- 
+      print('About to update state with user info');
+      
+      // Convert subscription_expiry_date to bool if it's a string
+      final isExpired = DateTime.parse(user['subscription_expiry_date']).isBefore(DateTime.now());
 
       state = state.copyWith(
-        subscriptionPlan: user['subscription_plan'],
-        isExpired: user['subscription_expiry_date'],
-        errorMessage: null,
-        userId: user['id'],
-        firstName: user['first_name'],
-        lastName: user['last_name'],
-        userStatus: user['user_status'],
-        role: user['role'],
-        isAdmin: user['is_admin'], 
-        subscriptionPlanID: user['subscription_planID'],
+        subscriptionPlan: user['subscription_name']?.toString(),
+        isExpired: isExpired,
+        userId: user['id']?.toString(),
+        firstName: user['firstname']?.toString(),
+        lastName: user['lastname']?.toString(),
+        userStatus: user['user_is_active']?.toString(),
+        role: user['role']?.toString(),
+        subscriptionPlanID: user['subscription_planID']?.toString(),
+        subscriptionExpiryDate: user['subscription_expiry_date']?.toString(),
+        isAdmin: user['role'] == 'superAdmin' ? true : false,
+
       );
+
+      print('back in the user provider after fetchUserDetails');
+      print('user state set Firstname: ${state.firstName}');
+      print('user state set isAdmin: ${state.isAdmin}');
+      print('user state set role: ${state.role}');
+      print('user state set subscriptionPlan: ${state.subscriptionPlan}');
+      print('user state set subscriptionPlanID: ${state.subscriptionPlanID}');
+      print('user state set userStatus: ${state.userStatus}');
+      print('user state set userId: ${state.userId}');
+ 
+      print('user state set isExpired: ${state.isExpired}');
+      print('user state set subscriptionExpiryDate: ${state.subscriptionExpiryDate}');
+
     } catch (e) {
+      print('Error in fetchUserDetails: $e');
       state = state.copyWith(errorMessage: e.toString());
+      rethrow;
     }
   }
 

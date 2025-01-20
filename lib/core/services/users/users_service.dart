@@ -14,31 +14,28 @@ Future<Map<String, dynamic>?> getCurrentUserInfo() async {
   print('in the user service, getCurrentUserInfo');
   
   try {
-  final user = await _supabaseClient.auth.currentUser;
+  final user =  _supabaseClient.auth.currentUser;
   
 
   if (user != null) {
     // Get the user info from our users table
     final userInfo = await _fetchUser(user.id);
     
-    print('userInfo: $user.email');
+      print('userInfo: ${userInfo}');
     if (userInfo != null) {
       // Create a new map that combines auth user data and our custom user data
       return {
         'id': user.id,
         'email': user.email,
         'created_at': userInfo['created_at'],
-        'first_name': userInfo['firstname'],
-        'last_name': userInfo['lastname'],
+        'firstname': userInfo['firstname'],
+        'lastname': userInfo['lastname'],
         'subscription_name': userInfo['subscriptiontype_name'],
         'subscription_status': userInfo['subscription_status'],
-        'expiry_date': userInfo['subscription_expiry_date'],
-        'subscription_planID': userInfo['subscription_id'],
-
-        'user_status': userInfo['user_is_active'],
-        'role': userInfo['role'],
-         if(userInfo['role'] == 'superAdmin') 'is_admin': true else 'is_admin':false,
-        // Add any other fields you need from either user or userInfo
+        'subscription_expiry_date': userInfo['subscription_expiry_date'],
+        'subscription_planID': userInfo['subscriptionid'],
+        'user_is_active': userInfo['user_is_active'],
+        'role': userInfo['role']
       };
     }
   }} on Exception catch (e) {

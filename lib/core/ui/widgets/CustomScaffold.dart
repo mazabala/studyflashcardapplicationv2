@@ -218,7 +218,11 @@ class _CustomScaffoldState extends ConsumerState<CustomScaffold> {
       selected: widget.currentRoute == route,
       onTap: () {
         Navigator.pop(context); // Close drawer
-        _navigateWithoutAnimation(context, route);
+        Future.delayed(Duration.zero, () {
+          if (mounted) {
+            _navigateWithoutAnimation(context, route);
+          }
+        });
       },
     );
   }

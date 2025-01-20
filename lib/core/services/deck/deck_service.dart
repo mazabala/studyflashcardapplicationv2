@@ -62,14 +62,7 @@ Future<List<Flashcard>> getFlashcards(String deckid) async{
       rethrow;}
 }
 
-Future<void> checkAPI() async {
-  if (_apiService is ApiClient) {
-    ApiClient apiClient = _apiService as ApiClient; // Safely cast to ApiClient
-    if (!apiClient.isInitialized) {
-      throw Exception('ApiClient is not initialized');
-    }
-  }
-}
+
  
   // Implement missing method getDeckDetails
   @override
@@ -148,7 +141,7 @@ try {
 
   
     if (response.isEmpty) {
-      print('No decks found ');
+      print('No decks found from the loadDeckPool in servicess ');
       throw Exception("No decks found");
     }
 
