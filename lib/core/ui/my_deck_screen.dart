@@ -73,7 +73,10 @@ TextEditingController _cardCountController = TextEditingController();
       
       // Then check if user is admin (only if authenticated)
        _checkSystemUser();
+       if (ref.read(deckProvider).deckloaded == false) {
        await _loadUserDecks();
+    }
+
     } catch (e) {
       print('Failed to initialize services: $e');
       // Handle error appropriately - maybe show error dialog

@@ -29,22 +29,26 @@ class DeckState {
   final bool isLoading;
   final String error;
   final List<Deck> decks;
+  final bool deckloaded;
 
    DeckState({
     this.isLoading = false,
     this.error = '',
     this.decks = const [],
+    this.deckloaded = false,
   });
 
   DeckState copyWith({
     bool? isLoading,
     String? error,
     List<Deck>? decks,
+    bool? deckloaded,
   }) {
     return DeckState(
       isLoading: isLoading ?? this.isLoading,
       error: error ?? this.error,
       decks: decks ?? this.decks,   
+      deckloaded: deckloaded ?? this.deckloaded,
     );
   }
 }
@@ -198,7 +202,7 @@ try{
     final decks = await _deckService.getUserDecks(userId);
     // Always update state with the decks, even if empty
     print('decks: $decks');
-    state = state.copyWith(decks: decks, isLoading: false);
+    state = state.copyWith(decks: decks, isLoading: false, deckloaded: true);
     return decks;
 
   } catch (e) {
