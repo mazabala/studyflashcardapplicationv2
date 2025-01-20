@@ -6,9 +6,17 @@ publish_to: 'none'
 version: 2.0.0+2
 
 environment:
-  sdk: '>=3.0.0 <4.0.0'
+  sdk: '>=3.0.0 <25.0.0'
+
+flutter_icons:
+  image_path: "assets/icons/logo.jpg" 
+  android: true
+  ios: true
+  # optionally, as transparency is not allowed on app store
+  # remove_alpha_ios: true
 
 dependencies:
+
   flutter:
     sdk: flutter
   cupertino_icons: ^1.0.2
@@ -27,7 +35,6 @@ dependencies:
   app_links: ^6.3.2
   path_provider: ^2.0.9
   google_fonts: ^6.2.1
- 
   dart_jsonwebtoken: ^2.14.2
   sign_in_with_apple: ^6.1.3
   google_sign_in: ^6.2.2
@@ -35,6 +42,7 @@ dependencies:
   purchases_ui_flutter: ^8.4.0
   url_launcher: ^6.0.0
   google_sign_in_android: ^6.1.33
+  flutter_launcher_icons: ^0.13.1
 
   
 
@@ -42,11 +50,13 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^2.0.0
+  flutter_launcher_icons: ^0.13.1
 
 flutter:
   uses-material-design: true
   
   assets:
+    - assets/icons/logo.jpg
     - assets/images/medical_bg.jpg
     - lib/core/config/api.config.yaml
     - 'assets/images/logo.png'
