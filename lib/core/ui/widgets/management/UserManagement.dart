@@ -79,47 +79,172 @@ class UserListView extends ConsumerStatefulWidget {
 }
 
 class _UserListViewState extends ConsumerState<UserListView> {
+  final TextEditingController _searchController = TextEditingController();
+  String _searchQuery = '';
+
   @override
   void initState() {
     super.initState();
-    // Fetch user details when the widget is initialized
-    ref.read(userProvider.notifier).fetchUserDetails();
+    // Load users when the widget is initialized
+    Future.microtask(() => ref.read(adminProvider.notifier).loadUsers());
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    final userState = ref.watch(userProvider);
+    final adminState = ref.watch(adminProvider);
 
-    if (userState.errorMessage != null) {
-      return Center(child: Text('Error: ${userState.errorMessage}'));
-    }
-
-    return ListView.builder(
-      itemCount: 3, // Replace with actual user count
-      itemBuilder: (context, index) {
-        return ListTile(
-          title: Text(
-            'User ${index + 1}',
-            style: Theme.of(context).textTheme.titleMedium,
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: TextField(
+            controller: _searchController,
+            decoration: InputDecoration(
+              hintText: 'Search users...',
+              prefixIcon: const Icon(Icons.search),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            ),
+            onChanged: (value) {
+              setState(() {
+                _searchQuery = value.toLowerCase();
+              });
+            },
           ),
-          subtitle: Text(
-            'Subscription: ${userState.subscriptionPlan ?? "None"}',
-            style: Theme.of(context).textTheme.bodySmall,
+        ),
+        if (adminState.isLoading)
+          const Expanded(child: Center(child: CircularProgressIndicator()))
+        else if (adminState.users.isEmpty)
+          const Expanded(child: Center(child: Text('No users found')))
+        else
+          Expanded(
+            child: ListView.builder(
+              itemCount: adminState.users.where((user) {
+                final searchStr = '${user['firstname']} ${user['lastname']} ${user['email']}'.toLowerCase();
+                return searchStr.contains(_searchQuery);
+              }).length,
+              itemBuilder: (context, index) {
+                final filteredUsers = adminState.users.where((user) {
+                  final searchStr = '${user['firstname']} ${user['lastname']} ${user['email']}'.toLowerCase();
+                  return searchStr.contains(_searchQuery);
+                }).toList();
+                final user = filteredUsers[index];
+                return ListTile(
+                  title: Text(
+                    'Name: ${user['firstname']} ${user['lastname']}\nEmail: ${user['email']}',
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
+                  subtitle: Text(
+                    'Subscription: ${user['subscription_tier'] ?? 'None'}\nUser Type: ${user['role'] ?? 'No role'}',
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
+                  trailing: PopupMenuButton(
+                    itemBuilder: (context) => [
+                      PopupMenuItem(
+                        child: const Text('Update Role'),
+                        onTap: () => _showRoleUpdateDialog(context, user['id']),
+                      ),
+                      PopupMenuItem(
+                        child: const Text('Update Subscription'),
+                        onTap: () => _showSubscriptionUpdateDialog(context, user['id']),
+                      ),
+                      PopupMenuItem(
+                        child: const Text('Delete User'),
+                        onTap: () => _showDeleteConfirmation(context, user['id']),
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
           ),
-          trailing: userState.isExpired == true
-            ? const Icon(Icons.warning, color: Colors.red)
-            : null,
-          onTap: () => _navigateToDetails(context, index),
-        );
-      },
+      ],
     );
   }
 
-  void _navigateToDetails(BuildContext context, int index) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => UserDetailsView(user: 'User ${index + 1}'),
+  void _showRoleUpdateDialog(BuildContext context, String userId) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Update Role'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              title: const Text('User'),
+              onTap: () {
+                ref.read(adminProvider.notifier).updateUserRole(userId, 'user');
+                Navigator.pop(context);
+              },
+            ),
+            ListTile(
+              title: const Text('Admin'),
+              onTap: () {
+                ref.read(adminProvider.notifier).updateUserRole(userId, 'admin');
+                Navigator.pop(context);
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showSubscriptionUpdateDialog(BuildContext context, String userId) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Update Subscription'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              title: const Text('Free'),
+              onTap: () {
+                ref.read(adminProvider.notifier).updateUserSubscription(userId, 'free');
+                Navigator.pop(context);
+              },
+            ),
+            ListTile(
+              title: const Text('Premium'),
+              onTap: () {
+                ref.read(adminProvider.notifier).updateUserSubscription(userId, 'premium');
+                Navigator.pop(context);
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showDeleteConfirmation(BuildContext context, String userId) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Delete User'),
+        content: const Text('Are you sure you want to delete this user?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () {
+              ref.read(adminProvider.notifier).deleteUser(userId);
+              Navigator.pop(context);
+            },
+            child: const Text('Delete'),
+          ),
+        ],
       ),
     );
   }
@@ -133,6 +258,7 @@ class UserDetailsView extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final userState = ref.watch(userProvider);
+
 
     return Scaffold(
       appBar: AppBar(

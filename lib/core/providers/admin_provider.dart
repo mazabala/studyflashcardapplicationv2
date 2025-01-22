@@ -13,6 +13,7 @@ class AdminState {
   final bool isAdmin;
   final List<String> pendingInvites;
   final List<String> flaggedContent;
+  final List<Map<String, dynamic>> users;
 
   const AdminState({
     this.isLoading = false,
@@ -20,6 +21,7 @@ class AdminState {
     this.isAdmin = false,
     this.pendingInvites = const [],
     this.flaggedContent = const [],
+    this.users = const [],
   });
 
   AdminState copyWith({
@@ -27,7 +29,8 @@ class AdminState {
     String? error,
     bool? isAdmin,
     List<String>? pendingInvites,
-    List<String>? flaggedContent,
+    List<String>? flaggedContent, 
+    List<Map<String, dynamic>>? users,
   }) {
     return AdminState(
       isLoading: isLoading ?? this.isLoading,
@@ -35,6 +38,7 @@ class AdminState {
       isAdmin: isAdmin ?? this.isAdmin,
       pendingInvites: pendingInvites ?? this.pendingInvites,
       flaggedContent: flaggedContent ?? this.flaggedContent,
+      users: users ?? this.users,
     );
   }
 }
@@ -94,6 +98,19 @@ class AdminNotifier extends StateNotifier<AdminState> {
   }
 
   
+  Future<void> loadUsers() async {
+    try {
+      state = state.copyWith(isLoading: true);
+      final users = await _adminService.getUsers();
+
+      state = state.copyWith(users: users);
+    } catch (e) {
+      state = state.copyWith(error: e.toString());
+    } finally {
+      state = state.copyWith(isLoading: false);
+    }
+  }
+
   Future<void> reviewFlaggedContent(String contentId, bool approved) async {
     try {
       state = state.copyWith(isLoading: true);

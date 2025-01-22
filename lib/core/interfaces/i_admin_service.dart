@@ -21,7 +21,7 @@ abstract class IAdminService {
 
   /// User management operations
   Future<void> updateUserRole(String userId, String role);
-  Future<List<String>> getUsersByRole(String role);
+  Future<List<Map<String, dynamic>>> getUsers();
 
   /// User deletion and data management
   Future<void> deleteUserAccount(String userId);

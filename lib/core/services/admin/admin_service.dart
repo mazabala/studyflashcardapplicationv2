@@ -1,3 +1,4 @@
+import 'package:flashcardstudyapplication/core/providers/user_provider.dart';
 import 'package:flashcardstudyapplication/core/services/authentication/authentication_service.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flashcardstudyapplication/core/interfaces/i_admin_service.dart';
@@ -198,19 +199,18 @@ class AdminService implements IAdminService {
   }
 
   @override
-  Future<List<String>> getUsersByRole(String role) async {
+  Future<List<Map<String, dynamic>>> getUsers() async {
     try {
       if (!await isSystemAdmin()) {
         throw ErrorHandler.handleUnauthorized();
       }
 
       final result = await _supabaseClient
-          .from('user_roles')
-          .select('user_id')
-          .eq('role', role);
-          
+          .from('users_view')
+          .select('*');
 
-      return (result as List).map((e) => e['user_id'] as String).toList();
+      
+      return List<Map<String, dynamic>>.from(result);
     } catch (e) {
       throw ErrorHandler.handle(e, 
         message: 'Failed to get users by role',

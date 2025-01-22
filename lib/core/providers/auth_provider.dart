@@ -180,12 +180,25 @@ _setupAuthListener();
     
     try {
       // Sign the user up
-      await _authService.signUp(email, password);
-      final user = await _authService.getCurrentUser();
+     final AuthResponse response = await _authService.signUp(email, password);
+
+     if (response.user != null) {
+      // Update the authentication state only if we have a valid user
+      state = state.copyWith(
+        user: response.user,
+        isAuthenticated: true,
+        isLoading: false,
+      );
+    } else {
+      throw Exception('User signup failed - no user returned');
+    }
+    
+     
+     await _authService.signIn(email, password);
       
       // Update the authentication state
       state = state.copyWith(
-        user: user,
+        user: response.user,
         isAuthenticated: true,
         isLoading: false,
       );
@@ -200,6 +213,7 @@ _setupAuthListener();
         errorMessage: e.toString(),
         isLoading: false,
       );
+      throw Exception(e);
       rethrow; // Allow UI to handle the error if needed
     }
   }

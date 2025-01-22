@@ -57,17 +57,21 @@ Future<void>  forgotPassword(String email) async{
   }
 
   @override
-  Future<void> signUp(String email, String password) async {
-    
-    try{
-      
-      final response = await _supabaseClient.auth.signUp(email: email, password: password);
+  Future<AuthResponse> signUp(String useremail, String userpassword) async {
+    try {
+      final response = await _supabaseClient.auth.signUp(
+        email: useremail,
+        password: userpassword );
 
-    if (response == null ) {
-      throw Exception(response); // Handle error
-    }
-    }catch (e){
-      print (e);
+      // Since email confirmation is disabled, we should have both user and session
+      if (response.user == null || response.session == null) {
+        throw Exception('Authentication failed after signup');
+      }
+      
+      // Note: session will be null if autoconfirm is OFF
+      return response;
+    } catch (e) {
+      print(e);
       rethrow;
     }
   }

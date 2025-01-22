@@ -97,7 +97,7 @@ Future<void> _signWithGoogle() async {
             text: 'Finish',
             isLoading: false,
             onPressed: () async {
-              await authNotifier.signUp(email, password);
+              await authNotifier.signUp(signUpEmailController.text, signUpPasswordController.text);
               if (mounted) {
                  Navigator.of(context).pop(); 
                   }
@@ -247,7 +247,7 @@ void _onForgotPasswordTapped() {
           Center(
             child: TextButton(
               onPressed: () {_onForgotPasswordTapped();},
-              child: const Text('Forgotten your password?'),
+              child: const Text('Forgot your password?'),
             ),
           ),
           if (!isWeb) const SizedBox(height: 16),
