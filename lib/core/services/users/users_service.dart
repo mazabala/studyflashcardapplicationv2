@@ -66,7 +66,7 @@ Future<Map<String, dynamic>?> _fetchUser(String userid) async {
   }
 
   @override
-  Future<void> updateUserProfile(String firstname, String ?lastname) async {
+  Future<void> updateUserProfile(String firstname, String ?lastname, String userId) async {
     final user = _supabaseClient.auth.currentUser;
     if (user == null) {
       throw ErrorHandler.handleUserNotFound();
@@ -77,12 +77,14 @@ Future<Map<String, dynamic>?> _fetchUser(String userid) async {
         'first_name': firstname,
         'last_name': lastname,
       })
-      .eq('id', user.id);
+      .eq('id', userId)
+      .select();
 
       if (result == null) {
+        print('result: $result');
         throw ErrorHandler.handleProfileUpdateError(
           null,
-          'Failed to update profile'
+          'Failed to update profile. Error: $result'
         );
       }
     } on PostgrestException catch (e) {

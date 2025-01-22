@@ -7,11 +7,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class UserProfileScreen extends ConsumerWidget {
   const UserProfileScreen({super.key});
+ 
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final userState = ref.watch(userProvider);
+    
     final userNotifier = ref.read(userProvider.notifier);
+     
 
     return CustomScaffold(
       currentRoute: '/userProfile',
@@ -22,7 +25,7 @@ class UserProfileScreen extends ConsumerWidget {
               child: Container(
                 padding: const EdgeInsets.all(16),
                 constraints: BoxConstraints(
-                  maxWidth: constraints.maxWidth > 600 ? 600 : constraints.maxWidth,
+                  maxWidth: constraints.maxWidth > 600 ? 800 : constraints.maxWidth,
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -56,18 +59,22 @@ class UserProfileScreen extends ConsumerWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              'Current Plan',
-                              style: Theme.of(context).textTheme.titleLarge,
+                              'Name: ${userState.firstName} ${userState.lastName}',
+                              style: Theme.of(context).textTheme.bodyLarge,
                             ),
-                            const SizedBox(height: 8),
+                               const SizedBox(height: 8),
+                            Text(
+                              'Current Plan:',
+                              style: Theme.of(context).textTheme.bodyLarge,
+                            ),
                             Text(
                               userState.subscriptionPlan ?? 'No active subscription',
                               style: Theme.of(context).textTheme.bodyLarge,
                             ),
-                            const SizedBox(height: 16),
+                              const SizedBox(height: 8),
                             Text(
                               'Status',
-                              style: Theme.of(context).textTheme.titleLarge,
+                              style: Theme.of(context).textTheme.bodyLarge,
                             ),
                             const SizedBox(height: 8),
                             Row(
@@ -89,6 +96,11 @@ class UserProfileScreen extends ConsumerWidget {
                                 ),
                               ],
                             ),
+                            const SizedBox(height: 8),
+                              Text(
+                              'Expiration Date: ${userState.subscriptionExpiryDate}',
+                              style: Theme.of(context).textTheme.bodyLarge,
+                                ),
                           ],
                         ),
                       ),
@@ -104,6 +116,13 @@ class UserProfileScreen extends ConsumerWidget {
                       isLoading: false,
                     ),
                     const SizedBox(height: 8),
+                    CustomButton(
+                      text: 'Edit Profile',
+                      onPressed: () {
+                        editProfileDialog(context, ref);
+                      },
+                      isLoading: false,
+                    ),
                     if (userState.errorMessage != null) ...[
                       Text(
                         userState.errorMessage!,
@@ -120,6 +139,54 @@ class UserProfileScreen extends ConsumerWidget {
             ),
           );
         },
+      ),
+    );
+  }
+
+  Future<void> editProfileDialog(BuildContext context, WidgetRef ref) async {
+
+    TextEditingController firstNameController = TextEditingController();
+    TextEditingController lastNameController = TextEditingController();
+    final userNotifier = ref.read(userProvider.notifier);
+    final userState = ref.watch(userProvider);
+    
+
+
+    showDialog(
+      
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Edit Profile'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: firstNameController ,
+              decoration: const InputDecoration(labelText: 'First Name'),
+            ),
+            const SizedBox(height: 8),
+            TextField(
+              controller: lastNameController ,
+              decoration: const InputDecoration(labelText: 'Last Name'),
+            ),
+            const SizedBox(height: 8),
+            CustomButton(
+              text: 'Save',
+              icon: Icons.save,
+              onPressed: () {
+                userNotifier.userService.updateUserProfile(
+                   firstNameController.text,
+                   lastNameController.text,
+                   userState.userId??''
+                );
+
+                  Navigator.pop(context);
+                
+              },
+              isLoading: false,
+            ),
+          ],
+        ),
       ),
     );
   }

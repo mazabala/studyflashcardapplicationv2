@@ -127,9 +127,9 @@ class UserNotifier extends StateNotifier<UserState> {
   }
 
   // Function to update user profile
-  Future<void> updateUserProfile(String firstname, String lastname) async {
+  Future<void> updateUserProfile(String firstname, String lastname, String userId) async {
     try {
-      await userService.updateUserProfile(firstname, lastname);
+      await userService.updateUserProfile(firstname, lastname, userId);
       // After updating, you may want to refetch or update the user state
       state = state.copyWith(errorMessage: null);
     } catch (e) {

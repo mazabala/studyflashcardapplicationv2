@@ -1,6 +1,7 @@
 // user_management_page.dart
 import 'package:flashcardstudyapplication/core/providers/admin_provider.dart';
 import 'package:flashcardstudyapplication/core/providers/user_provider.dart';
+import 'package:flashcardstudyapplication/core/ui/widgets/CustomButton.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flashcardstudyapplication/core/themes/app_theme.dart';
@@ -149,6 +150,10 @@ class _UserListViewState extends ConsumerState<UserListView> {
                   trailing: PopupMenuButton(
                     itemBuilder: (context) => [
                       PopupMenuItem(
+                        child: const Text('Edit Profile'),
+                        onTap: () => editProfileDialog(context,user['id'], ref),
+                      ),
+                      PopupMenuItem(
                         child: const Text('Update Role'),
                         onTap: () => _showRoleUpdateDialog(context, user['id']),
                       ),
@@ -250,6 +255,53 @@ class _UserListViewState extends ConsumerState<UserListView> {
   }
 }
 
+void editProfileDialog(BuildContext context, String userId, WidgetRef ref) {
+
+    TextEditingController firstNameController = TextEditingController();
+    TextEditingController lastNameController = TextEditingController();
+    final userNotifier = ref.read(userProvider.notifier);
+
+    print('userId to edit: $userId');
+    showDialog(
+      
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Edit Profile'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: firstNameController ,
+              decoration: const InputDecoration(labelText: 'First Name'),
+            ),
+            const SizedBox(height: 8),
+            TextField(
+              controller: lastNameController ,
+              decoration: const InputDecoration(labelText: 'Last Name'),
+            ),
+            const SizedBox(height: 8),
+            CustomButton(
+              text: 'Save',
+              icon: Icons.save,
+              onPressed: () {
+                userNotifier.userService.updateUserProfile(
+                   firstNameController.text,
+                   lastNameController.text,
+                   userId
+                );
+
+                  Navigator.pop(context);
+                
+              },
+              isLoading: false,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+
 class UserDetailsView extends ConsumerWidget {
   final String user;
 
@@ -317,13 +369,13 @@ class ReviewMembershipPage extends ConsumerWidget {
               'Current Plan: ${userState.subscriptionPlan ?? "None"}',
               style: Theme.of(context).textTheme.titleMedium,
             ),
-            SizedBox(height: 8),
+           const SizedBox(height: 8),
             if (userState.isExpired == true)
-              Text(
+              const Text(
                 'Your subscription has expired',
                 style: TextStyle(color: Colors.red),
               ),
-            SizedBox(height: 16),
+           const SizedBox(height: 16),
             ElevatedButton(
               onPressed: () {
                 ref.read(userProvider.notifier).upgradeSubscription('premium');
