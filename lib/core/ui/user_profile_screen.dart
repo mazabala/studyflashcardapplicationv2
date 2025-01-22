@@ -42,7 +42,7 @@ class UserProfileScreen extends ConsumerWidget {
                             ),
                             const SizedBox(height: 16),
                             Text(
-                              'Subscription Status',
+                              'Your Profile',
                               style: Theme.of(context).textTheme.headlineSmall,
                             ),
                           ],
@@ -59,7 +59,7 @@ class UserProfileScreen extends ConsumerWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              'Name: ${userState.firstName} ${userState.lastName}',
+                              'Name:\n${userState.firstName} ${userState.lastName}',
                               style: Theme.of(context).textTheme.bodyLarge,
                             ),
                                const SizedBox(height: 8),
@@ -73,12 +73,19 @@ class UserProfileScreen extends ConsumerWidget {
                             ),
                               const SizedBox(height: 8),
                             Text(
-                              'Status',
+                              'Status:',
                               style: Theme.of(context).textTheme.bodyLarge,
                             ),
                             const SizedBox(height: 8),
                             Row(
                               children: [
+                                Text(
+                                  userState.isExpired ?? true
+                                      ? 'Expired'
+                                      : 'Active',
+                                  style: Theme.of(context).textTheme.bodyLarge,
+                                ),
+                                const SizedBox(width: 8),
                                 Icon(
                                   userState.isExpired ?? true
                                       ? Icons.error_outline
@@ -87,13 +94,8 @@ class UserProfileScreen extends ConsumerWidget {
                                       ? AppColors.errorColor
                                       : Colors.green,
                                 ),
-                                const SizedBox(width: 8),
-                                Text(
-                                  userState.isExpired ?? true
-                                      ? 'Expired'
-                                      : 'Active',
-                                  style: Theme.of(context).textTheme.bodyLarge,
-                                ),
+                                
+                                
                               ],
                             ),
                             const SizedBox(height: 8),
