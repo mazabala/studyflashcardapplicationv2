@@ -56,6 +56,10 @@ class CatSubNotifier extends StateNotifier<CatSubState> {
 
 
   Future<void> initialize(String userId) async {
+    // Skip if already initializing or initialized
+    if (state.isInitializing || state.isInitialized) {
+      return;
+    }
     
     state = state.copyWith(isInitializing: true);
     
@@ -63,6 +67,10 @@ class CatSubNotifier extends StateNotifier<CatSubState> {
 
     try {
       print('in the catsubmanager');
+      await ref.read(revenueCatClientProvider.notifier).initialize();
+      print('revenuecat initialized');
+      //await ref.read(subscriptionProvider.notifier).initialize();
+
       if (Platform.isIOS) {
         StoreConfig(
             store: Stores.appleStore,
@@ -73,14 +81,15 @@ class CatSubNotifier extends StateNotifier<CatSubState> {
             store: Stores.googlePlay,
             apiKey: ApiManager.instance.getGoogleAPI(),
         );
+
       }
 
       // Get RevenueCat service from provider
 
 
-      await ref.read(revenueCatClientProvider.notifier).initialize();
+      
       // Initialize both services
-      await ref.read(subscriptionProvider.notifier).initialize();
+      
 
       // Fetch subscription status and packages
       await Future.wait([
@@ -155,13 +164,5 @@ class CatSubNotifier extends StateNotifier<CatSubState> {
 
 final catSubManagerProvider = StateNotifierProvider<CatSubNotifier, CatSubState>((ref) {
   final notifier = CatSubNotifier(ref);
-  
-  // Watch authState and trigger initialization when necessary.
-  ref.listen<AuthState>(authProvider, (previous, next) {
-    if (next.isAuthenticated && next.user != null) {
-      notifier.initialize(next.user!.id);
-    }
-  });
-
   return notifier;
 });

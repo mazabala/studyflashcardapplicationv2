@@ -107,17 +107,7 @@ class UserNotifier extends StateNotifier<UserState> {
 
       );
 
-      print('back in the user provider after fetchUserDetails');
-      print('user state set Firstname: ${state.firstName}');
-      print('user state set isAdmin: ${state.isAdmin}');
-      print('user state set role: ${state.role}');
-      print('user state set subscriptionPlan: ${state.subscriptionPlan}');
-      print('user state set subscriptionPlanID: ${state.subscriptionPlanID}');
-      print('user state set userStatus: ${state.userStatus}');
-      print('user state set userId: ${state.userId}');
- 
-      print('user state set isExpired: ${state.isExpired}');
-      print('user state set subscriptionExpiryDate: ${state.subscriptionExpiryDate}');
+
 
     } catch (e) {
       print('Error in fetchUserDetails: $e');

@@ -160,11 +160,12 @@ _setupAuthListener();
         
         
         
-       // await ref.read(userProvider.notifier).initializeUser();
-       // await ref.read(catSubManagerProvider.notifier).initialize(user.id);
+        await ref.read(userProvider.notifier).initializeUser();
+        await ref.read(catSubManagerProvider.notifier).initialize(user.id);
         
         // Initialize user details after successful sign in
         await ref.read(subscriptionProvider.notifier).fetchSubscriptionStatus(user.id);
+        
       }
     } catch (e) {
       state = state.copyWith(

@@ -22,7 +22,7 @@ class RevenueCatNotifier extends StateNotifier<RevenueCatService?> {
 
   Future<void> initialize() async {
     try {
-      final apiManager = ref.read(apiManagerProvider);
+      final apiManager = ApiManager.instance;
       final revKey = apiManager.getRevenueCatApiKey();
       
       state = RevenueCatService(
