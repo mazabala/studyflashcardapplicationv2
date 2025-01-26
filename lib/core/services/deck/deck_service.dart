@@ -47,7 +47,7 @@ Future<List<Flashcard>> getFlashcards(String deckid) async{
 
 
             if (flashcardsResponse.isEmpty) {
-        throw ErrorHandler.handle(flashcardsResponse);
+        throw ErrorHandler.handle('No flashcards found');
       }
 
       final flashcards = (flashcardsResponse as List)         //this needs to be into a different method so we can access flashcards on the UI/

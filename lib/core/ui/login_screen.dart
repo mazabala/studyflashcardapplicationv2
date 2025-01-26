@@ -124,7 +124,10 @@ Future<void> _signWithGoogle() async {
         }
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString())));
+      if (mounted) {
+  ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString())));
+}
+else dispose();
     }
   }
 

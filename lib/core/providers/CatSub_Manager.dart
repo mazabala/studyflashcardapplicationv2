@@ -66,11 +66,11 @@ class CatSubNotifier extends StateNotifier<CatSubState> {
 
 
     try {
-      print('in the catsubmanager');
+      
       await ref.read(revenueCatClientProvider.notifier).initialize();
-      print('revenuecat initialized');
+      
       //await ref.read(subscriptionProvider.notifier).initialize();
-
+    await Purchases.setLogLevel(LogLevel.debug);
       if (Platform.isIOS) {
         StoreConfig(
             store: Stores.appleStore,
@@ -81,6 +81,7 @@ class CatSubNotifier extends StateNotifier<CatSubState> {
             store: Stores.googlePlay,
             apiKey: ApiManager.instance.getGoogleAPI(),
         );
+        print(ApiManager.instance.getGoogleAPI());
 
       }
 
@@ -92,21 +93,25 @@ class CatSubNotifier extends StateNotifier<CatSubState> {
       
 
       // Fetch subscription status and packages
-      await Future.wait([
-        ref.read(subscriptionProvider.notifier).fetchSubscriptionStatus(userId),
-        ref.read(subscriptionProvider.notifier).loadPackages(),
-      ]);
+      // await Future.wait([
+      //   ref.read(subscriptionProvider.notifier).fetchSubscriptionStatus(userId),
+      //   ref.read(subscriptionProvider.notifier).loadPackages(),
+      // ]);
 
       // Get customer info from RevenueCat service
       final customerInfo = await ref.read(userProvider).userId;
+     // await ref.read(revenueCatClientProvider.notifier).checkSubscriptionStatus(ApiManager.instance.getEntitlementName('Basic'));
       final packages = await ref.read(revenueCatClientProvider.notifier).getOfferings();
+      print('revencat package: $packages');
+     
+      
 
       state = state.copyWith(
         isInitializing: false,
         isInitialized: true,
         hasSubscription: !ref.read(subscriptionProvider).isExpired,
         customerID: customerInfo,
-        availablePackages: packages,
+        
       );
 
       if(state.isInitialized == true){
@@ -140,6 +145,7 @@ class CatSubNotifier extends StateNotifier<CatSubState> {
 
   Future<void> checkSubscriptionStatus(String userId, String entitlement) async {
     if (!state.isInitialized) {
+       print('fetiching subscription status with entitlement: $entitlement');
       await initialize(userId);
       return;
     }

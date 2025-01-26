@@ -28,8 +28,8 @@ class RevenueCatNotifier extends StateNotifier<RevenueCatService?> {
       state = RevenueCatService(
         revenueCatApiKey: revKey,
       );
-
-      await state?.initialize();
+      print('revenuecat initialized');
+     // await state?.initialize();
     } catch (e) {
       print('RevenueCat initialization error: $e');
       rethrow;
@@ -58,6 +58,7 @@ Future<void> getCustomerInfo() async {
 }
 
 Future<List<Offering>> getOfferings() async {
+   
   return await state?.getOfferings() ?? [];
 }
 

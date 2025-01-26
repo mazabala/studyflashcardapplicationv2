@@ -157,17 +157,15 @@ _setupAuthListener();
 
       if(state.isAuthenticated && user != null){
         // Initialize API Manager first
-        
-        
-        
+      
         await ref.read(userProvider.notifier).initializeUser();
-        await ref.read(catSubManagerProvider.notifier).initialize(user.id);
         
         // Initialize user details after successful sign in
         await ref.read(subscriptionProvider.notifier).fetchSubscriptionStatus(user.id);
-        
+        //await ref.read(catSubManagerProvider.notifier).initialize(user.id);  //causing the api error
       }
     } catch (e) {
+      print('in the catch auth');
       state = state.copyWith(
         errorMessage: e.toString(),
         isLoading: false,

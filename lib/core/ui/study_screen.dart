@@ -1,5 +1,6 @@
 import 'package:flashcardstudyapplication/core/models/deck.dart';
 import 'package:flashcardstudyapplication/core/ui/study_screen_controller.dart';
+import 'package:flashcardstudyapplication/core/ui/widgets/CustomButton.dart';
 import 'package:flashcardstudyapplication/core/ui/widgets/CustomScaffold.dart';
 import 'package:flashcardstudyapplication/core/ui/widgets/navigation_button.dart';
 import 'package:flutter/material.dart';
@@ -40,7 +41,9 @@ class StudyScreen extends ConsumerWidget {
            // Pass deckId here
 
           // Navigation Buttons (Next, Previous)
-          NavigationButtonsWidget(controller: controller),  // Pass controller here
+          NavigationButtonsWidget(controller: controller),
+          
+          CustomButton(text: 'Go back',isLoading: false,icon: Icons.transit_enterexit, onPressed: () { Navigator.pushNamed(context, '/myDecks');}),  // Pass controller here
 
           // Progress Button (Correct / Incorrect)
           if (flashcardState.isFlipped)

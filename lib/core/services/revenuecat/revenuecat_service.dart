@@ -67,6 +67,7 @@ Future<List<Offering>> getOfferings() async {
 
     try {
       
+     
       final offerings = await Purchases.getOfferings();
       return offerings.all.values.toList();
     } catch (e) {

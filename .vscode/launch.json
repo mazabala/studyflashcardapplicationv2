@@ -11,6 +11,7 @@
     },
     "configurations": [
 
+
         {
             "name": "flashcardstudyapplication",
             "request": "launch",
@@ -28,6 +29,13 @@
             "request": "launch",
             "type": "dart",
             "deviceId": "emulator-5554"
+            
+        },
+        {
+            "name": "flashcardstudyapplication (C51 - usb)",
+            "request": "launch",
+            "type": "dart",
+            "deviceId": "C51000000025364"
             
         },
         {
