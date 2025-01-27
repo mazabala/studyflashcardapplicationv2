@@ -41,14 +41,19 @@ class DeckDisplayWidget extends StatelessWidget {
           }).toList();
         }
 
-        return ListView.builder(
+        return ListView.separated(
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
           itemCount: filteredDecks.length,
+          padding: const EdgeInsets.all(8),
+          separatorBuilder: (context, index) => const SizedBox(height: 8),
           itemBuilder: (context, index) {
             final deck = filteredDecks[index];
             return ListTile(
-              tileColor: theme.scaffoldBackgroundColor,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              tileColor: Colors.white,
               focusColor: theme.secondaryHeaderColor,
               title: Text(
                 deck.title,
@@ -58,7 +63,7 @@ class DeckDisplayWidget extends StatelessWidget {
                 'Difficulty: ${deck.difficultyLevel}',
                 style:  theme.textTheme.bodyMedium,
                 ),
-                
+              
               onTap: () async {
                 if (!isSearchingNewDecks) {
                   // Proceed with studying if not in search mode
@@ -85,10 +90,10 @@ class DeckDisplayWidget extends StatelessWidget {
                           Navigator.pushNamed(context, '/myDecks');
                       },
                     ):
-              IconButton(
-                icon: const Icon(Icons.delete),
-                onPressed: () => ref.read(deckProvider.notifier).deleteDeck(deck.id),
-              ),
+                IconButton(
+                  icon: const Icon(Icons.delete),
+                  onPressed: () => ref.read(deckProvider.notifier).deleteDeck(deck.id),
+                ),
             );
           },
         );

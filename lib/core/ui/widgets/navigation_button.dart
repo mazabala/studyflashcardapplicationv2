@@ -33,7 +33,7 @@ class NavigationButtonsWidget extends StatelessWidget {
                       children: [Icon(Icons.skip_previous), Text('Previous Card')],
                     ),
                   ),
-                  const SizedBox(width: 16),
+                  const SizedBox(width: 8),
                   ElevatedButton(
                     onPressed: flashcardState.currentCardIndex < flashcards.length - 1
                         ? () => controller.nextCard(context)
