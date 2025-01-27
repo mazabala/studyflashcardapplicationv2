@@ -123,7 +123,21 @@ _setupAuthListener();
     }
   }
 
+  Future<void> signInWithApple() async {
+    state = state.copyWith(isLoading: true, errorMessage: null);
+    await _authService.signInWithApple();
+
+    final user = await _authService.getCurrentUser();
+    state = state.copyWith(
+      user: user,
+      isAuthenticated: true,
+      isLoading: false,
+    );
+
+  }
+
   Future<void> googleSignin() async {
+    state = state.copyWith(isLoading: true, errorMessage: null);
     await _authService.signInWithGoogle();
     final user = await _authService.getCurrentUser();
     state = state.copyWith(

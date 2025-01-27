@@ -47,20 +47,31 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   }
 
 Future<void> _signWithGoogle() async {
+    final authNotifier = ref.read(authProvider.notifier);
+    await authNotifier.googleSignin();
 
-  final authNotifier = ref.read(authProvider.notifier);
-  await authNotifier.googleSignin();
-  
-  final isAuthed = ref.read(authProvider).isAuthenticated;
+    final isAuthed = ref.read(authProvider).isAuthenticated;
 
-  if(isAuthed )
- 
-  {
-
- Navigator.pushReplacementNamed(context, '/myDecks');
+    if (isAuthed) {
+      Navigator.pushReplacementNamed(context, '/myDecks');
+    }
   }
-  
-}
+
+  Future<void> _signInWithApple() async {
+    final authNotifier = ref.read(authProvider.notifier);
+    await authNotifier.signInWithApple();
+
+    final isAuthed = ref.read(authProvider).isAuthenticated;
+
+    if (isAuthed) {
+      Navigator.pushReplacementNamed(context, '/myDecks');
+    }
+  }
+
+
+
+
+
 
   Future<void> _handleSubmit(bool isSignUp) async {
     if (!_formKey.currentState!.validate()) return;
@@ -190,7 +201,7 @@ void _onForgotPasswordTapped() {
           CustomButton(
             text: 'Continue with Apple',
             isLoading: false,
-            onPressed: () {/* Implement Apple sign in */},
+            onPressed: () {_signInWithApple();},
           ),
           const SizedBox(height: 12),
           CustomButton(
