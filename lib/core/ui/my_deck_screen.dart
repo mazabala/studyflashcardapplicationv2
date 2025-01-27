@@ -35,7 +35,7 @@ class _MyDeckScreenState extends ConsumerState<MyDeckScreen> {
   bool isSystemUser = false;
   List<String>? _selectedCategories = [];
   Map<String, TextEditingController> _descriptionControllers = {};
-
+  bool isInitialized= false;
 
 
 
@@ -53,7 +53,10 @@ TextEditingController _cardCountController = TextEditingController();
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _initializeServices();
+    
+    if (!isInitialized) {
+  _initializeServices();
+}
   }
 
   Future<void> _initializeServices() async {
@@ -61,10 +64,9 @@ TextEditingController _cardCountController = TextEditingController();
       print('in the my deck screen ui, initializeServices');
       // First check if user is authenticated
       final userState = ref.read(authProvider);
-     
       
       if (!userState.isAuthenticated) {
-        // Navigate to login if not authenticated
+        // Instead of showing a dialog, just navigate to login
         if (mounted) {
           Navigator.of(context).pushReplacementNamed('/login');
         }
@@ -72,26 +74,19 @@ TextEditingController _cardCountController = TextEditingController();
       }
       
       // Then check if user is admin (only if authenticated)
-       _checkSystemUser();
-       if (ref.read(deckProvider).deckloaded == false) {
-       await _loadUserDecks();
-    }
-
+      _checkSystemUser();
+      if (ref.read(deckProvider).deckloaded == false) {
+        await _loadUserDecks();
+      }
+      isInitialized = true;
     } catch (e) {
-
-      // Handle error appropriately - maybe show error dialog
+      print('Initialization error: $e');
+      // Instead of showing dialog, you could use a SnackBar or just log the error
       if (mounted) {
-        showDialog(
-          context: context,
-          builder: (context) => AlertDialog(
-            title: const Text('Error'),
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
             content: Text('Failed to initialize: $e'),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(),
-                child: const Text('OK'),
-              ),
-            ],
+            duration: const Duration(seconds: 3),
           ),
         );
       }

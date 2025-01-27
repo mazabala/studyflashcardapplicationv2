@@ -64,18 +64,22 @@ Future<void> deleteUser(String userid) async {
       throw Exception('User ID is required');
     }
 
-  final user = await _supabaseClient
-      .from('users')
-      .delete()
-      .eq('id', userid);
-
     final userSubscription = await _supabaseClient
       .from('user_subscriptions')
       .delete()
       .eq('user_id', userid);
-  return user;
-} on Exception catch (e) {
-  print('service user error: $e');
+
+
+await _supabaseClient.rpc('deleteUser');
+  //  await _supabaseClient
+  //     .auth.admin.deleteUser(userid);
+
+
+} catch (e) {
+  throw ErrorHandler.handle(e, 
+        message: 'Failed to delete user: $e',
+        specificType: ErrorType.userProfile
+      );
 }
 }
 
