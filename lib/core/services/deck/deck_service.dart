@@ -77,7 +77,7 @@ Future<List<Flashcard>> getFlashcards(String deckid) async{
 
 
       if (deckResponse.isEmpty) {
-        throw 'User has no decks';
+       return [];
       }
       else{
 
@@ -142,7 +142,7 @@ try {
   
     if (response.isEmpty) {
       print('No decks found from the loadDeckPool in servicess ');
-      throw Exception("No decks found");
+
     }
 
     // Extract deck IDs from the response

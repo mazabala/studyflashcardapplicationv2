@@ -11,7 +11,7 @@ class UserService implements IUserService {
 
 @override
 Future<Map<String, dynamic>?> getCurrentUserInfo() async {
-  print('in the user service, getCurrentUserInfo');
+
   
   try {
   final user =  _supabaseClient.auth.currentUser;
@@ -56,7 +56,28 @@ Future<Map<String, dynamic>?> _fetchUser(String userid) async {
 }
 
 
+Future<void> deleteUser(String userid) async {
 
+  try {
+
+    if (userid == null || userid == '') {
+      throw Exception('User ID is required');
+    }
+
+  final user = await _supabaseClient
+      .from('users')
+      .delete()
+      .eq('id', userid);
+
+    final userSubscription = await _supabaseClient
+      .from('user_subscriptions')
+      .delete()
+      .eq('user_id', userid);
+  return user;
+} on Exception catch (e) {
+  print('service user error: $e');
+}
+}
 
 
   @override

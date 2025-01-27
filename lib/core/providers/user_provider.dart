@@ -75,6 +75,11 @@ class UserNotifier extends StateNotifier<UserState> {
     }
   }
 
+  Future<void> deleteUser() async {
+    await userService.deleteUser(state.userId??'');
+    state = UserState();
+  }
+
   // Update fetchUserDetails to handle cases where user isn't authenticated
   Future<void> fetchUserDetails() async {
     try {
@@ -88,7 +93,7 @@ class UserNotifier extends StateNotifier<UserState> {
         throw Exception('Unable to retrieve the user details from Auth Provider');
       }
 
-      print('About to update state with user info');
+
       
       // Convert subscription_expiry_date to bool if it's a string
       final isExpired = DateTime.parse(user['subscription_expiry_date']).isBefore(DateTime.now());

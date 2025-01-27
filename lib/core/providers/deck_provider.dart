@@ -137,9 +137,7 @@ Future<List<Flashcard>> getDeckFlashcards (String deckid) async
   state = state.copyWith(isLoading: true, error: '');
 
   try {
-    print(
-          'fetching available decks'
-    );
+
     final userId = _userService.userId;
     if (userId == null) {
       throw Exception("User is not logged in");

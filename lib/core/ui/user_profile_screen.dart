@@ -125,6 +125,15 @@ class UserProfileScreen extends ConsumerWidget {
                       },
                       isLoading: false,
                     ),
+                    const SizedBox(height: 8),
+                    CustomButton(
+                      text: 'Delete Account',
+                      onPressed: () {
+                        deleteAccountDialog(context, ref);
+                      },
+                      isLoading: false,
+                      icon: Icons.delete,
+                    ),
                     if (userState.errorMessage != null) ...[
                       Text(
                         userState.errorMessage!,
@@ -141,6 +150,35 @@ class UserProfileScreen extends ConsumerWidget {
             ),
           );
         },
+      ),
+    );
+  }
+
+
+  Future<void> deleteAccountDialog(BuildContext context, WidgetRef ref) async {
+
+    final userNotifier = ref.read(userProvider.notifier);
+ 
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        icon: const Icon(Icons.warning),
+        iconColor: AppColors.errorColor,
+        title: const Text('Delete Account'),
+        content: const Text('This action is inmmidiate and irreversible and will remove all your data from the system. \n\nAre you sure you want to delete your account? '),
+        actions: [
+          CustomButton(
+            text: 'Delete',
+            icon: (Icons.warning),
+            onPressed: () {
+              userNotifier.deleteUser();
+              userNotifier.downgradeSubscription('free');
+              Navigator.pop(context);
+              Navigator.pushReplacementNamed(context, '/login');
+            },
+            isLoading: false,
+          ),
+        ],
       ),
     );
   }

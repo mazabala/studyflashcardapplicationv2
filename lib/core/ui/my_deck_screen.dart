@@ -78,7 +78,7 @@ TextEditingController _cardCountController = TextEditingController();
     }
 
     } catch (e) {
-      print('Failed to initialize services: $e');
+
       // Handle error appropriately - maybe show error dialog
       if (mounted) {
         showDialog(
@@ -152,7 +152,9 @@ TextEditingController _cardCountController = TextEditingController();
       final decks = await ref.read(deckProvider.notifier).loadAvailableDecks();
       if (mounted) { // Ensure the widget is still mounted before calling setState
         setState(() {
-          if (decks.isEmpty || decks == null || decks == []) {
+          print('decks: $decks');
+          if (decks.isEmpty || decks == []) {
+            print('decks is empty');
             isSearchingNewDecks = false;
             _filteredDecks = decks;
             _loadUserDecks();
@@ -336,13 +338,14 @@ TextEditingController _cardCountController = TextEditingController();
                 isSearchingNewDecks: isSearchingNewDecks,
                 onSeachNewDecks: () {
                   if (!isSearchingNewDecks) {
-                       _searchNewDecks();
+                       _searchNewDecks(); CustomButton(text: 'Go back',isLoading: false,icon: Icons.transit_enterexit, onPressed: () { isSearchingNewDecks = false; _loadUserDecks();});  // Pass controller here
                             }
                   else {_loadUserDecks();}
                   },
                 onCreateDeck: () {_createDeck();}, // Implement create deck logic here
                 onSignOut: () {_signOut();}, // Implement sign-out logic here
               ),
+             
           ],
         ),
       ),
