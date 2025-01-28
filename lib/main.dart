@@ -55,10 +55,21 @@ class _MyAppState extends ConsumerState<MyApp> {
       await Supabase.initialize(
         url: supabaseUrl,
         anonKey: supabaseAnonKey,
-   
-        
       );
+
       print('Supabase initialized');
+      
+      final response = await Supabase.instance.client.from('api_resources').select('*').eq('name', 'ChatGPT').single();
+      final baseKey = response['api_key'];
+      final baseUrl = response['Other'];
+
+      print('baseKey: $baseKey');
+      print('baseUrl: $baseUrl');
+
+      await apiClient.setupOpenAI(baseUrl, baseKey);
+
+      print('OpenAI initialized');
+      
       Supabase.instance.client.auth.signOut();
 
 

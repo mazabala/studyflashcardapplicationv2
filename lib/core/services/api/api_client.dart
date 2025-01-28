@@ -44,19 +44,19 @@ class ApiClient implements IApiService {
       _config = Map<String, dynamic>.from(yamlMap['api']);
 
       // Validate the required fields exist
-      if (!_config.containsKey('openai') || 
-          !_config['openai'].containsKey('base_url') ||
-          !_config['openai'].containsKey('openai_key')) {
-        throw Exception('Missing required OpenAI configuration');
-      }
+      // if (!_config.containsKey('openai') || 
+      //     !_config['openai'].containsKey('base_url') ||
+      //     !_config['openai'].containsKey('openai_key')) {
+      //   throw Exception('Missing required OpenAI configuration');
+      // }
 
       // Set Supabase credentials
       _supabaseUrl = _config['supabase']['supabase_url'];
       _supabaseAnonKey = _config['supabase']['supabase_key'];
 
-      // Set base URL (e.g., for OpenAI API)
-      _baseUrl = _config['openai']['base_url'];
-      _baseKey = _config['openai']['openai_key'];
+      // // Set base URL (e.g., for OpenAI API)
+      // _baseUrl = _config['openai']['base_url'];
+      // _baseKey = _config['openai']['openai_key'];
 
       _initialized = true;
       print('ApiClient initialized successfully');
@@ -67,8 +67,22 @@ class ApiClient implements IApiService {
     }
   }
 
+
+
+Future<void>setupOpenAI(String baseUrl, String baseKey) async {
+ 
+       try {
+  _baseUrl = baseUrl;
+        _baseKey = baseKey;
+} on Exception catch (e) {
+  throw ErrorHandler.handle(e, message: 'Failed to setup OpenAI');
+}
+}
+
+
   String getSupabaseUrl() => _supabaseUrl;
   String getSupabaseAnonKey() => _supabaseAnonKey;
+
 
   @override
   Future<Map<String, dynamic>> get(String endpoint, {Map<String, dynamic>? queryParams}) async {

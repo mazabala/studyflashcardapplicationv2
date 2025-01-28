@@ -21,6 +21,7 @@ class _CreateDeckDialogState extends ConsumerState<CreateDeckDialog> {
   // Declare state variables for category and difficulty level data
   List<String> categories = [];
   List<String> difficultyLevels = [];
+  bool _isInitialized = false;
 
   // Declare TextEditingController for the deck title and description
   final TextEditingController _titleController = TextEditingController();
@@ -62,12 +63,19 @@ class _CreateDeckDialogState extends ConsumerState<CreateDeckDialog> {
     }
   }
 
-  // Call both fetch methods when the dialog is shown
   @override
   void initState() {
     super.initState();
-    _fetchCategories();  // Fetch categories
-    _fetchDeckDifficulty();  // Fetch difficulty levels
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_isInitialized) {
+      _fetchCategories();
+      _fetchDeckDifficulty();
+      _isInitialized = true;
+    }
   }
 
   @override
@@ -84,6 +92,7 @@ class _CreateDeckDialogState extends ConsumerState<CreateDeckDialog> {
                   controller: _titleController,
                   decoration: InputDecoration(labelText: 'Deck Title'),
                 ),
+                const SizedBox(height: 8),
                 TextField(
                   controller: _descriptionController,
                   decoration: InputDecoration(labelText: 'Deck Focus'),

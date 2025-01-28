@@ -18,7 +18,7 @@ class CardCountSlider extends StatelessWidget {
         Slider(
           value: initialValue,
           min: 1.0,
-          max: 100.0,
+          max: 50.0,
           divisions: 99,
           label: initialValue.round().toString(),
           onChanged: onChanged,  // Call the passed onChanged callback

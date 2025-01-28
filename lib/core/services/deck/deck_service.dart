@@ -530,7 +530,7 @@ Future<double> _getDeckMaxTokens (String difficultyTypeid) async
   .eq('difficultyType_id',difficultyTypeid)
   .single();
  
-  return deckTokenReader['max_tokens'];
+  return deckTokenReader['max_tokens'].toDouble();
   }catch (e)
   {
   print('MaxTokens: $e');
