@@ -16,10 +16,10 @@ abstract class IDeckService {
   // Add flashcard to a deck
   Future<void> decktoUser(String deckId, String userId);
 
-  Future<void> systemCreateDeck(List<SystemDeckConfig> configs, String userId);
+  //Future<void> systemCreateDeck(List<SystemDeckConfig> configs, String userId);
 
   // Create a new deck
-  Future<void> createDeck(String title,String category, String description,String difficultyLevel, String userid, int cardCount);
+  Future<void> createDeck(String subject, String concept, String description,String category, String difficultyLevel, String userid, int cardCount);
   // Update dec
   Future<void> updateDeck(String deckId, String title, String difficultyLevel, String userid);
 

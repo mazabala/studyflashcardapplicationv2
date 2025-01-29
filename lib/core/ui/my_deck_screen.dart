@@ -195,10 +195,10 @@ TextEditingController _cardCountController = TextEditingController();
       context: context,
       builder: (context) {
         return CreateDeckDialog(
-          onSubmit: (String title, String description, String category, String difficultyLevel, int cardCount) async {
+          onSubmit: (String subject, String concept, String description, String category, String difficultyLevel, int cardCount) async {
             final userId = userService.userId;
             if (userId != null) {
-              await ref.read(deckProvider.notifier).createDeck(title, category, description, difficultyLevel, userId, cardCount);
+              await ref.read(deckProvider.notifier).createDeck(subject, concept, description, category, difficultyLevel, userId, cardCount);
 
               if (mounted) { // Ensure the widget is still mounted before popping
                 _loadUserDecks(); // Refresh the deck list

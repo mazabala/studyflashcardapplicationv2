@@ -5,7 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flashcardstudyapplication/core/ui/widgets/CardCountSlider.dart';  // Make sure to import the slider widget
 
 class CreateDeckDialog extends ConsumerStatefulWidget {
-  final Function(String title, String description, String category, String difficultyLevel, int cardcount) onSubmit;
+  final Function(String subject, String concept ,String description, String category, String difficultyLevel, int cardcount) onSubmit;
 
   const CreateDeckDialog({required this.onSubmit});
 
@@ -24,7 +24,8 @@ class _CreateDeckDialogState extends ConsumerState<CreateDeckDialog> {
   bool _isInitialized = false;
 
   // Declare TextEditingController for the deck title and description
-  final TextEditingController _titleController = TextEditingController();
+  final TextEditingController _subjectController = TextEditingController();
+  final TextEditingController _conceptController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
   
   double _cardCount = 10.0;  // Initial slider value
@@ -81,21 +82,26 @@ class _CreateDeckDialogState extends ConsumerState<CreateDeckDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Text('Create New Deck'),
+      title: const Text('Create New Deck'),
       content: categories.isEmpty || difficultyLevels.isEmpty
-          ? Center(child: CircularProgressIndicator())  // Show loading spinner while fetching data
+          ? const Center(child: CircularProgressIndicator())  // Show loading spinner while fetching data
           : Column(
               mainAxisSize: MainAxisSize.min,
               children: [
                 // Deck Title TextField
                 TextField(
-                  controller: _titleController,
-                  decoration: InputDecoration(labelText: 'Deck Title'),
+                  controller: _subjectController,
+                  decoration: const InputDecoration(labelText: 'Subject'),
+                ),
+                const SizedBox(height: 8),
+                TextField(
+                  controller: _conceptController,
+                  decoration: const InputDecoration(labelText: 'Key Concepts'),
                 ),
                 const SizedBox(height: 8),
                 TextField(
                   controller: _descriptionController,
-                  decoration: InputDecoration(labelText: 'Deck Focus'),
+                  decoration: const InputDecoration(labelText: 'Context Information'),
                 ),
 
                 // Replace the TextField with the CardCountSlider widget
@@ -111,7 +117,7 @@ class _CreateDeckDialogState extends ConsumerState<CreateDeckDialog> {
                 // Category Dropdown
                 DropdownButton<String>(
                   value: _selectedCategory,
-                  hint: Text('Select Category'),
+                  hint: const Text('Select Category'),
                   onChanged: (newValue) {
                     if (mounted) {
                       setState(() {
@@ -130,7 +136,7 @@ class _CreateDeckDialogState extends ConsumerState<CreateDeckDialog> {
                 // Difficulty Level Dropdown
                 DropdownButton<String>(
                   value: _selectedDifficulty,
-                  hint: Text('Select Difficulty Level'),
+                  hint: const Text('Select Difficulty Level'),
                   onChanged: (newValue) {
                     if (mounted) {
                       setState(() {
@@ -155,11 +161,12 @@ class _CreateDeckDialogState extends ConsumerState<CreateDeckDialog> {
               Navigator.pop(context);
             }
           },
-          child: Text('Cancel'),
+          child: const Text('Cancel'),
         ),
         ElevatedButton(
           onPressed: () {
-            final title = _titleController.text;
+            final subject = _subjectController.text;
+            final concept = _conceptController.text;
             final category = _selectedCategory ?? '';  // Default to empty string if no category selected
             final difficultyLevel = _selectedDifficulty ?? ''; // Default to empty string if no difficulty selected
             final description = _descriptionController.text;
@@ -172,14 +179,14 @@ class _CreateDeckDialogState extends ConsumerState<CreateDeckDialog> {
             }
 
             // Call the onSubmit callback with the values entered
-            widget.onSubmit(title, description, category, difficultyLevel, cardcount);
+            widget.onSubmit(subject, concept, description, category, difficultyLevel, cardcount);
 
             // Close the dialog after submitting
             if (mounted) {
               Navigator.pop(context);
             }
           },
-          child: Text('Create'),
+          child: const Text('Create'),
         ),
       ],
     );

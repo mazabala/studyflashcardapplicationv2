@@ -330,14 +330,14 @@ class _CreateDeckPageState extends ConsumerState<CreateDeckPage> {
                   
                   try {
                     final userId = ref.watch(userProvider).userId;
-                    await ref.read(deckProvider.notifier).createDeck(
-                      _titleController.text,
-                      _selectedCategory!,
-                      _descriptionController.text,
-                      _selectedDifficulty!,
-                      userId ?? '',
-                      int.parse(_cardCountController.text),
-                    );
+                    // await ref.read(deckProvider.notifier).createDeck(
+                    //   _titleController.text,
+                    //   _selectedCategory!,
+                    //   _descriptionController.text,
+                    //   _selectedDifficulty!,
+                    //   userId ?? '',
+                    //   int.parse(_cardCountController.text) as String,
+                    // );
                     Navigator.pop(context);
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(content: Text('Deck created successfully')),

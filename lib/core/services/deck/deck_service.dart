@@ -207,9 +207,10 @@ Future<void>flagFlashcard (String flashcardId) async {
 }
 
 Future<List<Flashcard>> _generateFlashcards({
-    required String title,
+    required String concept,
+    required String subject,
     required String category,
-    required String focus,
+    required String description,
     required String difficultyLevel,
     required int cardCount,
     required String deckid,
@@ -234,11 +235,23 @@ Future<List<Flashcard>> _generateFlashcards({
           },
           {
             'role': 'user',
-            'content': '''Create exactly $cardCount flashcards about $category focus specifically in $focus for $difficultyLevel-level clinical students. 
-            The flashcards should include clinical applications, disease mechanisms, pathophysiology, and differential diagnoses based on reliable, evidence-based medical knowledge from trusted sources such as textbooks, clinical guidelines, and peer-reviewed literature. 
-            Ensure the content is challenging yet relevant to a clinical student at this level. 
-            Return ONLY a JSON array in this exact format: [{\"front\":\"question text\", \"back\":\"answer text\"}]
-            '''
+            'content': '''Generate $cardCount precise flashcards for $difficultyLevel study of $concept in $subject ($category).
+Context: $description
+Content Requirements:
+- Use ONLY verified academic content from peer-reviewed sources
+- Base answers on established textbooks and academic literature
+- NO speculative or unverified information
+- Include ONLY widely accepted facts and principles
+
+Card Structure:
+- Front: Clear, focused question on a single verifiable concept
+- Back: Precise answer with academically-verified information
+- Difficulty: Maintain $difficultyLevel academic standards
+- Length: Concise but complete academic explanation
+
+Format: [{\"front\":\"question\",\"back\":\"answer\"}]
+
+Note: If a concept cannot be verified through academic sources, exclude it.'''
           }
         ],
       };
@@ -320,7 +333,7 @@ Future<List<Flashcard>> _generateFlashcards({
 
   // Create a new deck
   @override  
-  Future<void> createDeck(String title, String category ,String description,String difficultyLevel, String userid, int cardCount) async {
+  Future<void> createDeck(String subject, String concept ,String description,String category, String difficultyLevel, String userid, int cardCount) async {
     try {
       bool isPublic = false;
       final deckId = _uuid.v4();
@@ -335,10 +348,12 @@ Future<List<Flashcard>> _generateFlashcards({
 
       final PostgrestMap response = await _supabaseClient.from('decks').insert({
         'id': deckId,
-        'title': title,
+        'title': ('$subject - $concept'),
+        'subject': subject,
+        'concept': concept,
         'description': description,
         'difficulty': difficultyLevel,
-        'category_id': categoryid,        
+        'category_id': categoryid,     // Medicine, Law, etc.   
         'total_cards': flashcards.length,
         'is_public': isPublic,
         'creator_id': userid,
@@ -361,7 +376,7 @@ Future<List<Flashcard>> _generateFlashcards({
 
       //Generation Flashcards now
 
-      final aiFlashcards = await _generateFlashcards(title: title, deckid: deckId, category: category, focus: description, difficultyLevel: difficultyLevel, cardCount: cardCount); 
+      final aiFlashcards = await _generateFlashcards(concept: concept,subject: subject, deckid: deckId, category: category, description: description, difficultyLevel: difficultyLevel, cardCount: cardCount); 
       
       
       // If there are flashcards, create them with their own UUIDs
@@ -386,7 +401,7 @@ Future<List<Flashcard>> _generateFlashcards({
         .update({'total_cards':flashcardsData.length})
         .eq('id', deckId);
       }
-      print('Deck Created $title');
+      print('Deck Created ${subject} - ${concept}');
     } catch (e) {
       throw ErrorHandler.handle(e);
     }
@@ -641,38 +656,38 @@ Future<void> addDeckCategory(String category) async {
 
 // Add this method to the DeckService class
 
-  @override
-  Future<void> systemCreateDeck(List<SystemDeckConfig> configs, String userId) async {
-  try {
+//   @override
+//   Future<void> systemCreateDeck(List<SystemDeckConfig> configs, String userId) async {
+//   try {
 
 
-    // Create decks using existing createDeck method
-    for (var config in configs) {
+//     // Create decks using existing createDeck method
+//     for (var config in configs) {
 
        
-       print('Category: ${config.category}');
-       print('Description: ${config.description}');
+//        print('Category: ${config.category}');
+//        print('Description: ${config.description}');
 
-      // Generate system-specific title
-      final title = '${config.category} - ${config.description}';
+//       // Generate system-specific title
+//       final title = '${config.category} - ${config.description}';
       
-      // Use existing createDeck method but add system-specific handling
-      await createDeck(
-        title,
-        config.category,
-        config.description,
-        config.difficultyLevel,
-        userId,
-        config.cardCount
-      );
+//       // Use existing createDeck method but add system-specific handling
+//       await createDeck(
+//         title,
+//         config.category,
+//         config.description,
+//         config.difficultyLevel,
+//         userId,
+//         config.cardCount
+//       );
 
 
-    }
-  } catch (e) {
-    print('Error in systemCreateDeck: $e');
-    throw ErrorHandler.handle(e);
-  }
-}
+//     }
+//   } catch (e) {
+//     print('Error in systemCreateDeck: $e');
+//     throw ErrorHandler.handle(e);
+//   }
+// }
 
 
 }

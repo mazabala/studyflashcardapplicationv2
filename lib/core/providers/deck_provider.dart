@@ -112,7 +112,7 @@ Future<List<Flashcard>> getDeckFlashcards (String deckid) async
     }
 }
 
-  Future<void> createDeck(String title,String category, String description, String difficultyLevel, String userid,int cardCount) async {
+  Future<void> createDeck(String subject,String concept,String description,String category, String difficultyLevel, String userid,int cardCount) async {
     state = state.copyWith(isLoading: true, error: '');
     try {
       final userId = _userService.userId;
@@ -121,7 +121,7 @@ Future<List<Flashcard>> getDeckFlashcards (String deckid) async
       }
       final userSubscription = _userService.subscriptionPlanID;
 
-      await _deckService.createDeck(title, category, description ,difficultyLevel, userid, cardCount);  
+      await _deckService.createDeck(subject, concept, description, category, difficultyLevel, userid, cardCount);  
       
       //final decks = await _deckService.getUserDecks(userId);
       //state = state.copyWith(decks: decks);
@@ -279,26 +279,26 @@ try{
 
 }
 
-Future<void> systemCreateDecks(List<SystemDeckConfig> configs) async {
-  state = state.copyWith(isLoading: true, error: '');
-  try {
-    final userId = _userService.userId;
-    if (userId == null) {
-      throw Exception("System user is not logged in");
-    }
+// Future<void> systemCreateDecks(List<SystemDeckConfig> configs) async {
+//   state = state.copyWith(isLoading: true, error: '');
+//   try {
+//     final userId = _userService.userId;
+//     if (userId == null) {
+//       throw Exception("System user is not logged in");
+//     }
 
       
-    await _deckService.systemCreateDeck(configs, userId);
+//     await _deckService.systemCreateDeck(configs, userId);
     
-    // Refresh the available decks list after creation
-    await loadAvailableDecks();
-  } catch (e) {
-    print('Error in systemCreateDecks: $e');
-    state = state.copyWith(error: e.toString());
-  } finally {
-    state = state.copyWith(isLoading: false);
-  }
-}
+//     // Refresh the available decks list after creation
+//     await loadAvailableDecks();
+//   } catch (e) {
+//     print('Error in systemCreateDecks: $e');
+//     state = state.copyWith(error: e.toString());
+//   } finally {
+//     state = state.copyWith(isLoading: false);
+//   }
+// }
 
 
 
