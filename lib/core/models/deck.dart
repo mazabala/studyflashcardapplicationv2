@@ -1,6 +1,5 @@
 // lib/core/models/deck.dart
 
-import 'flashcard.dart';
 
 class Deck {
   final String id;

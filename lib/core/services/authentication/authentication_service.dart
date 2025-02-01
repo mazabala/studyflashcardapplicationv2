@@ -32,7 +32,8 @@ class AuthService implements IAuthService {
     {print ('Error: on auth service: $e');}
 }
 
-Future<void>  forgotPassword(String email) async{
+@override
+  Future<void>  forgotPassword(String email) async{
 
       final response = await Supabase.instance.client.auth
         .resetPasswordForEmail(email);
@@ -95,13 +96,14 @@ Future<void>  forgotPassword(String email) async{
 
 
 
-Future<void> signInWithGoogle() async {
-  /// TODO: update the Web client ID with your own.
+@override
+  Future<void> signInWithGoogle() async {
+
   ///
   /// Web Client ID that you registered with Google Cloud.
   const webClientId = '554533078721-j7rkh5nqttb4svljrvkhh8mi77oloote.apps.googleusercontent.com';
 
-  /// TODO: update the iOS client ID with your own.
+  /// 
   ///
   /// iOS Client ID that you registered with Google Cloud.
   const iosClientId = '554533078721-2i39941fuqmjh4mka39rvn5tv49ig56p.apps.googleusercontent.com';
@@ -130,7 +132,8 @@ Future<void> signInWithGoogle() async {
 }
 
 /// Performs Apple sign in on iOS or macOS
-Future<AuthResponse> signInWithApple() async {
+@override
+  Future<AuthResponse> signInWithApple() async {
   final rawNonce = _supabaseClient.auth.generateRawNonce();
   final hashedNonce = sha256.convert(utf8.encode(rawNonce)).toString();
 

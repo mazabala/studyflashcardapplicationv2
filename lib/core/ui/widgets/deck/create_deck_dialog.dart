@@ -7,7 +7,7 @@ import 'package:flashcardstudyapplication/core/ui/widgets/CardCountSlider.dart';
 class CreateDeckDialog extends ConsumerStatefulWidget {
   final Function(String subject, String concept ,String description, String category, String difficultyLevel, int cardcount) onSubmit;
 
-  const CreateDeckDialog({required this.onSubmit});
+  const CreateDeckDialog({super.key, required this.onSubmit});
 
   @override
   _CreateDeckDialogState createState() => _CreateDeckDialogState();

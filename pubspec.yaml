@@ -3,7 +3,7 @@ description: A medical flashcard application for students
 
 publish_to: 'none'
 
-version: 2.0.0+2
+version: 2.0.0+3
 
 environment:
   sdk: '>=3.0.0 <25.0.0'

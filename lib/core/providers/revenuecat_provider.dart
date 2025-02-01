@@ -11,14 +11,15 @@ import 'package:purchases_flutter/models/offering_wrapper.dart';
 import 'package:purchases_ui_flutter/purchases_ui_flutter.dart'; // Import ApiClient
 import 'package:flashcardstudyapplication/core/services/api/api_manager.dart'; // Add this import
 
-final revenueCatClientProvider = StateNotifierProvider<RevenueCatNotifier, RevenueCatService?>((ref) {
+final revenueCatClientProvider = StateNotifierProvider<RevenueCatNotifier, RevenueCatService>((ref) {
   return RevenueCatNotifier(ref);
 });
 
-class RevenueCatNotifier extends StateNotifier<RevenueCatService?> {
+class RevenueCatNotifier extends StateNotifier<RevenueCatService> {
   final Ref ref;
 
-  RevenueCatNotifier(this.ref) : super(null);
+  RevenueCatNotifier(this.ref) : super(RevenueCatService(revenueCatApiKey: ApiManager.instance.getRevenueCatApiKey()));
+
 
   Future<void> initialize() async {
     try {
@@ -29,7 +30,7 @@ class RevenueCatNotifier extends StateNotifier<RevenueCatService?> {
         revenueCatApiKey: revKey,
       );
       print('revenuecat initialized');
-     // await state?.initialize();
+      await state.initialize();
     } catch (e) {
       print('RevenueCat initialization error: $e');
       rethrow;
@@ -44,10 +45,11 @@ Future<void> checkSubscriptionStatus(String entitlement) async {
   await state?.checkSubscriptionStatus(entitlement);
 } 
 
-Future<void> showPaywall() async {
+Future<void> showPaywallProvider() async {
   print('showing wall from revn cat provider');
   await state?.showPaywall();
 }
+
 
 Future<void> showPaywallIfNeeded(String entitlement) async {
   await state?.showPaywallIfNeeded(entitlement);

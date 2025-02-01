@@ -38,6 +38,7 @@ class SubscriptionService implements ISubscriptionService {
     }
   }
 
+  @override
   Future<void> updateSubscription(String userId, String subscriptionTier) async {
     // Update subscription in database
     final response = await _supabaseClient.from('user_subscriptions')

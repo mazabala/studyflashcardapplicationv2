@@ -2,7 +2,6 @@
 
 
 import 'package:flashcardstudyapplication/core/models/deck.dart';
-import 'package:flashcardstudyapplication/core/services/deck/deck_service.dart';
 
 abstract class IDeckService {
 

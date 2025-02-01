@@ -110,7 +110,7 @@ class _SystemDeckScreenState extends ConsumerState<SystemDeckScreen> {
         )
       );
 
-      await ref.read(deckProvider.notifier).systemCreateDecks(configs);
+     // await ref.read(deckProvider.notifier).systemCreateDecks(configs);
 
       if (mounted) {
         Navigator.pushReplacementNamed(context, '/myDecks');

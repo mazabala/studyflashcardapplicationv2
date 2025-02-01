@@ -235,7 +235,7 @@ Future<List<Flashcard>> _generateFlashcards({
           },
           {
             'role': 'user',
-            'content': '''Generate $cardCount precise flashcards for $difficultyLevel study of $concept in $subject ($category).
+            'content': '''Generate $cardCount precise flashcards for a $difficultyLevel level of study of $concept in $subject ($category).
 Context: $description
 Content Requirements:
 - Use ONLY verified academic content from peer-reviewed sources
@@ -497,7 +497,6 @@ if (difficultyNamesResponse== null || difficultyNamesResponse.isEmpty) {
   }
 
 
-@override
 Future<String>_getDifficultyPrompt (String difficultyTypeid) async
 {
   try{
@@ -516,7 +515,6 @@ Future<String>_getDifficultyPrompt (String difficultyTypeid) async
    rethrow;}
 
 }
-@override
 Future<List> _getModel () async
 {
   try{
@@ -535,24 +533,23 @@ Future<List> _getModel () async
 
 }
 
-@override
-Future<double> _getDeckMaxTokens (String difficultyTypeid) async
+Future<int> _getDeckMaxTokens (String difficultyTypeid) async
 {
   try{
   final  deckTokenReader= await _supabaseClient
   .from('deck_difficulties')
   .select('max_tokens')
   .eq('difficultyType_id',difficultyTypeid)
+
   .single();
  
-  return deckTokenReader['max_tokens'].toDouble();
+  return deckTokenReader['max_tokens'];
   }catch (e)
   {
   print('MaxTokens: $e');
    rethrow;}
 
 }
-@override
 Future<double> _getDeckTemp (String difficultyTypeid) async
 {
   try{
@@ -592,7 +589,6 @@ Future<List<String>> getDeckCategory() async
 
 
 
-@override
 Future<String> _getDeckDifficultyID(String deckDifficultyName) async
 {
     try{
@@ -616,7 +612,6 @@ Future<String> _getDeckDifficultyID(String deckDifficultyName) async
 
 
 }
-@override
 Future<String> _getDeckCategoryID(String categoryName) async
 {
     try{

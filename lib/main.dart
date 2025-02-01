@@ -1,4 +1,5 @@
 import 'package:flashcardstudyapplication/core/providers/auth_provider.dart';
+import 'package:flashcardstudyapplication/core/providers/revenuecat_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flashcardstudyapplication/core/services/api/api_client.dart';
 import 'package:flashcardstudyapplication/core/themes/app_theme.dart';
@@ -6,6 +7,7 @@ import 'package:flashcardstudyapplication/core/navigation/router_manager.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flashcardstudyapplication/core/ui/home_screen.dart';
+import 'package:flashcardstudyapplication/core/services/api/api_manager.dart';
 
 // Add a loading state provider
 final initializationProvider = StateProvider<bool>((ref) => false);
@@ -49,8 +51,6 @@ class _MyAppState extends ConsumerState<MyApp> {
       final supabaseUrl = apiClient.getSupabaseUrl();
       final supabaseAnonKey = apiClient.getSupabaseAnonKey();
       
-
-      
       // Initialize Supabase with session persistence
       await Supabase.initialize(
         url: supabaseUrl,
@@ -58,6 +58,14 @@ class _MyAppState extends ConsumerState<MyApp> {
       );
 
       print('Supabase initialized');
+
+      // Initialize ApiManager
+      await ApiManager.instance.initialize();
+      print('ApiManager initialized');
+
+      // Initialize RevenueCat
+      await ref.read(revenueCatClientProvider.notifier).initialize();
+      print('RevenueCat initialized');
       
       final response = await Supabase.instance.client.from('api_resources').select('*').eq('name', 'ChatGPT').single();
       final baseKey = response['api_key'];
@@ -72,22 +80,6 @@ class _MyAppState extends ConsumerState<MyApp> {
       
       Supabase.instance.client.auth.signOut();
 
-
-   
-      // Initialize auth first
-      //await ref.read(authProvider.notifier).initializeAuth();
-      //print('Auth initialized. is loading: ');
-      
-      // final authState = ref.read(authProvider);
-      // print('auth state from main authState: ${authState.isLoading}');
-      // if (authState.isAuthenticated) {
-      //   // Initialize other services only if authenticated
-      //   await Future.wait([
-      //     ref.read(subscriptionProvider.notifier).initialize(),
-      //     ref.read(revenueCatClientProvider.notifier).initialize(),
-      //   ]);
-      // }
-      
       // Mark initialization as complete
       if (mounted) {
         setState(() {

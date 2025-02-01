@@ -6,6 +6,8 @@ import 'package:flashcardstudyapplication/core/themes/app_theme.dart';
 import 'package:flashcardstudyapplication/core/models/deck.dart';
 
 class DeckManagementPage extends ConsumerWidget {
+  const DeckManagementPage({super.key});
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final deckState = ref.watch(deckProvider);
@@ -16,19 +18,19 @@ class DeckManagementPage extends ConsumerWidget {
       ),
       body: Column(
         children: [
-          DeckActions(),
+          const DeckActions(),
           if (deckState.error.isNotEmpty)
             Padding(
               padding: const EdgeInsets.all(8.0),
               child: Text(
                 deckState.error,
-                style: TextStyle(color: Colors.red),
+                style: const TextStyle(color: Colors.red),
               ),
             ),
           if (deckState.isLoading)
             const Center(child: CircularProgressIndicator())
           else
-            Expanded(child: DeckListView()),
+            const Expanded(child: DeckListView()),
         ],
       ),
     );
@@ -46,12 +48,12 @@ class DeckActions extends ConsumerWidget {
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
           ElevatedButton(
-            onPressed: () => _navigateTo(context, CreateDeckPage()),
-            child: Text('Create Deck'),
+            onPressed: () => _navigateTo(context, const CreateDeckPage()),
+            child: const Text('Create Deck'),
           ),
           ElevatedButton(
             onPressed: () => _navigateTo(context, AddCategoryPage()),
-            child: Text('Add Category'),
+            child: const Text('Add Category'),
           ),
         ],
       ),
@@ -67,13 +69,15 @@ class DeckActions extends ConsumerWidget {
 }
 
 class DeckListView extends ConsumerWidget {
+  const DeckListView({super.key});
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final deckState = ref.watch(deckProvider);
     final decks = deckState.decks;
 
     if (decks.isEmpty) {
-      return Center(child: Text('No decks available'));
+      return const Center(child: Text('No decks available'));
     }
 
     return ListView.builder(
@@ -87,7 +91,7 @@ class DeckListView extends ConsumerWidget {
             style: Theme.of(context).textTheme.bodySmall,
           ),
           trailing: IconButton(
-            icon: Icon(Icons.delete, color: Colors.red),
+            icon: const Icon(Icons.delete, color: Colors.red),
             onPressed: () => _showDeleteConfirmation(context, ref, deck),
           ),
           onTap: () => _navigateTo(context, DeckDetailsView(deck: deck)),
@@ -100,28 +104,31 @@ class DeckListView extends ConsumerWidget {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('Delete Deck'),
+        title: const Text('Delete Deck'),
         content: Text('Are you sure you want to delete ${deck.title}?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: Text('Cancel'),
+            child: const Text('Cancel'),
           ),
           TextButton(
             onPressed: () async {
               Navigator.pop(context);
+              final scaffoldMessenger = ScaffoldMessenger.of(context);
               try {
                 await ref.read(deckProvider.notifier).deleteDeck(deck.id);
-                ScaffoldMessenger.of(context).showSnackBar(
+                if (!context.mounted) return;
+                scaffoldMessenger.showSnackBar(
                   SnackBar(content: Text('${deck.title} deleted')),
                 );
               } catch (e) {
-                ScaffoldMessenger.of(context).showSnackBar(
+                if (!context.mounted) return;
+                scaffoldMessenger.showSnackBar(
                   SnackBar(content: Text('Error deleting deck: $e')),
                 );
               }
             },
-            child: Text('Delete'),
+            child: const Text('Delete'),
             style: TextButton.styleFrom(foregroundColor: Colors.red),
           ),
         ],
@@ -140,7 +147,7 @@ class DeckListView extends ConsumerWidget {
 class DeckDetailsView extends ConsumerStatefulWidget {
   final Deck deck;
 
-  DeckDetailsView({required this.deck});
+  DeckDetailsView({super.key, required this.deck});
 
   @override
   _DeckDetailsViewState createState() => _DeckDetailsViewState();
@@ -171,9 +178,9 @@ class _DeckDetailsViewState extends ConsumerState<DeckDetailsView> {
           children: [
             TextField(
               controller: _titleController,
-              decoration: InputDecoration(labelText: 'Deck Title'),
+              decoration: const InputDecoration(labelText: 'Deck Title'),
             ),
-            SizedBox(height: 16),
+            const SizedBox(height: 16),
             FutureBuilder<List<String>>(
               future: ref.read(deckProvider.notifier)
                   .getDeckDifficulty(widget.deck.id),
@@ -181,7 +188,7 @@ class _DeckDetailsViewState extends ConsumerState<DeckDetailsView> {
                 if (snapshot.hasData) {
                   return DropdownButtonFormField<String>(
                     value: _selectedDifficulty,
-                    decoration: InputDecoration(labelText: 'Difficulty Level'),
+                    decoration: const InputDecoration(labelText: 'Difficulty Level'),
                     items: snapshot.data!.map((difficulty) {
                       return DropdownMenuItem(
                         value: difficulty,
@@ -193,29 +200,33 @@ class _DeckDetailsViewState extends ConsumerState<DeckDetailsView> {
                     },
                   );
                 }
-                return CircularProgressIndicator();
+                return const CircularProgressIndicator();
               },
             ),
-            SizedBox(height: 24),
+            const SizedBox(height: 24),
             ElevatedButton(
               onPressed: () async {
+                final scaffoldMessenger = ScaffoldMessenger.of(context);
+                final navigator = Navigator.of(context);
                 try {
                   await ref.read(deckProvider.notifier).updateDeck(
                     widget.deck.id,
                     _titleController.text,
                     _selectedDifficulty ?? widget.deck.difficultyLevel,
                   );
-                  Navigator.pop(context);
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Deck updated successfully')),
+                  if (!context.mounted) return;
+                  navigator.pop();
+                  scaffoldMessenger.showSnackBar(
+                    const SnackBar(content: Text('Deck updated successfully')),
                   );
                 } catch (e) {
-                  ScaffoldMessenger.of(context).showSnackBar(
+                  if (!context.mounted) return;
+                  scaffoldMessenger.showSnackBar(
                     SnackBar(content: Text('Error updating deck: $e')),
                   );
                 }
               },
-              child: Text('Save Changes'),
+              child: const Text('Save Changes'),
             ),
           ],
         ),
@@ -231,6 +242,8 @@ class _DeckDetailsViewState extends ConsumerState<DeckDetailsView> {
 }
 
 class CreateDeckPage extends ConsumerStatefulWidget {
+  const CreateDeckPage({super.key});
+
   @override
   _CreateDeckPageState createState() => _CreateDeckPageState();
 }
@@ -259,22 +272,22 @@ class _CreateDeckPageState extends ConsumerState<CreateDeckPage> {
             children: [
               TextField(
                 controller: _titleController,
-                decoration: InputDecoration(labelText: 'Deck Title'),
+                decoration: const InputDecoration(labelText: 'Deck Title'),
               ),
-              SizedBox(height: 16),
+              const SizedBox(height: 16),
               TextField(
                 controller: _descriptionController,
-                decoration: InputDecoration(labelText: 'Description'),
+                decoration: const InputDecoration(labelText: 'Description'),
                 maxLines: 3,
               ),
-              SizedBox(height: 16),
+              const SizedBox(height: 16),
               FutureBuilder<List<String>>(
                 future: ref.read(deckProvider.notifier).getDeckCategory(),
                 builder: (context, snapshot) {
                   if (snapshot.hasData) {
                     return DropdownButtonFormField<String>(
                       value: _selectedCategory,
-                      decoration: InputDecoration(labelText: 'Category'),
+                      decoration: const InputDecoration(labelText: 'Category'),
                       items: snapshot.data!.map((category) {
                         return DropdownMenuItem(
                           value: category,
@@ -286,10 +299,10 @@ class _CreateDeckPageState extends ConsumerState<CreateDeckPage> {
                       },
                     );
                   }
-                  return CircularProgressIndicator();
+                  return const CircularProgressIndicator();
                 },
               ),
-              SizedBox(height: 16),
+              const SizedBox(height: 16),
               FutureBuilder<List<String>>(
                 future: ref.read(deckProvider.notifier)
                     .getDeckDifficulty(userSubPlan as String),  // Replace with actual subscription ID
@@ -297,7 +310,7 @@ class _CreateDeckPageState extends ConsumerState<CreateDeckPage> {
                   if (snapshot.hasData) {
                     return DropdownButtonFormField<String>(
                       value: _selectedDifficulty,
-                      decoration: InputDecoration(labelText: 'Difficulty Level'),
+                      decoration: const InputDecoration(labelText: 'Difficulty Level'),
                       items: snapshot.data!.map((difficulty) {
                         return DropdownMenuItem(
                           value: difficulty,
@@ -309,21 +322,23 @@ class _CreateDeckPageState extends ConsumerState<CreateDeckPage> {
                       },
                     );
                   }
-                  return CircularProgressIndicator();
+                  return const CircularProgressIndicator();
                 },
               ),
-              SizedBox(height: 16),
+              const SizedBox(height: 16),
               TextField(
                 controller: _cardCountController,
-                decoration: InputDecoration(labelText: 'Number of Cards'),
+                decoration: const InputDecoration(labelText: 'Number of Cards'),
                 keyboardType: TextInputType.number,
               ),
-              SizedBox(height: 24),
+              const SizedBox(height: 24),
               ElevatedButton(
                 onPressed: () async {
+                  final scaffoldMessenger = ScaffoldMessenger.of(context);
+                  final navigator = Navigator.of(context);
                   if (_selectedCategory == null || _selectedDifficulty == null) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Please fill all fields')),
+                    scaffoldMessenger.showSnackBar(
+                      const SnackBar(content: Text('Please fill all fields')),
                     );
                     return;
                   }
@@ -338,17 +353,19 @@ class _CreateDeckPageState extends ConsumerState<CreateDeckPage> {
                     //   userId ?? '',
                     //   int.parse(_cardCountController.text) as String,
                     // );
-                    Navigator.pop(context);
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Deck created successfully')),
+                    if (!context.mounted) return;
+                    navigator.pop();
+                    scaffoldMessenger.showSnackBar(
+                      const SnackBar(content: Text('Deck created successfully')),
                     );
                   } catch (e) {
-                    ScaffoldMessenger.of(context).showSnackBar(
+                    if (!context.mounted) return;
+                    scaffoldMessenger.showSnackBar(
                       SnackBar(content: Text('Error creating deck: $e')),
                     );
                   }
                 },
-                child: Text('Create Deck'),
+                child: const Text('Create Deck'),
               ),
             ],
           ),
@@ -386,25 +403,29 @@ class _AddCategoryPageState extends ConsumerState<AddCategoryPage> {
           children: [
             TextField(
               controller: _categoryController,
-              decoration: InputDecoration(labelText: 'Category Name'),
+              decoration: const InputDecoration(labelText: 'Category Name'),
             ),
-            SizedBox(height: 24),
+            const SizedBox(height: 24),
             ElevatedButton(
               onPressed: () async {
+                final scaffoldMessenger = ScaffoldMessenger.of(context);
+                final navigator = Navigator.of(context);
                 try {
                   await ref.read(deckProvider.notifier)
                       .addDeckCategory(_categoryController.text);
-                  Navigator.pop(context);
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Category added successfully')),
+                  if (!context.mounted) return;
+                  navigator.pop();
+                  scaffoldMessenger.showSnackBar(
+                    const SnackBar(content: Text('Category added successfully')),
                   );
                 } catch (e) {
-                  ScaffoldMessenger.of(context).showSnackBar(
+                  if (!context.mounted) return;
+                  scaffoldMessenger.showSnackBar(
                     SnackBar(content: Text('Error adding category: $e')),
                   );
                 }
               },
-              child: Text('Add Category'),
+              child: const Text('Add Category'),
             ),
           ],
         ),

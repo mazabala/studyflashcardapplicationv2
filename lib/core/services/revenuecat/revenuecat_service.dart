@@ -83,8 +83,13 @@ Future<void>getCustomerInfo() async {
 
 Future<void>showPaywall() async {
   
+  try {
   final paywallResult = await RevenueCatUI.presentPaywall();
   print('Paywall result: $paywallResult');
+} on Exception catch (e) {
+  print('Error showing paywall: $e');
+  // TODO
+}
 }
 
 Future<void>showPaywallIfNeeded(String entitlement) async {

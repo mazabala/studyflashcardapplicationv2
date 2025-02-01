@@ -164,7 +164,7 @@ class CatSubNotifier extends StateNotifier<CatSubState> {
 
   Future<void> presentPaywall() async {
     
-    await ref.read(revenueCatClientProvider.notifier).showPaywall();
+    await ref.read(revenueCatClientProvider.notifier).showPaywallProvider();
   }
 }
 
