@@ -101,7 +101,7 @@ Future<void> initialize() async {
     return key;
   }
 
-  String getRevenueCatApiKey() => _getKey('RevenueCat'); // TODO: THIS IS THE SANDBOX ONLY
+  String getRevenueCatApiKey() => _getKey('SandBox_RevenueCat'); // TODO: THIS IS THE SANDBOX ONLY
   String getEntitlementID() => _getKey('entitlementID');
   String getGoogleAPI() => _getKey('googleAPI');
   String getAppleAPI() => _getKey('appleAPI');

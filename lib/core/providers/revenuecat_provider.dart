@@ -21,20 +21,20 @@ class RevenueCatNotifier extends StateNotifier<RevenueCatService> {
   RevenueCatNotifier(this.ref) : super(RevenueCatService(revenueCatApiKey: ApiManager.instance.getRevenueCatApiKey()));
 
 
-  Future<void> initialize() async {
+  Future<void> initialize(String apiKey) async {
     try {
-      final apiManager = ApiManager.instance;
-      final revKey = apiManager.getRevenueCatApiKey();
-      
-      state = RevenueCatService(
-        revenueCatApiKey: revKey,
-      );
+
+      final user = ref.read(userProvider);
+      final userId = user.userId;
+
       print('revenuecat initialized');
-      await state.initialize();
+      await state.initialize(apiKey, userId);
+
     } catch (e) {
       print('RevenueCat initialization error: $e');
       rethrow;
     }
+
   }
 
 Future<void> restorePurchases() async {

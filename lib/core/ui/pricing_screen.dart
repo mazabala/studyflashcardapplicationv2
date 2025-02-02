@@ -22,9 +22,18 @@ class _PricingScreenState extends ConsumerState<PricingScreen> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(subscriptionProvider.notifier).loadPackages();
-      
+
+
+        ref.read(catSubManagerProvider.notifier).initialize();
+
+
     });
+
+
+
+    
   }
+
 
 
 

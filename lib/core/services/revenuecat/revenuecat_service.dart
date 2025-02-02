@@ -25,10 +25,11 @@ class RevenueCatService {
   });
 
 
-Future<void> initialize() async {
-  await Purchases.configure(
-    PurchasesConfiguration(revenueCatApiKey) ..appUserID = userId
-  );
+Future<void> initialize(String apiKey, String ?userId) async {
+await Purchases.configure(
+           PurchasesConfiguration(apiKey) ..appUserID = userId
+          );
+
 
   _isInitialized = true;
 
@@ -39,7 +40,7 @@ Future<void> purchasePlan(String offeringName, String entitlementName) async {
 
 
 
-  try {
+  try { 
     Offerings offerings = await Purchases.getOfferings();
     Offering? customOffering = offerings.getOffering(offeringName);
 
@@ -129,7 +130,7 @@ Future<String>checkSubscriptionStatus(String entitlement) async {
 }
 
 Future<List<Offering>> getOfferings() async {
-    if (!_isInitialized) await initialize();
+   
 
     try {
       

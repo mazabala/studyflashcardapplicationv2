@@ -235,28 +235,24 @@ Future<List<Flashcard>> _generateFlashcards({
           },
           {
             'role': 'user',
-            'content': '''Generate $cardCount precise flashcards for a $difficultyLevel level of study of $concept in $subject ($category).
-Context: $description
-Content Requirements:
-- Use ONLY verified academic content from peer-reviewed sources
-- Base answers on established textbooks and academic literature
-- NO speculative or unverified information
-- Include ONLY widely accepted facts and principles
+            'content': '''Create exactly $cardCount flashcards about $subject in concept of $concept for $difficultyLevel-level clinical students. 
+            The flashcards should include clinical applications, disease mechanisms, pathophysiology, and differential diagnoses based on reliable, evidence-based medical knowledge from trusted sources such as textbooks, clinical guidelines, and peer-reviewed literature. 
+            Ensure the content is challenging yet relevant to a clinical student at this level. 
+            Context information: $description
+            Category: $category
 
-Card Structure:
-- Front: Clear, focused question on a single verifiable concept
-- Back: Precise answer with academically-verified information
-- Difficulty: Maintain $difficultyLevel academic standards
-- Length: Concise but complete academic explanation
 
-Format: [{\"front\":\"question\",\"back\":\"answer\"}]
-
-Note: If a concept cannot be verified through academic sources, exclude it.'''
+            Return ONLY a JSON array in this exact format: [{\"front\":\"question text\", \"back\":\"answer text\"}]
+            
+            Note: If a concept cannot be verified through academic sources, exclude it.'''
           }
         ],
       };
 
-      
+   
+ 
+      print('body: $body');
+
       final bodyJson = jsonEncode(body);
       // 3. Make the POST request to generate flashcards
       final response = await _apiService.post('', body: bodyJson);

@@ -55,34 +55,34 @@ class CatSubNotifier extends StateNotifier<CatSubState> {
   CatSubNotifier(this.ref) : super(CatSubState());
 
 
-  Future<void> initialize(String userId) async {
+  Future<void> initialize() async {
     // Skip if already initializing or initialized
     if (state.isInitializing || state.isInitialized) {
       return;
     }
-    
-    state = state.copyWith(isInitializing: true);
-    
 
+    state = state.copyWith(isInitializing: true);
 
     try {
-      
-      await ref.read(revenueCatClientProvider.notifier).initialize();
-      
       //await ref.read(subscriptionProvider.notifier).initialize();
-    await Purchases.setLogLevel(LogLevel.debug);
+      await Purchases.setLogLevel(LogLevel.debug);
       if (Platform.isIOS) {
         StoreConfig(
-            store: Stores.appleStore,
-            apiKey: ApiManager.instance.getAppleAPI(),
+          store: Stores.appleStore,
+          apiKey: ApiManager.instance.getAppleAPI(),
         );
+        await ref
+            .read(revenueCatClientProvider.notifier)
+            .initialize(ApiManager.instance.getAppleAPI());
       } else if (Platform.isAndroid) {
         StoreConfig(
-            store: Stores.googlePlay,
-            apiKey: ApiManager.instance.getGoogleAPI(),
+          store: Stores.googlePlay,
+          apiKey: ApiManager.instance.getGoogleAPI(),
         );
+        await ref
+            .read(revenueCatClientProvider.notifier)
+            .initialize(ApiManager.instance.getGoogleAPI());
         print(ApiManager.instance.getGoogleAPI());
-
       }
 
 
@@ -133,7 +133,8 @@ class CatSubNotifier extends StateNotifier<CatSubState> {
   Future<void> checkSubscriptionStatus(String userId, String entitlement) async {
     if (!state.isInitialized) {
        print('fetiching subscription status with entitlement: $entitlement');
-      await initialize(userId);
+       
+      await initialize();
       return;
     }
     try{

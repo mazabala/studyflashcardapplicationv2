@@ -64,7 +64,7 @@ class _MyAppState extends ConsumerState<MyApp> {
       print('ApiManager initialized');
 
       // Initialize RevenueCat
-      await ref.read(revenueCatClientProvider.notifier).initialize();
+      //await ref.read(revenueCatClientProvider.notifier).initialize();
       print('RevenueCat initialized');
       
       final response = await Supabase.instance.client.from('api_resources').select('*').eq('name', 'ChatGPT').single();
