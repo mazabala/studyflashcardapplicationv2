@@ -85,33 +85,25 @@ class CatSubNotifier extends StateNotifier<CatSubState> {
         print(ApiManager.instance.getGoogleAPI());
       }
 
-
-
       // Get customer info from RevenueCat service
       final customerInfo = await ref.read(userProvider).userId;
-     // await ref.read(revenueCatClientProvider.notifier).checkSubscriptionStatus(ApiManager.instance.getEntitlementName('Basic'));
-
-   
+      // await ref.read(revenueCatClientProvider.notifier).checkSubscriptionStatus(ApiManager.instance.getEntitlementName('Basic'));
 
       state = state.copyWith(
         isInitializing: false,
         isInitialized: true,
         hasSubscription: !ref.read(subscriptionProvider).isExpired,
         customerID: customerInfo,
-        
       );
 
-      if(state.isInitialized == true){
+      if (state.isInitialized == true) {
         print('CatSubManager initialized');
       }
-
     } catch (e) {
       state = state.copyWith(
         isInitializing: false,
         isInitialized: false,
         errorMessage: e.toString(),
-
-        
       );
       throw Exception(e);
     }

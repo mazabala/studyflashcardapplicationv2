@@ -12,12 +12,15 @@ abstract class ISubscriptionService {
   /// Throws an error if the subscription update fails or if no active subscription is found.
   Future<void> updateSubscription(String userId, String subscriptionTier);
 
+
+Future<void> purchaseSubscription(String userId, String subType);
   /// Renews an existing subscription for a user.
   /// 
   /// [userId] The ID of the user whose subscription is being renewed.
   /// 
   /// Throws an error if renewal fails or if no active subscription is found.
   Future<void> renewSubscription(String userId);
+
 
   /// Cancels a user's subscription.
   /// This will handle both RevenueCat cancellation and local database updates.
@@ -63,7 +66,7 @@ abstract class ISubscriptionService {
   /// [userId] The ID of the user whose subscription is being validated.
   /// 
   /// Returns `true` if subscription is valid and active, `false` otherwise.
-  Future<bool> validateSubscription(String userId);
+  
 
   Future<String> getSubscriptionStatus(String userId);
 }

@@ -15,14 +15,13 @@ class SubscriptionState {
   final bool isLoading;
   final bool isExpired;
   final String errorMessage;
-  final List<String>? availablePackages;
   final bool isInitialized;
 
   SubscriptionState({
     this.isLoading = false,
     this.isExpired = false,
     this.errorMessage = '',
-    this.availablePackages = const [],
+
     this.isInitialized = false,
   });
 
@@ -38,7 +37,6 @@ class SubscriptionState {
       isLoading: isLoading ?? this.isLoading,
       isExpired: isExpired ?? this.isExpired,
       errorMessage: errorMessage ?? this.errorMessage,
-      availablePackages: availablePackages ?? this.availablePackages,
       isInitialized: isInitialized ?? this.isInitialized,
     );
   }
@@ -82,21 +80,7 @@ class SubscriptionNotifier extends StateNotifier<SubscriptionState> {
     }
   }
 
-  Future<void> loadPackages() async {
-    state = state.copyWith(isLoading: true);
-    try {
-      final packages = await _subscriptionService.getAvailablePackages();
-      state = state.copyWith(
-        availablePackages: packages,
-        isLoading: false
-      );
-    } catch (e) {
-      state = state.copyWith(
-        errorMessage: e.toString(),
-        isLoading: false
-      );
-    }
-  }
+
 }
 
 final subscriptionServiceProvider = Provider<SubscriptionService>((ref) {

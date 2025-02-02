@@ -6,12 +6,15 @@ import 'package:flashcardstudyapplication/core/interfaces/i_subscription_service
 import 'package:flashcardstudyapplication/core/services/users/users_service.dart';
 import 'package:flashcardstudyapplication/core/services/revenuecat/revenuecat_service.dart';
 import 'package:flashcardstudyapplication/core/error/error_handler.dart';
+import 'package:flashcardstudyapplication/core/classes/subscriptions.dart';
 
 class SubscriptionService implements ISubscriptionService {
   final SupabaseClient _supabaseClient;
   final UserState _userService;
-
+  
   bool _isInitialized = false;
+  List<Subscription> _subscriptions = [];
+  List<Subscription> get subscriptions => _subscriptions;
 
   SubscriptionService(
     this._supabaseClient,
@@ -30,6 +33,14 @@ class SubscriptionService implements ISubscriptionService {
       final userId = _userService.userId;
       if (userId == null) throw Exception('User not found');
 
+      // Fetch all subscriptions during initialization
+      final response = await _supabaseClient
+        .from('subscriptiontype')
+        .select('*')
+        .eq('is_active', true);
+      
+      _subscriptions = response.map((item) => Subscription.fromJson(item)).toList();
+
       _isInitialized = true;
     } catch (e) {
       throw ErrorHandler.handle(e,
@@ -38,6 +49,35 @@ class SubscriptionService implements ISubscriptionService {
     }
   }
 
+  
+  @override
+  Future<void> purchaseSubscription(String userId, String subType) async {
+    // Update subscription in database
+      late String duration;
+
+    if (subType != 'demo') {
+       duration = 'monthly';
+    } else {
+       duration = 'weekly';
+    }
+
+
+    final subscription = _subscriptions.firstWhere((sub) => sub.subscriptionName == subType);
+    
+    final response = await _supabaseClient.from('user_subscriptions')
+      .update({
+      'subscriptionTypeID': subscription.subscriptionId,
+      'end_date': _calculateEndDate(duration).toIso8601String(),
+    })
+    .eq('user_id', userId);
+
+
+
+
+    if (response.error != null) {
+      throw ErrorHandler.handleDatabaseError(response);
+    }
+    }
   @override
   Future<void> updateSubscription(String userId, String subscriptionTier) async {
     // Update subscription in database
@@ -147,28 +187,8 @@ class SubscriptionService implements ISubscriptionService {
 
 
 
-  // Helper method to validate subscription
-  Future<bool> _validateSubscription(String userId) async {
-    try {
-      // final hasActiveSubscription = await _revenueCatService.hasActiveSubscription();
-      // if (!hasActiveSubscription) return false;
+ 
 
-      final response = await _supabaseClient
-          .from('user_subscriptions')
-          .select('end_date')
-          .eq('user_id', userId)
-          .single();
-
-      if (response['end_date'] < DateTime.now()) {
-        return false;
-      }
-
-      return response['status'] == 'active';
-    } catch (e) {
-      print('Error validating subscription: $e');
-      return false;
-    }
-  }
 
   @override
   Future<List<String>> getAvailablePackages() async {
@@ -189,112 +209,6 @@ class SubscriptionService implements ISubscriptionService {
     }
   }
 
-// @override
-//   Future<bool> purchasePackage(String userId, Package package) async {
-//     try {
-//       if (kIsWeb) {
-//         return await _handleWebPurchase(userId, package);
-//       }
-
-//       // Verify user exists
-//       final userExists = await _userService.getCurrentUserId() == userId;
-//       if (!userExists) {
-//         throw ErrorHandler.handle(
-//           Exception('Invalid user'),
-//           message: 'User not found',
-//           specificType: ErrorType.subscription
-//         );
-//       }
-
-//       // Attempt purchase through RevenueCat
-//       //final success = await _revenueCatService.purchasePackage(package);
-
-//       if (success) {
-//         // Update local database with new subscription
-//         await _updateSubscriptionInDatabase(
-//           userId: userId,
-//           subscriptionTier: package.identifier,
-
-//         );
-
-//         // Verify purchase was successful
-//         final isValid = await validateSubscription(userId);
-//         if (!isValid) {
-//           throw ErrorHandler.handle(
-//             Exception('Purchase validation failed'),
-//             message: 'Could not validate purchase',
-//             specificType: ErrorType.subscription
-//           );
-//         }
-//       }
-
-//       return success;
-//     } catch (e) {
-//       // Handle specific RevenueCat errors
-//       if (e is PurchasesErrorCode) {
-//         switch (e) {
-//           case PurchasesErrorCode.purchaseCancelledError:
-//             return false;
-//           case PurchasesErrorCode.paymentPendingError:
-//             throw ErrorHandler.handle(
-//               e,
-//               message: 'Payment is pending',
-//               specificType: ErrorType.subscription
-//             );
-//           default:
-//             throw ErrorHandler.handle(
-//               e,
-//               message: 'Purchase failed',
-//               specificType: ErrorType.subscription
-//             );
-//         }
-//       }
-
-//       throw ErrorHandler.handle(
-//         e,
-//         message: 'Failed to purchase package',
-//         specificType: ErrorType.subscription
-//       );
-//     }
-//   }
-
-  // Future<bool> validateSubscription(String userId) async {
-  //   try {
-  //     // First check RevenueCat status
-  //    // final hasActiveSubscription = await _revenueCatService.hasActiveSubscription();
-  //    // if (!hasActiveSubscription) return false;
-
-  //     // Then verify with local database
-  //     final response = await _supabaseClient
-  //         .from('user_subscriptions')
-  //         .select('status, end_date')
-  //         .eq('user_id', userId)
-  //         .single();
-
-  //     if (response == null ) {
-  //       return false;
-  //     }
-
-  //     final status = response['status'] as String;
-  //     final endDate = DateTime.parse(response['end_date'] as String);
-
-  //     // Check if subscription is active and not expired
-  //     final isValid = status == 'active' &&
-  //                    endDate.isAfter(DateTime.now());
-
-  //     // If there's a mismatch between RevenueCat and local database,
-  //     // attempt to sync the data
-  //    // if (hasActiveSubscription != isValid) {
-  //    //   await _syncSubscriptionStatus(userId);
-  //    // }
-
-  //     return isValid;
-  //   } catch (e) {
-  //     print('Error validating subscription: $e');
-  //     // In case of error, fall back to RevenueCat status
-  //    return //await _revenueCatService.hasActiveSubscription();
-  //   }
-  // }
 
 
 
@@ -322,28 +236,20 @@ class SubscriptionService implements ISubscriptionService {
     }
   }
 
-  
+  // Get all available subscriptions
+  Future<List<Subscription>> getAllSubscriptions() async {
+    return _subscriptions;
+  }
 
-  @override
-  Future<bool> validateSubscription(String userId) async {
+  // Get a specific subscription by ID
+  Future<Subscription?> getSubscriptionById(String subscriptionId) {
     try {
-      final userId = _userService.userId;
-      if (userId == null) throw Exception('User not found');
-
-      if (kIsWeb) {
-        final response = await getSubscriptionStatus(userId);
-
-        if (response == null) return false;
-
-        return response == 'Active';
-      }
-
-
-      return true;
+      return Future.value(_subscriptions.firstWhere(
+        (sub) => sub.subscriptionId == subscriptionId,
+      ));
     } catch (e) {
-      throw ErrorHandler.handle(e,
-          message: 'Failed to validate subscription',
-          specificType: ErrorType.subscription);
+      return Future.value(null);
     }
   }
+
 }
