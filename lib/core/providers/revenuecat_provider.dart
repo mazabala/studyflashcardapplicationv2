@@ -55,14 +55,13 @@ Future<void> showPaywallIfNeeded(String entitlement) async {
   await state?.showPaywallIfNeeded(entitlement);
 }
 
-Future<void> getCustomerInfo() async {
-  await state?.getCustomerInfo();
+
+
+Future<void> purchasePlan(String offeringName, String entitlementName) async {
+  await state.purchasePlan(offeringName, entitlementName);
 }
 
-Future<List<Offering>> getOfferings() async {
-   
-  return await state?.getOfferings() ?? [];
-}
+
 
 
 

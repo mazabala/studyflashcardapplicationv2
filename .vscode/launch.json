@@ -11,6 +11,14 @@
     },
     "configurations": [
 
+        {
+            "name": "flashcardstudyapplication (Flutter emulator)",
+            "request": "launch",
+            "type": "dart",
+            "deviceId": "emulator-555"
+            
+
+        },
 
         {
             "name": "flashcardstudyapplication",

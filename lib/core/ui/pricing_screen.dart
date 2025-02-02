@@ -28,100 +28,7 @@ class _PricingScreenState extends ConsumerState<PricingScreen> {
 
 
 
-void presentPaywall() async {
-  // Check authentication state
-  final authState = ref.read(authProvider);
-  
-  if (!authState.isAuthenticated) {
-    if (mounted) {
-      // Show a dialog explaining why login is needed
-      await showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-          title: const Text('Login Required'),
-          content: const Text('Please log in to purchase a subscription.'),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop(); // Close dialog
-                Navigator.pushNamed(context, '/login'); // Navigate to login
-              },
-              child: const Text('Login'),
-            ),
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text('Cancel'),
-            ),
-          ],
-        ),
-      );
-    }
-    return; // Exit the method if not authenticated
-  }
 
-   ref.read(catSubManagerProvider.notifier).presentPaywall();
-
-}
-//  Future<void> _handleSubscription(String planName, double price) async {
-//     final user = ref.read(userProvider);
-    
-//     // Check if user is logged in
-//     if (user == null) {
-//       // Navigate to login page
-//       Navigator.pushNamed(context, '/login');
-//       return;
-//     }
-
-//     // Get the subscription state
-//     final subscriptionState = ref.read(subscriptionProvider);
-    
-//     // Find the matching package for the selected plan
-//     final selectedPackage = subscriptionState.availablePackages?.firstWhere(
-//       (package) => package.storeProduct.priceString == '\$${price.toString()}',
-//       orElse: () {
-//         ScaffoldMessenger.of(context).showSnackBar(
-//           const SnackBar(content: Text('Selected package not available')),
-//         );
-//         return subscriptionState.availablePackages!.first; // This line won't be reached
-//       },
-//     );
-
-//     // Early return if packages are null or empty
-//     if (subscriptionState.availablePackages == null || 
-//         subscriptionState.availablePackages!.isEmpty) {
-//       ScaffoldMessenger.of(context).showSnackBar(
-//         const SnackBar(content: Text('No packages available')),
-//       );
-//       return;
-//     }
-
-//     if (selectedPackage == null) {
-//       ScaffoldMessenger.of(context).showSnackBar(
-//         const SnackBar(content: Text('Selected package not available')),
-//       );
-//       return;
-//     }
-
-//     try {
-
-//       // final success = await ref.read(subscriptionProvider.notifier)
-//       //     .purchasePackage(user?.userId ?? '', selectedPackage);
-
-//       if (success) {
-//         ScaffoldMessenger.of(context).showSnackBar(
-//           SnackBar(content: Text('Successfully subscribed to $planName plan!')),
-//         );
-//       } else {
-//         ScaffoldMessenger.of(context).showSnackBar(
-//           const SnackBar(content: Text('Failed to complete subscription')),
-//         );
-//       }
-//     } catch (e) {
-//       ScaffoldMessenger.of(context).showSnackBar(
-//         SnackBar(content: Text('Error: ${e.toString()}')),
-//       );
-//     }
-//   }
   @override
   Widget build(BuildContext context) {
     return CustomScaffold(
@@ -312,7 +219,9 @@ void presentPaywall() async {
               child: ElevatedButton(
                 onPressed: () {
                   //_handleSubscription(planName, price);
-                  presentPaywall();
+                  isPremium 
+                  ? ref.read(catSubManagerProvider.notifier).purchasePlan('basic', 'basic') 
+                  : ref.read(catSubManagerProvider.notifier).purchasePlan('premium', 'premium');
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: isPremium 

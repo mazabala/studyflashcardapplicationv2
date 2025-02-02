@@ -34,31 +34,97 @@ Future<void> initialize() async {
 
 }
 
-Future<void> restorePurchases() async {
+
+Future<void> purchasePlan(String offeringName, String entitlementName) async {
+
+
 
   try {
-  CustomerInfo customerInfo = await Purchases.restorePurchases();
-} on PlatformException catch (e) {
-  print('Error restoring purchases: $e');
-}
-  
-}
+    Offerings offerings = await Purchases.getOfferings();
+    Offering? customOffering = offerings.getOffering(offeringName);
 
-Future<void>checkSubscriptionStatus(String entitlement) async {
+    print ("offerings: $offerings");
+    print(customOffering?.identifier);
 
-  try {
-  CustomerInfo customerInfo = await Purchases.getCustomerInfo();
-  
-  
-  if (customerInfo.activeSubscriptions.isNotEmpty) {
-    print('User has an active subscription'); // Basic
-  } else if (customerInfo.entitlements.all[entitlement]?.isActive == true) {
-    print('User has an active entitlement'); //Advanced
-  } else if(customerInfo.entitlements.all[entitlement]?.isActive == false) {
-    print('User does not have an active subscription'); //Demo
+    if (customOffering != null &&
+        customOffering.availablePackages.isNotEmpty == true) {
+      Package selectedPackage = customOffering.availablePackages![0];
+
+      // Make the purchase
+      CustomerInfo purchaserInfo =
+      await Purchases.purchasePackage(selectedPackage);
+
+      print("Here is the purchase info of the payment");
+      print(purchaserInfo.entitlements);
+
+      // Check if the entitlement is active
+      if (purchaserInfo.entitlements.active.containsKey(entitlementName)) {
+        print("✅ PURCHASE SUCCESSFUL");
+        // Do something after a successful purchase
+        
+
+      }
+    }
+
+    
+  } catch (e) {
+    // Handle platform exceptions
+    print("Platform Exception: $e");
+    
   }
+}
+
+
+Future<bool> restorePurchases() async {
+  try {
+    CustomerInfo customerInfo = await Purchases.restorePurchases();
+    if (customerInfo.entitlements.active.isNotEmpty) {
+      // User has access to some entitlements
+      return true;
+    }
+    return false;
+  } on PlatformException catch (e) {
+    print('Error restoring purchases: $e');
+    return false;
+  }
+}
+
+Future<String>checkSubscriptionStatus(String entitlement) async {
+
+  try {
+      Offerings offerings = await Purchases.getOfferings();
+      Offering? customOffering = offerings.getOffering("default");
+
+      if (customOffering != null && customOffering.availablePackages.isNotEmpty == true)  {
+        // Display packages for sale
+        // For simplicity, let's assume you want to purchase the first available package
+        Package selectedPackage = customOffering.availablePackages[0];
+
+             CustomerInfo customerInfo =
+      await Purchases.purchasePackage(selectedPackage);
+
+
+        if (customerInfo.entitlements.active.containsKey(entitlement)) {
+          print("User has an active entitlement");
+          return entitlement;
+        }
+        else {
+                    return customerInfo.entitlements.active.keys.first;
+        //User is subscribed to PRO plan
+        }
+      } 
+      else {
+        return "No offerings found";
+
+      }
+
+
+   
+
+  
 } on PlatformException catch (e) {
   print('Error checking subscription status: $e');
+  return "Error";
 }
 }
 
@@ -99,3 +165,5 @@ Future<void>showPaywallIfNeeded(String entitlement) async {
 
 
 }
+
+

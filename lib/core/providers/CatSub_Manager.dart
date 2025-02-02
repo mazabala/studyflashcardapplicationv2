@@ -85,26 +85,13 @@ class CatSubNotifier extends StateNotifier<CatSubState> {
 
       }
 
-      // Get RevenueCat service from provider
 
-
-      
-      // Initialize both services
-      
-
-      // Fetch subscription status and packages
-      // await Future.wait([
-      //   ref.read(subscriptionProvider.notifier).fetchSubscriptionStatus(userId),
-      //   ref.read(subscriptionProvider.notifier).loadPackages(),
-      // ]);
 
       // Get customer info from RevenueCat service
       final customerInfo = await ref.read(userProvider).userId;
      // await ref.read(revenueCatClientProvider.notifier).checkSubscriptionStatus(ApiManager.instance.getEntitlementName('Basic'));
-      final packages = await ref.read(revenueCatClientProvider.notifier).getOfferings();
-      print('revencat package: $packages');
-     
-      
+
+   
 
       state = state.copyWith(
         isInitializing: false,
@@ -161,11 +148,15 @@ class CatSubNotifier extends StateNotifier<CatSubState> {
     }
   }
 
+Future<void> purchasePlan(String plan, String entitlement) async {
+  await ref.read(revenueCatClientProvider.notifier).purchasePlan(plan, entitlement);
+}
 
   Future<void> presentPaywall() async {
     
     await ref.read(revenueCatClientProvider.notifier).showPaywallProvider();
   }
+
 }
 
 final catSubManagerProvider = StateNotifierProvider<CatSubNotifier, CatSubState>((ref) {
