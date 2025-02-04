@@ -21,7 +21,6 @@ class SubscriptionState {
     this.isLoading = false,
     this.isExpired = false,
     this.errorMessage = '',
-
     this.isInitialized = false,
   });
 
@@ -80,10 +79,30 @@ class SubscriptionNotifier extends StateNotifier<SubscriptionState> {
     }
   }
 
+Future<void> purchaseSubscription(String userId, String subType) async {
+  await _subscriptionService.purchaseSubscription(userId, subType);
+}
+
+Future<void> upgradeSubscription(String userId, String subType) async {
+  await _subscriptionService.upgradeSubscription(userId, subType);
+}
+
+Future<void> cancelSubscription(String userId) async {  
+  await _subscriptionService.cancelSubscription(userId);
+}
+
+Future<void> renewSubscription(String userId) async {
+  await _subscriptionService.renewSubscription(userId);
+}
+
+
+
 
 }
 
 final subscriptionServiceProvider = Provider<SubscriptionService>((ref) {
+
+
   final supabaseClient = ref.read(supabaseServiceProvider);
   final userService = ref.read(userProvider);
 

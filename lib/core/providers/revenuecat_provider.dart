@@ -57,9 +57,10 @@ Future<void> showPaywallIfNeeded(String entitlement) async {
 
 
 
-Future<void> purchasePlan(String offeringName, String entitlementName) async {
-  await state.purchasePlan(offeringName, entitlementName);
+Future<bool> purchasePlan(String offeringName, String entitlementName) async {
+  return await state.purchasePlan(offeringName, entitlementName);
 }
+
 
 
 

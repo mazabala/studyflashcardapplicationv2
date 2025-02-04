@@ -39,8 +39,9 @@ class SubscriptionService implements ISubscriptionService {
         .select('*')
         .eq('is_active', true);
       
+    
       _subscriptions = response.map((item) => Subscription.fromJson(item)).toList();
-
+      print('subscriptions - ${_subscriptions.length}');
       _isInitialized = true;
     } catch (e) {
       throw ErrorHandler.handle(e,
@@ -53,38 +54,59 @@ class SubscriptionService implements ISubscriptionService {
   @override
   Future<void> purchaseSubscription(String userId, String subType) async {
     // Update subscription in database
+    try {
       late String duration;
 
+      if (subType != 'demo') {
+        duration = 'monthly';
+      } else {
+        duration = 'weekly';
+      }
+
+      final subscription =
+          _subscriptions.firstWhere((sub) => sub.subscriptionName == subType);
+          
+
+
+await _supabaseClient
+  .from('user_subscriptions')
+  .update({
+    'subscriptionTypeID': subscription.subscriptionId,
+    'end_date': _calculateEndDate(duration).toIso8601String() // Use toISOString() for standard format
+  })
+  .eq('user_id', userId);
+
+ 
+
+    
+
+    }  catch (e) {
+      print('userid - $userId - ERROR IS: $e');
+     throw ErrorHandler.handle(e);
+      
+
+    }
+  }
+  
+
+  @override
+  Future<void> upgradeSubscription(String userId, String subType) async {
+        late String duration;
+
     if (subType != 'demo') {
-       duration = 'monthly';
+      duration = 'monthly';
     } else {
-       duration = 'weekly';
+      duration = 'weekly';
     }
 
-
-    final subscription = _subscriptions.firstWhere((sub) => sub.subscriptionName == subType);
+    final subscription =
+        _subscriptions.firstWhere((sub) => sub.subscriptionName == subType);
     
+    // Update subscription in database
     final response = await _supabaseClient.from('user_subscriptions')
       .update({
       'subscriptionTypeID': subscription.subscriptionId,
       'end_date': _calculateEndDate(duration).toIso8601String(),
-    })
-    .eq('user_id', userId);
-
-
-
-
-    if (response.error != null) {
-      throw ErrorHandler.handleDatabaseError(response);
-    }
-    }
-  @override
-  Future<void> updateSubscription(String userId, String subscriptionTier) async {
-    // Update subscription in database
-    final response = await _supabaseClient.from('user_subscriptions')
-      .update({
-      'subscriptionID': subscriptionTier,
-      'end_date': _calculateEndDate(subscriptionTier).toIso8601String(),
     })
     .eq('user_id', userId);
 
@@ -97,12 +119,20 @@ class SubscriptionService implements ISubscriptionService {
   @override
   Future<void> renewSubscription(String userId) async {
     try {
-
-
       final currentTier = await _getCurrentSubscriptionTier(userId);
+    late String duration;
+
+    final subscription =
+        _subscriptions.firstWhere((sub) => sub.subscriptionName == currentTier);
+
+      if (subscription.subscriptionName != 'demo') {
+        duration = 'monthly';
+      } else {
+        duration = 'weekly';
+      }
 
       final response = await _supabaseClient.from('user_subscriptions').update({
-        'end_date': _calculateEndDate(currentTier).toIso8601String(),
+        'end_date': _calculateEndDate(duration).toIso8601String(),
         'status': 'active',
         'renewed_at': DateTime.now().toIso8601String()
       }).eq('user_id', userId);
@@ -122,8 +152,9 @@ class SubscriptionService implements ISubscriptionService {
   Future<void> cancelSubscription(String userId) async {
     try {
       // Update local database
-      final response = await _supabaseClient.from('user_subscriptions').update(
-          {'end_date': DateTime.now().toIso8601String()}).eq('user_id', userId);
+      final response = await _supabaseClient.from('user_subscriptions')
+      .update({'end_date': DateTime.now().toIso8601String(),'is_active': false})
+      .eq('user_id', userId);
 
       if (response.error != null) {
         throw ErrorHandler.handleDatabaseError(response.error!,

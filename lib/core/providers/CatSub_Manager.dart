@@ -82,7 +82,7 @@ class CatSubNotifier extends StateNotifier<CatSubState> {
         await ref
             .read(revenueCatClientProvider.notifier)
             .initialize(ApiManager.instance.getGoogleAPI());
-        print(ApiManager.instance.getGoogleAPI());
+
       }
 
       // Get customer info from RevenueCat service
@@ -109,7 +109,14 @@ class CatSubNotifier extends StateNotifier<CatSubState> {
     }
   }
 
-  
+
+Future<void>updateCustomerInfo() async {
+  final customerInfo = await ref.read(userProvider).userId;
+
+
+  state = state.copyWith(customerID: customerInfo);
+}
+
 
   Future<void> restorePurchases() async {
     try {
@@ -142,7 +149,26 @@ class CatSubNotifier extends StateNotifier<CatSubState> {
   }
 
 Future<void> purchasePlan(String plan, String entitlement) async {
-  await ref.read(revenueCatClientProvider.notifier).purchasePlan(plan, entitlement);
+  final userId = await ref.read(userProvider).userId;
+  if(userId == null){
+    state = state.copyWith(errorMessage: 'User not found');
+    return;
+  }
+try{
+  final isPurchased = await ref.read(revenueCatClientProvider.notifier).purchasePlan(plan, entitlement);
+  if(isPurchased){
+    await ref.read(subscriptionProvider.notifier).purchaseSubscription(userId, plan);
+  }
+
+
+
+
+
+} catch (e) {
+  state = state.copyWith(errorMessage: e.toString());
+}
+
+
 }
 
   Future<void> presentPaywall() async {

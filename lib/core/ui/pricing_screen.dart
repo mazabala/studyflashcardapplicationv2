@@ -18,20 +18,12 @@ class PricingScreen extends ConsumerStatefulWidget {
 class _PricingScreenState extends ConsumerState<PricingScreen> {
   @override
   void initState() {
-    
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(subscriptionProvider.notifier).initialize();
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      await ref.read(subscriptionProvider.notifier).initialize();
 
-
-        ref.read(catSubManagerProvider.notifier).initialize();
-
-
+      ref.read(catSubManagerProvider.notifier).initialize();
     });
-
-
-
-    
   }
 
 
@@ -229,8 +221,9 @@ class _PricingScreenState extends ConsumerState<PricingScreen> {
                 onPressed: () {
                   //_handleSubscription(planName, price);
                   isPremium 
-                  ? ref.read(catSubManagerProvider.notifier).purchasePlan('basic', 'basic') 
-                  : ref.read(catSubManagerProvider.notifier).purchasePlan('premium', 'premium');
+                  ? ref.read(catSubManagerProvider.notifier).purchasePlan('premium', 'premium') 
+                  : ref.read(catSubManagerProvider.notifier).purchasePlan('basic', 'basic');
+
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: isPremium 

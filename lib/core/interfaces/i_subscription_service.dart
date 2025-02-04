@@ -10,7 +10,7 @@ abstract class ISubscriptionService {
   /// [subscriptionTier] The new subscription tier to apply.
   /// 
   /// Throws an error if the subscription update fails or if no active subscription is found.
-  Future<void> updateSubscription(String userId, String subscriptionTier);
+  Future<void> upgradeSubscription(String userId, String subscriptionTier);
 
 
 Future<void> purchaseSubscription(String userId, String subType);

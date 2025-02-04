@@ -36,16 +36,10 @@ await Purchases.configure(
 }
 
 
-Future<void> purchasePlan(String offeringName, String entitlementName) async {
-
-
-
+Future<bool> purchasePlan(String offeringName, String entitlementName) async {
   try { 
     Offerings offerings = await Purchases.getOfferings();
     Offering? customOffering = offerings.getOffering(offeringName);
-
-    print ("offerings: $offerings");
-    print(customOffering?.identifier);
 
     if (customOffering != null &&
         customOffering.availablePackages.isNotEmpty == true) {
@@ -53,25 +47,29 @@ Future<void> purchasePlan(String offeringName, String entitlementName) async {
 
       // Make the purchase
       CustomerInfo purchaserInfo =
-      await Purchases.purchasePackage(selectedPackage);
-
-      print("Here is the purchase info of the payment");
-      print(purchaserInfo.entitlements);
+          await Purchases.purchasePackage(selectedPackage);
 
       // Check if the entitlement is active
       if (purchaserInfo.entitlements.active.containsKey(entitlementName)) {
-        print("✅ PURCHASE SUCCESSFUL");
-        // Do something after a successful purchase
-        
-
+        // Purchase was successful
+        return true;
       }
     }
-
-    
+    return false;
+  } on PlatformException catch (e) {
+    // Check if user cancelled the purchase
+    if (PurchasesErrorHelper.getErrorCode(e) == 
+        PurchasesErrorCode.purchaseCancelledError) {
+      print("Purchase cancelled by user");
+      return false;
+    }
+    // Handle other platform exceptions
+    print("Platform Exception: ${e.message}");
+    return false;
   } catch (e) {
-    // Handle platform exceptions
-    print("Platform Exception: $e");
-    
+    // Handle other types of errors
+    print("Error: $e");
+    return false;
   }
 }
 
@@ -166,5 +164,6 @@ Future<void>showPaywallIfNeeded(String entitlement) async {
 
 
 }
+
 
 
