@@ -5,7 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flashcardstudyapplication/core/ui/widgets/CardCountSlider.dart';  // Make sure to import the slider widget
 
 class CreateDeckDialog extends ConsumerStatefulWidget {
-  final Function(String subject, String concept ,String description, String category, String difficultyLevel, int cardcount) onSubmit;
+  final Function(String topic, String focus , String category, String difficultyLevel, int cardcount) onSubmit;
 
   const CreateDeckDialog({super.key, required this.onSubmit});
 
@@ -24,9 +24,9 @@ class _CreateDeckDialogState extends ConsumerState<CreateDeckDialog> {
   bool _isInitialized = false;
 
   // Declare TextEditingController for the deck title and description
-  final TextEditingController _subjectController = TextEditingController();
-  final TextEditingController _conceptController = TextEditingController();
-  final TextEditingController _descriptionController = TextEditingController();
+  final TextEditingController _topicController = TextEditingController();
+  final TextEditingController _focusController = TextEditingController();
+
   
   double _cardCount = 10.0;  // Initial slider value
 
@@ -90,19 +90,17 @@ class _CreateDeckDialogState extends ConsumerState<CreateDeckDialog> {
               children: [
                 // Deck Title TextField
                 TextField(
-                  controller: _subjectController,
-                  decoration: const InputDecoration(labelText: 'Subject'),
+                  controller: _topicController,
+                  decoration: const InputDecoration(labelText: 'Topic'),
                 ),
                 const SizedBox(height: 8),
+
                 TextField(
-                  controller: _conceptController,
-                  decoration: const InputDecoration(labelText: 'Key Concepts'),
+                  controller: _focusController,
+                  decoration: const InputDecoration(labelText: 'Key Focus'),
                 ),
-                const SizedBox(height: 8),
-                TextField(
-                  controller: _descriptionController,
-                  decoration: const InputDecoration(labelText: 'Context Information'),
-                ),
+
+
 
                 // Replace the TextField with the CardCountSlider widget
                 CardCountSlider(
@@ -165,11 +163,11 @@ class _CreateDeckDialogState extends ConsumerState<CreateDeckDialog> {
         ),
         ElevatedButton(
           onPressed: () {
-            final subject = _subjectController.text;
-            final concept = _conceptController.text;
+            final topic = _topicController.text;
+            final focus = _focusController.text;
             final category = _selectedCategory ?? '';  // Default to empty string if no category selected
             final difficultyLevel = _selectedDifficulty ?? ''; // Default to empty string if no difficulty selected
-            final description = _descriptionController.text;
+    
             final cardcount = _cardCount.toInt();  // Convert the slider value to an integer
 
             if (category.isEmpty || difficultyLevel.isEmpty) {
@@ -179,7 +177,7 @@ class _CreateDeckDialogState extends ConsumerState<CreateDeckDialog> {
             }
 
             // Call the onSubmit callback with the values entered
-            widget.onSubmit(subject, concept, description, category, difficultyLevel, cardcount);
+            widget.onSubmit(topic, focus,  category, difficultyLevel, cardcount);
 
             // Close the dialog after submitting
             if (mounted) {

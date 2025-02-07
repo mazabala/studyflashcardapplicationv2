@@ -328,7 +328,7 @@ Future<List<Flashcard>> _generateFlashcards({
 
   // Create a new deck
   @override  
-  Future<void> createDeck(String topic, String focus ,String description,String category, String difficultyLevel, String userid, int cardCount) async {
+  Future<void> createDeck(String topic, String focus ,String category, String difficultyLevel, String userid, int cardCount) async {
     try {
       bool isPublic = false;
       final deckId = _uuid.v4();
@@ -346,7 +346,7 @@ Future<List<Flashcard>> _generateFlashcards({
         'title': ('$topic - $focus'),
         'subject': topic,
         'concept': focus,
-        'description': description,
+        'description': '',
         'difficulty': difficultyLevel,
         'category_id': categoryid,     // Medicine, Law, etc.   
         'total_cards': flashcards.length,
