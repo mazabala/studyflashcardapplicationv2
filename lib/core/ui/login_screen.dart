@@ -85,12 +85,29 @@ Future<void> _signWithGoogle() async {
       if (isSignUp) {
         final signUpEmailController = TextEditingController();
         final signUpPasswordController = TextEditingController();
+        final signUpNameController = TextEditingController();
+        final signUpLastNameController = TextEditingController();
+
 
     showDialog(
       context: context,
       builder: (context) => CustomDialogWidget(
         title: 'Register',
         dialogContent: [
+          const Text('Enter your name:'),
+          CustomTextField(
+            controller: signUpNameController,
+            label: 'Name',
+            hint: 'Enter your name here',
+
+          ),
+          const Text('Enter your last name:'),
+          CustomTextField(
+            controller: signUpLastNameController,
+            label: 'Last Name',
+            hint: 'Enter your last name here',
+          ),
+
           const Text('Enter your email address:'),
           CustomTextField(
             controller: signUpEmailController,
@@ -108,7 +125,8 @@ Future<void> _signWithGoogle() async {
             text: 'Finish',
             isLoading: false,
             onPressed: () async {
-              await authNotifier.signUp(signUpEmailController.text, signUpPasswordController.text);
+              await authNotifier.signUp(signUpEmailController.text, signUpPasswordController.text, signUpNameController.text, signUpLastNameController.text); //TODO: VERIFY THIS WORKS
+              
               if (mounted) {
                  Navigator.of(context).pop(); 
                   }
