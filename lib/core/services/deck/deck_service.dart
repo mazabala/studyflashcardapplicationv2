@@ -207,10 +207,9 @@ Future<void>flagFlashcard (String flashcardId) async {
 }
 
 Future<List<Flashcard>> _generateFlashcards({
-    required String concept,
-    required String subject,
+    required String topic,
+    required String focus,
     required String category,
-    required String description,
     required String difficultyLevel,
     required int cardCount,
     required String deckid,
@@ -235,10 +234,10 @@ Future<List<Flashcard>> _generateFlashcards({
           },
           {
             'role': 'user',
-            'content': '''Create exactly $cardCount flashcards about $subject in concept of $concept for $difficultyLevel-level clinical students. 
+            'content': '''Create exactly $cardCount flashcards about $topic include $focus generate the content for a $difficultyLevel-level clinical students. 
             The flashcards should include clinical applications, disease mechanisms, pathophysiology, and differential diagnoses based on reliable, evidence-based medical knowledge from trusted sources such as textbooks, clinical guidelines, and peer-reviewed literature. 
             Ensure the content is challenging yet relevant to a clinical student at this level. 
-            Context information: $description
+            
             Category: $category
 
 
@@ -329,7 +328,7 @@ Future<List<Flashcard>> _generateFlashcards({
 
   // Create a new deck
   @override  
-  Future<void> createDeck(String subject, String concept ,String description,String category, String difficultyLevel, String userid, int cardCount) async {
+  Future<void> createDeck(String topic, String focus ,String description,String category, String difficultyLevel, String userid, int cardCount) async {
     try {
       bool isPublic = false;
       final deckId = _uuid.v4();
@@ -344,9 +343,9 @@ Future<List<Flashcard>> _generateFlashcards({
 
       final PostgrestMap response = await _supabaseClient.from('decks').insert({
         'id': deckId,
-        'title': ('$subject - $concept'),
-        'subject': subject,
-        'concept': concept,
+        'title': ('$topic - $focus'),
+        'subject': topic,
+        'concept': focus,
         'description': description,
         'difficulty': difficultyLevel,
         'category_id': categoryid,     // Medicine, Law, etc.   
@@ -372,7 +371,7 @@ Future<List<Flashcard>> _generateFlashcards({
 
       //Generation Flashcards now
 
-      final aiFlashcards = await _generateFlashcards(concept: concept,subject: subject, deckid: deckId, category: category, description: description, difficultyLevel: difficultyLevel, cardCount: cardCount); 
+      final aiFlashcards = await _generateFlashcards(topic: topic,focus: focus, deckid: deckId, category: category, difficultyLevel: difficultyLevel, cardCount: cardCount); 
       
       
       // If there are flashcards, create them with their own UUIDs
@@ -397,10 +396,11 @@ Future<List<Flashcard>> _generateFlashcards({
         .update({'total_cards':flashcardsData.length})
         .eq('id', deckId);
       }
-      print('Deck Created ${subject} - ${concept}');
+      print('Deck Created ${topic} - ${focus}');
     } catch (e) {
       throw ErrorHandler.handle(e);
     }
+
   }
 
   // Update a deck's metadata
