@@ -1,8 +1,8 @@
+import 'package:flashcardstudyapplication/core/providers/provider_config.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flashcardstudyapplication/core/models/deck.dart';
-import 'package:flashcardstudyapplication/core/providers/deck_provider.dart';
-import 'package:flashcardstudyapplication/core/providers/flashcard_provider.dart';
+
 
 class DeckDisplayWidget extends StatelessWidget {
   final List<Deck>? filteredDecks;
@@ -22,9 +22,10 @@ class DeckDisplayWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer(
       builder: (context, ref, child) {
-        final deckState = ref.watch(deckProvider);
-        final flashcardState = ref.watch(flashcardProvider);
+        final deckState = ref.watch(deckStateProvider);
+        final flashcardState = ref.watch(flashcardStateProvider);
         final ThemeData theme = Theme.of(context);
+
 
         if (deckState.isLoading) {
           return const Center(child: CircularProgressIndicator());
@@ -68,10 +69,11 @@ class DeckDisplayWidget extends StatelessWidget {
                 if (!isSearchingNewDecks) {
                   // Proceed with studying if not in search mode
                   try {
-                    await ref.read(flashcardProvider.notifier).getFlashcardsForDeck(deck.id);
+                    await ref.read(flashcardStateProvider.notifier).getFlashcardsForDeck(deck.id);
                     if (context.mounted) {
                       Navigator.pushNamed(context, '/study', arguments: deck);
                     }
+
                   } catch (e) {
                     if (context.mounted) {
                       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error loading flashcards: $e')));
@@ -85,17 +87,19 @@ class DeckDisplayWidget extends StatelessWidget {
                       icon: const Icon(Icons.add),
                       onPressed: () {
                         // Add deck to library logic here
-                         ref.read(deckProvider.notifier).addDecktoUser(deck.id);
+                         ref.read(deckStateProvider.notifier).addDecktoUser(deck.id);
                           onDeckAdded();
                           Navigator.pushNamed(context, '/myDecks');
+
                       },
                     ):
                 IconButton(
                   icon: const Icon(Icons.delete),
-                  onPressed: () => ref.read(deckProvider.notifier).deleteDeck(deck.id),
+                  onPressed: () => ref.read(deckStateProvider.notifier).deleteDeck(deck.id),
                 ),
             );
           },
+
         );
       },
     );

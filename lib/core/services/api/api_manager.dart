@@ -1,3 +1,4 @@
+import 'package:flashcardstudyapplication/core/interfaces/i_api_manager.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flashcardstudyapplication/core/error/error_handler.dart';
@@ -7,7 +8,7 @@ final apiManagerProvider = Provider<ApiManager>((ref) {
   return ApiManager.instance;
 });
 
-class ApiManager {
+class ApiManager implements IApiManager {
   final SupabaseClient _supabaseClient;
   
   Map<String, String> _apiKeys = {};
@@ -32,7 +33,8 @@ class ApiManager {
   }
 
 
-Future<void> initialize() async {
+@override
+  Future<void> initialize() async {
   try {
   final apiManager = ApiManager.instance;
   await apiManager._loadKeysSync();
@@ -101,11 +103,22 @@ Future<void> initialize() async {
     return key;
   }
 
+  @override
   String getRevenueCatApiKey() => _getKey('SandBox_RevenueCat'); // TODO: THIS IS THE SANDBOX ONLY
+
+  @override
   String getEntitlementID() => _getKey('entitlementID');
+
+  @override
   String getGoogleAPI() => _getKey('googleAPI');
+
+  @override
   String getAppleAPI() => _getKey('appleAPI');
+
+  @override
   String getAmazonAPI() => _getKey('amazonAPI');
 
+  @override
   String getEntitlementName(String entitlementName) => _getRevEntitlementID(entitlementName);
+
 }

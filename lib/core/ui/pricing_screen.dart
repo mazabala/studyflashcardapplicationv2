@@ -1,13 +1,11 @@
 import 'package:flashcardstudyapplication/core/providers/CatSub_Manager.dart';
-import 'package:flashcardstudyapplication/core/providers/auth_provider.dart';
-import 'package:flashcardstudyapplication/core/providers/revenuecat_provider.dart';
-import 'package:flashcardstudyapplication/core/providers/subscription_provider.dart';
-import 'package:flashcardstudyapplication/core/providers/user_provider.dart';
+
 import 'package:flashcardstudyapplication/core/themes/colors.dart';
 import 'package:flashcardstudyapplication/core/ui/widgets/CustomScaffold.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:purchases_ui_flutter/purchases_ui_flutter.dart';
+import 'package:flashcardstudyapplication/core/providers/provider_config.dart';
 //import 'package:revenuecat_ui/revenuecat_ui.dart';
 
 class PricingScreen extends ConsumerStatefulWidget {
@@ -20,7 +18,8 @@ class _PricingScreenState extends ConsumerState<PricingScreen> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) async {
-      await ref.read(subscriptionProvider.notifier).initialize();
+      await ref.read(subscriptionStateProvider.notifier).initialize();
+
 
       ref.read(catSubManagerProvider.notifier).initialize();
     });

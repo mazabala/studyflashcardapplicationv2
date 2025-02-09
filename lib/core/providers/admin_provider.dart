@@ -1,4 +1,6 @@
+import 'package:flashcardstudyapplication/core/interfaces/i_admin_service.dart';
 import 'package:flashcardstudyapplication/core/providers/auth_provider.dart';
+import 'package:flashcardstudyapplication/core/providers/provider_config.dart';
 import 'package:flashcardstudyapplication/core/providers/supabase_provider.dart';
 import 'package:flashcardstudyapplication/core/services/authentication/authentication_service.dart';
 import 'package:flashcardstudyapplication/core/services/deck/deck_service.dart';
@@ -44,7 +46,7 @@ class AdminState {
 }
 
 class AdminNotifier extends StateNotifier<AdminState> {
-  final AdminService _adminService;
+  final IAdminService _adminService;
 
   AdminNotifier(this._adminService) : super(const AdminState()) {
     _initializeAdminState();
@@ -167,16 +169,3 @@ class AdminNotifier extends StateNotifier<AdminState> {
     }
   }
 }
-
-// Provider for AdminService
-final adminServiceProvider = Provider<AdminService>((ref) {
-  final supabaseClient = ref.read(supabaseServiceProvider);
-  final authService = ref.read(authServiceProvider);
-  return AdminService(supabaseClient.client, authService as AuthService);
-});
-
-// StateNotifierProvider for AdminNotifier
-final adminProvider = StateNotifierProvider<AdminNotifier, AdminState>((ref) {
-  final adminService = ref.watch(adminServiceProvider);
-  return AdminNotifier(adminService);
-});

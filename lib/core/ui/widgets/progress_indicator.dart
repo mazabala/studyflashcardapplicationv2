@@ -1,3 +1,4 @@
+import 'package:flashcardstudyapplication/core/providers/provider_config.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flashcardstudyapplication/core/providers/flashcard_provider.dart';
@@ -10,8 +11,9 @@ class ProgressIndicatorWidget extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     // Get the flashcard state from the provider
-    final flashcardState = ref.watch(flashcardProvider);
+    final flashcardState = ref.watch(flashcardStateProvider);
     final flashcards = flashcardState.flashcardsByDeck[deckId] ?? [];
+
 
     // If there are no flashcards, no progress to show
     if (flashcards.isEmpty) {

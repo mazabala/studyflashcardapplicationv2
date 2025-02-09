@@ -1,6 +1,7 @@
 import 'dart:io';
 
 
+import 'package:flashcardstudyapplication/core/providers/provider_config.dart';
 import 'package:flashcardstudyapplication/core/providers/user_provider.dart';
 import 'package:flashcardstudyapplication/core/services/revenuecat/revenuecat_service.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -86,15 +87,17 @@ class CatSubNotifier extends StateNotifier<CatSubState> {
       }
 
       // Get customer info from RevenueCat service
-      final customerInfo = await ref.read(userProvider).userId;
+      final customerInfo = await ref.read(userStateProvider).userId;
       // await ref.read(revenueCatClientProvider.notifier).checkSubscriptionStatus(ApiManager.instance.getEntitlementName('Basic'));
+
 
       state = state.copyWith(
         isInitializing: false,
         isInitialized: true,
-        hasSubscription: !ref.read(subscriptionProvider).isExpired,
+        hasSubscription: !ref.read(subscriptionStateProvider).isExpired,
         customerID: customerInfo,
       );
+
 
       if (state.isInitialized == true) {
         print('CatSubManager initialized');
@@ -111,7 +114,8 @@ class CatSubNotifier extends StateNotifier<CatSubState> {
 
 
 Future<void>updateCustomerInfo() async {
-  final customerInfo = await ref.read(userProvider).userId;
+  final customerInfo = await ref.read(userStateProvider).userId;
+
 
 
   state = state.copyWith(customerID: customerInfo);
@@ -149,7 +153,7 @@ Future<void>updateCustomerInfo() async {
   }
 
 Future<void> purchasePlan(String plan, String entitlement) async {
-  final userId = await ref.read(userProvider).userId;
+  final userId = await ref.read(userStateProvider).userId;
   if(userId == null){
     state = state.copyWith(errorMessage: 'User not found');
     return;
@@ -157,8 +161,9 @@ Future<void> purchasePlan(String plan, String entitlement) async {
 try{
   final isPurchased = await ref.read(revenueCatClientProvider.notifier).purchasePlan(plan, entitlement);
   if(isPurchased){
-    await ref.read(subscriptionProvider.notifier).purchaseSubscription(userId, plan);
+    await ref.read(subscriptionStateProvider.notifier).purchaseSubscription(userId, plan);
   }
+
 
 
 

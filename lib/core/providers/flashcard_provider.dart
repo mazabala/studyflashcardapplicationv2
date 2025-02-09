@@ -1,4 +1,5 @@
 // flashcard_state.dart
+import 'package:flashcardstudyapplication/core/interfaces/i_deck_service.dart';
 import 'package:flashcardstudyapplication/core/models/deck.dart';
 import 'package:flashcardstudyapplication/core/models/flashcard.dart';
 import 'package:flashcardstudyapplication/core/providers/deck_provider.dart';
@@ -38,7 +39,7 @@ class FlashcardState {
 }
 
 class FlashcardNotifier extends StateNotifier<FlashcardState> {
-  final DeckService _deckService;
+  final IDeckService _deckService;
 
   FlashcardNotifier(this._deckService) : super(const FlashcardState());
 
@@ -119,8 +120,3 @@ Future<void> reportCard(Flashcard flashcard) async{
     state = state.copyWith(currentCardIndex: 0, isFlipped: false);
   }
 }
-// providers.dart
-final flashcardProvider = StateNotifierProvider<FlashcardNotifier, FlashcardState>((ref) {
-  final deckService = ref.watch(deckServiceProvider);
-  return FlashcardNotifier(deckService);
-});

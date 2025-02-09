@@ -1,11 +1,16 @@
 // lib/core/interfaces/i_deck_service.dart
 
-
 import 'package:flashcardstudyapplication/core/models/deck.dart';
+import 'package:flashcardstudyapplication/core/models/flashcard.dart';
 
 abstract class IDeckService {
+  Future<List<String>> getDeckDifficulty(String? subscriptionId);
 
+  Future<void> flagFlashcard(String flashcardId);
 
+  Future<List<Deck>> loadDeckPool(String userId);
+  
+  Future<List<Flashcard>> getFlashcards(String deckid);
   // Add the missing method to get details of a single deck
   Future<List<Deck>> getDeckDetails(List<String> deckIds);
 
@@ -18,13 +23,17 @@ abstract class IDeckService {
   //Future<void> systemCreateDeck(List<SystemDeckConfig> configs, String userId);
 
   // Create a new deck
-  Future<void> createDeck(String topic, String focus,String category, String difficultyLevel, String userid, int cardCount);
+  Future<void> createDeck(String topic, String focus, String category,
+      String difficultyLevel, String userid, int cardCount);
   // Update dec
-  Future<void> updateDeck(String deckId, String title, String difficultyLevel, String userid);
+  Future<void> updateDeck(
+      String deckId, String title, String difficultyLevel, String userid);
 
   // Delete deck
   Future<void> removeDeck(String deckId);
 
   //Get deck category
-  Future<List> getDeckCategory();
+  Future<List<String>> getDeckCategory();
+
+  Future<void> addDeckCategory(String category);
 }

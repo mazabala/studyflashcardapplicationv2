@@ -1,6 +1,7 @@
 import 'package:flashcardstudyapplication/core/models/deck.dart';
 import 'package:flashcardstudyapplication/core/navigation/router_manager.dart';
 import 'package:flashcardstudyapplication/core/providers/auth_provider.dart';
+import 'package:flashcardstudyapplication/core/providers/provider_config.dart';
 import 'package:flashcardstudyapplication/core/services/deck/deck_service.dart';
 import 'package:flashcardstudyapplication/core/ui/widgets/CategoryMultiSelect.dart';
 import 'package:flashcardstudyapplication/core/ui/widgets/CustomButton.dart';
@@ -63,8 +64,9 @@ TextEditingController _cardCountController = TextEditingController();
     try {
       print('in the my deck screen ui, initializeServices');
       // First check if user is authenticated
-      final userState = ref.read(authProvider);
+      final userState = ref.read(authStateProvider);
       
+
       if (!userState.isAuthenticated) {
         // Instead of showing a dialog, just navigate to login
         if (mounted) {
@@ -75,10 +77,11 @@ TextEditingController _cardCountController = TextEditingController();
       
       // Then check if user is admin (only if authenticated)
       _checkSystemUser();
-      if (ref.read(deckProvider).deckloaded == false) {
+      if (ref.read(deckStateProvider).deckloaded == false) {
         await _loadUserDecks();
       }
       isInitialized = true;
+
     } catch (e) {
       print('Initialization error: $e');
       // Instead of showing dialog, you could use a SnackBar or just log the error
@@ -97,7 +100,8 @@ TextEditingController _cardCountController = TextEditingController();
   void _checkSystemUser() {
    
     // Watch the provider instead of just reading it once
-    final userState = ref.watch(userProvider);
+    final userState = ref.watch(userStateProvider);
+
 
     print(userState.isAdmin);
     // Check both isAdmin and role for superAdmin
@@ -135,8 +139,9 @@ TextEditingController _cardCountController = TextEditingController();
   
     final deckReader = ref.read(deckServiceProvider);
 
-    final userService = ref.read(userProvider);
+    final userService = ref.read(userStateProvider);
     
+
 
     return await deckReader.getDeckDifficulty(userService.subscriptionPlanID);
   }
@@ -144,10 +149,11 @@ TextEditingController _cardCountController = TextEditingController();
 
   void _searchNewDecks() async {
     try {
-      final decks = await ref.read(deckProvider.notifier).loadAvailableDecks();
+      final decks = await ref.read(deckStateProvider.notifier).loadAvailableDecks();
       if (mounted) { // Ensure the widget is still mounted before calling setState
         setState(() {
           print('decks: $decks');
+
           if (decks.isEmpty || decks == []) {
             print('decks is empty');
             isSearchingNewDecks = false;
@@ -174,8 +180,9 @@ TextEditingController _cardCountController = TextEditingController();
 
   // Function to handle logout
   Future<void> _signOut() async {
-    final authNotifier = ref.read(authProvider.notifier);
+    final authNotifier = ref.read(authStateProvider.notifier);
     await authNotifier.signOut(); // Ensure signOut is called using the notifier
+
 
     if (mounted) { // Check if widget is still mounted before navigating
       Navigator.pushReplacementNamed(context, '/login');
@@ -188,17 +195,19 @@ TextEditingController _cardCountController = TextEditingController();
   void _createDeck() async {
     final deckCategory = await _getDeckCategory();
     final deckDifficulty = await _getDeckDifficulty();
-    final userService = ref.read(userProvider);
+    final userService = ref.read(userStateProvider);
     
+
 
     showDialog(
       context: context,
       builder: (context) {
         return CreateDeckDialog(
-          onSubmit: (String subject, String concept, String description, String category, String difficultyLevel, int cardCount) async {
+          onSubmit: (String subject, String concept,  String category, String difficultyLevel, int cardCount) async {
             final userId = userService.userId;
             if (userId != null) {
-              await ref.read(deckProvider.notifier).createDeck(subject, concept, description, category, difficultyLevel, userId, cardCount);
+              await ref.read(deckStateProvider.notifier).createDeck(subject, concept, category, difficultyLevel, userId, cardCount);
+
 
               if (mounted) { // Ensure the widget is still mounted before popping
                 _loadUserDecks(); // Refresh the deck list
@@ -214,15 +223,16 @@ TextEditingController _cardCountController = TextEditingController();
 
   // Function to load user decks from the service
   Future<void> _loadUserDecks() async {
-    final userService = ref.read(userProvider);
+    final userService = ref.read(userStateProvider);
     
+
     final userId = userService.userId;
 
     if (userId != null) {
         print('(inside the if statement) loading users decks with user id: $userId');
         
-      await ref.read(deckProvider.notifier).loadUserDecks(userId);
-      final decks = ref.read(deckProvider).decks;
+      await ref.read(deckStateProvider.notifier).loadUserDecks(userId);
+      final decks = ref.read(deckStateProvider).decks;
 
       if (mounted) { // Ensure the widget is still mounted before calling setState
         setState(() {
@@ -278,7 +288,8 @@ TextEditingController _cardCountController = TextEditingController();
     final String currentRoute = ModalRoute.of(context)?.settings.name ?? '/';
 
     // Check subscription status using the subscription provider
-    final subscriptionStatus = ref.watch(subscriptionProvider);
+    final subscriptionStatus = ref.watch(subscriptionStateProvider);
+
 
     // If subscription is expired, show the blocking dialog
     if (subscriptionStatus.isExpired) {

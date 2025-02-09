@@ -1,3 +1,4 @@
+import 'package:flashcardstudyapplication/core/providers/provider_config.dart';
 import 'package:flashcardstudyapplication/core/providers/user_provider.dart';
 import 'package:flashcardstudyapplication/core/themes/colors.dart';
 import 'package:flashcardstudyapplication/core/ui/widgets/CustomButton.dart';
@@ -11,10 +12,12 @@ class UserProfileScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final userState = ref.watch(userProvider);
+    final userState = ref.watch(userStateProvider);
     
-    final userNotifier = ref.read(userProvider.notifier);
+
+    final userNotifier = ref.read(userStateProvider.notifier);
      
+
 
     return CustomScaffold(
       currentRoute: '/userProfile',
@@ -157,8 +160,9 @@ class UserProfileScreen extends ConsumerWidget {
 
   Future<void> deleteAccountDialog(BuildContext context, WidgetRef ref) async {
 
-    final userNotifier = ref.read(userProvider.notifier);
+    final userNotifier = ref.read(userStateProvider.notifier);
  
+
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -187,9 +191,10 @@ class UserProfileScreen extends ConsumerWidget {
 
     TextEditingController firstNameController = TextEditingController();
     TextEditingController lastNameController = TextEditingController();
-    final userNotifier = ref.read(userProvider.notifier);
-    final userState = ref.watch(userProvider);
+    final userNotifier = ref.read(userStateProvider.notifier);
+    final userState = ref.watch(userStateProvider);
     
+
 
 
     showDialog(

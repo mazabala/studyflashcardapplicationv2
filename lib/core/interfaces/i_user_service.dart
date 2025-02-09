@@ -6,6 +6,7 @@ abstract class IUserService {
   Future<void> updateUserProfile(String name, String email, String userId);
   Future<void> upgradeSubscription(String planType);
   Future<void> downgradeSubscription(String planType);
+  Future<void> deleteUser(String userid);
 
   
 }

@@ -1,17 +1,20 @@
-import 'package:flashcardstudyapplication/core/providers/deck_provider.dart';
-import 'package:flashcardstudyapplication/core/providers/user_provider.dart';
+
+import 'package:flashcardstudyapplication/core/providers/provider_config.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flashcardstudyapplication/core/themes/app_theme.dart';
 import 'package:flashcardstudyapplication/core/models/deck.dart';
+
 
 class DeckManagementPage extends ConsumerWidget {
   const DeckManagementPage({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final deckState = ref.watch(deckProvider);
+    final deckState = ref.watch(deckStateProvider);
     
+
     return Scaffold(
       appBar: AppBar(
         title: Text('Deck Management', style: Theme.of(context).textTheme.labelLarge),
@@ -73,8 +76,9 @@ class DeckListView extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final deckState = ref.watch(deckProvider);
+    final deckState = ref.watch(deckStateProvider);
     final decks = deckState.decks;
+
 
     if (decks.isEmpty) {
       return const Center(child: Text('No decks available'));
@@ -116,10 +120,11 @@ class DeckListView extends ConsumerWidget {
               Navigator.pop(context);
               final scaffoldMessenger = ScaffoldMessenger.of(context);
               try {
-                await ref.read(deckProvider.notifier).deleteDeck(deck.id);
+                await ref.read(deckStateProvider.notifier).deleteDeck(deck.id);
                 if (!context.mounted) return;
                 scaffoldMessenger.showSnackBar(
                   SnackBar(content: Text('${deck.title} deleted')),
+
                 );
               } catch (e) {
                 if (!context.mounted) return;
@@ -182,10 +187,11 @@ class _DeckDetailsViewState extends ConsumerState<DeckDetailsView> {
             ),
             const SizedBox(height: 16),
             FutureBuilder<List<String>>(
-              future: ref.read(deckProvider.notifier)
+              future: ref.read(deckStateProvider.notifier)
                   .getDeckDifficulty(widget.deck.id),
               builder: (context, snapshot) {
                 if (snapshot.hasData) {
+
                   return DropdownButtonFormField<String>(
                     value: _selectedDifficulty,
                     decoration: const InputDecoration(labelText: 'Difficulty Level'),
@@ -209,10 +215,11 @@ class _DeckDetailsViewState extends ConsumerState<DeckDetailsView> {
                 final scaffoldMessenger = ScaffoldMessenger.of(context);
                 final navigator = Navigator.of(context);
                 try {
-                  await ref.read(deckProvider.notifier).updateDeck(
+                  await ref.read(deckStateProvider.notifier).updateDeck(
                     widget.deck.id,
                     _titleController.text,
                     _selectedDifficulty ?? widget.deck.difficultyLevel,
+
                   );
                   if (!context.mounted) return;
                   navigator.pop();
@@ -258,8 +265,9 @@ class _CreateDeckPageState extends ConsumerState<CreateDeckPage> {
 
   @override
   Widget build(BuildContext context) {
-    final userSubPlan = ref.watch(userProvider).subscriptionPlanID;
+    final userSubPlan = ref.watch(userStateProvider).subscriptionPlanID;
     
+
     return Scaffold(
       appBar: AppBar(
         title: Text('Create Deck', style: Theme.of(context).textTheme.labelLarge),
@@ -282,10 +290,11 @@ class _CreateDeckPageState extends ConsumerState<CreateDeckPage> {
               ),
               const SizedBox(height: 16),
               FutureBuilder<List<String>>(
-                future: ref.read(deckProvider.notifier).getDeckCategory(),
+                future: ref.read(deckStateProvider.notifier).getDeckCategory(),
                 builder: (context, snapshot) {
                   if (snapshot.hasData) {
                     return DropdownButtonFormField<String>(
+
                       value: _selectedCategory,
                       decoration: const InputDecoration(labelText: 'Category'),
                       items: snapshot.data!.map((category) {
@@ -304,9 +313,10 @@ class _CreateDeckPageState extends ConsumerState<CreateDeckPage> {
               ),
               const SizedBox(height: 16),
               FutureBuilder<List<String>>(
-                future: ref.read(deckProvider.notifier)
+                future: ref.read(deckStateProvider.notifier)
                     .getDeckDifficulty(userSubPlan as String),  // Replace with actual subscription ID
                 builder: (context, snapshot) {
+
                   if (snapshot.hasData) {
                     return DropdownButtonFormField<String>(
                       value: _selectedDifficulty,
@@ -344,12 +354,13 @@ class _CreateDeckPageState extends ConsumerState<CreateDeckPage> {
                   }
                   
                   try {
-                    final userId = ref.watch(userProvider).userId;
+                    final userId = ref.watch(userStateProvider).userId;
                     // await ref.read(deckProvider.notifier).createDeck(
                     //   _titleController.text,
                     //   _selectedCategory!,
                     //   _descriptionController.text,
                     //   _selectedDifficulty!,
+
                     //   userId ?? '',
                     //   int.parse(_cardCountController.text) as String,
                     // );
@@ -411,7 +422,7 @@ class _AddCategoryPageState extends ConsumerState<AddCategoryPage> {
                 final scaffoldMessenger = ScaffoldMessenger.of(context);
                 final navigator = Navigator.of(context);
                 try {
-                  await ref.read(deckProvider.notifier)
+                  await ref.read(deckStateProvider.notifier)
                       .addDeckCategory(_categoryController.text);
                   if (!context.mounted) return;
                   navigator.pop();

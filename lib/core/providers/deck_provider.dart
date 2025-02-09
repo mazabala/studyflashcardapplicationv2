@@ -1,6 +1,8 @@
+import 'package:flashcardstudyapplication/core/interfaces/i_deck_service.dart';
+import 'package:flashcardstudyapplication/core/interfaces/i_user_service.dart';
 import 'package:flashcardstudyapplication/core/models/flashcard.dart';
-import 'package:flashcardstudyapplication/core/providers/auth_provider.dart' as app_auth;
-import 'package:flashcardstudyapplication/core/providers/user_provider.dart';
+
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flashcardstudyapplication/core/models/deck.dart';
@@ -8,19 +10,8 @@ import 'package:flashcardstudyapplication/core/services/deck/deck_service.dart';
 import 'package:flashcardstudyapplication/core/services/api/api_client.dart';
 import 'package:flashcardstudyapplication/core/services/users/users_service.dart';
 
-/// Direct Service Injection within the provider file
-final supabaseClientProvider = Provider<SupabaseClient>((ref) {
-  return Supabase.instance.client;
-});
 
 
-
-/// DeckService injected with SupabaseClient and ApiClient directly
-final deckServiceProvider = Provider<DeckService>((ref) {
-  final supabaseClient = ref.watch(supabaseClientProvider);
-  final apiClient = ref.watch(apiClientProvider);
-  return DeckService(supabaseClient, apiClient);
-});
 
 
 
@@ -57,24 +48,23 @@ class DeckState {
 
 /// DeckNotifier to manage the state of the deck
 class DeckNotifier extends StateNotifier<DeckState> {
-  final DeckService _deckService;
-  final UserState _userService;
+  final IDeckService _deckService;
+  final IUserService _userService;
   final Ref ref;
 
   DeckNotifier(this._deckService, this._userService, this.ref) : super( DeckState()) {
     // Listen to auth state changes
-    ref.listen<app_auth.AuthState>(app_auth.authProvider, (previous, next) {
-      
-    });
+ 
+ 
   }   
 
   Future<void> _loadUserDecks(String ?userId) async {
     if (userId == null) {
-      final usernewId = _userService.userId;
+      final usernewId = await _userService.getCurrentUserInfo();
       if (usernewId == null) {
         throw Exception("User is not logged in");
       }
-      userId = usernewId;
+      userId = usernewId['id'];
     }
     await loadUserDecks(userId);
   }
@@ -112,16 +102,17 @@ Future<List<Flashcard>> getDeckFlashcards (String deckid) async
     }
 }
 
-  Future<void> createDeck(String subject,String concept,String description,String category, String difficultyLevel, String userid,int cardCount) async {
+  Future<void> createDeck(String subject,String concept,String category, String difficultyLevel, String userid,int cardCount) async {
     state = state.copyWith(isLoading: true, error: '');
     try {
-      final userId = _userService.userId;
+      final userId = _userService.getCurrentUserInfo();
       if (userId == null) {
         throw Exception("User is not logged in");
       }
-      final userSubscription = _userService.subscriptionPlanID;
 
-      await _deckService.createDeck(subject, concept, description, category, difficultyLevel, userid, cardCount);  
+      final userSubscription = _userService.getCurrentUserInfo();
+
+      await _deckService.createDeck(subject, concept,  category, difficultyLevel, userid, cardCount);  
       
       //final decks = await _deckService.getUserDecks(userId);
       //state = state.copyWith(decks: decks);
@@ -138,16 +129,18 @@ Future<List<Flashcard>> getDeckFlashcards (String deckid) async
 
   try {
 
-    final userId = _userService.userId;
+    final userId = await _userService.getCurrentUserInfo();
     if (userId == null) {
       throw Exception("User is not logged in");
     }
 
-    final decks = await _deckService.loadDeckPool(userId);
+
+    final decks = await _deckService.loadDeckPool(userId['id']);
     if (decks != null) {
           state = state.copyWith(decks: decks);
           return decks; 
         }
+
         else return [];
 // Return the list of decks
   } catch (e) {
@@ -163,12 +156,13 @@ Future<void>addDecktoUser(String deckId) async {
 try{
     state = state.copyWith(isLoading: true, error: '');
     
-    final userId = _userService.userId;
+    final userId = await _userService.getCurrentUserInfo();
     if (userId == null) {
       throw Exception("User is not logged in");
     }
+
     
-    await _deckService.decktoUser(deckId, userId);
+    await _deckService.decktoUser(deckId, userId['id']);
 
 
   }
@@ -184,23 +178,28 @@ try{
 
 }
 
- Future<List<Deck>> loadUserDecks(String ?userId) async {
+ Future<List<Deck>> loadUserDecks(String? userId) async {
   try {
     //state = state.copyWith(isLoading: true);
     
+    String userIdToUse;
     if (userId == null) {
-      final usernewId = _userService.userId;
-      if (usernewId == null) {
-        state = state.copyWith(error: "User is not logged in", isLoading: false);
-        return [];
-      }
-      userId = usernewId;
+        final userInfo = await _userService.getCurrentUserInfo();
+        if(userInfo == null) {
+          state = state.copyWith(error: "User is not logged in", isLoading: false);
+          return [];
+        }
+        userIdToUse = userInfo['id'];
+    } else {
+      userIdToUse = userId;
     }
-    
-    final decks = await _deckService.getUserDecks(userId);
+
+    final decks = await _deckService.getUserDecks(userIdToUse);
     // Always update state with the decks, even if empty
     print('decks: $decks');
+
     state = state.copyWith(decks: decks, isLoading: false, deckloaded: true);
+
     return decks;
 
   } catch (e) {
@@ -208,21 +207,22 @@ try{
     final errorMsg = e.toString();
     state = state.copyWith(error: errorMsg, isLoading: false, decks: []);
     rethrow;
-    
   }
 }
  
   Future<void> updateDeck(String deckId, String title, String difficultyLevel) async {
     state = state.copyWith(isLoading: true, error: '');
-    try {
-      final userId = _userService.userId;
+        try {
+      final userId = await _userService.getCurrentUserInfo();
       if (userId == null) {
         throw Exception("User is not logged in");
+
       }
 
-      await _deckService.updateDeck(deckId, title, difficultyLevel, userId);
-      final decks = await _deckService.getUserDecks(userId);
+      await _deckService.updateDeck(deckId, title, difficultyLevel, userId['id']);
+      final decks = await _deckService.getUserDecks(userId['id']);
       state = state.copyWith(decks: decks);
+
     } catch (e) {
       state = state.copyWith(error: e.toString());
     } finally {
@@ -233,14 +233,16 @@ try{
   Future<void> deleteDeck(String deckId) async {
     state = state.copyWith(isLoading: true, error: '');
     try {
-      final userId = _userService.userId;
+      final userId = await _userService.getCurrentUserInfo();
       if (userId == null) {
         throw Exception("User is not logged in");
+
       }
 
       await _deckService.removeDeck(deckId);
-      final decks = await _deckService.getUserDecks(userId);
+      final decks = await _deckService.getUserDecks(userId['id']);
       state = state.copyWith(decks: decks);
+
     } catch (e) {
       state = state.copyWith(error: e.toString());
     } finally {
@@ -259,10 +261,11 @@ Future<List<String>> getDeckDifficulty(String subcriptionID) async{
 
 Future<List<String>> getDeckCategory() async{  
   try{
-    final deckCategory = _deckService.getDeckCategory();
+    final deckCategory = await _deckService.getDeckCategory();
     return deckCategory;
   }catch (error)
   {throw Exception(error);}
+
 }
 
 Future<void> addDeckCategory(String category) async {
@@ -304,10 +307,3 @@ try{
 
 }
 
-/// Provider for DeckNotifier that ties together DeckService and UserService
-final deckProvider = StateNotifierProvider<DeckNotifier, DeckState>((ref) {
-  final deckService = ref.watch(deckServiceProvider);
-  final userService = ref.watch(userProvider);
- 
-  return DeckNotifier(deckService, userService,ref);
-});

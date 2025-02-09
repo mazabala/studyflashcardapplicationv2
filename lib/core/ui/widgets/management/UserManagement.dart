@@ -1,6 +1,6 @@
 // user_management_page.dart
-import 'package:flashcardstudyapplication/core/providers/admin_provider.dart';
-import 'package:flashcardstudyapplication/core/providers/user_provider.dart';
+
+import 'package:flashcardstudyapplication/core/providers/provider_config.dart';
 import 'package:flashcardstudyapplication/core/ui/widgets/CustomButton.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -11,8 +11,9 @@ class UserManagementPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final userState = ref.watch(userProvider);
+    final userState = ref.watch(userStateProvider);
     
+
     return Scaffold(
       appBar: AppBar(
         title: Text('User Management', style: Theme.of(context).textTheme.titleMedium),
@@ -45,10 +46,11 @@ class UserActions extends ConsumerWidget {
         children: [
           ElevatedButton(
             onPressed: () async {
-              final userNotifier = ref.read(userProvider.notifier);
-              final isAdmin = ref.watch(userProvider).isAdmin;
+              final userNotifier = ref.read(userStateProvider.notifier);
+              final isAdmin = ref.watch(userStateProvider).isAdmin;
               if (isAdmin != null && isAdmin) {
                 _navigateTo(context, CreateUserPage());
+
               } else {
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(content: Text('Only admins can create users')),
@@ -87,8 +89,9 @@ class _UserListViewState extends ConsumerState<UserListView> {
   void initState() {
     super.initState();
     // Load users when the widget is initialized
-    Future.microtask(() => ref.read(adminProvider.notifier).loadUsers());
+    Future.microtask(() => ref.read(adminStateProvider.notifier).loadUsers());
   }
+
 
   @override
   void dispose() {
@@ -98,7 +101,8 @@ class _UserListViewState extends ConsumerState<UserListView> {
 
   @override
   Widget build(BuildContext context) {
-    final adminState = ref.watch(adminProvider);
+    final adminState = ref.watch(adminStateProvider);
+
 
     return Column(
       children: [
@@ -186,16 +190,18 @@ class _UserListViewState extends ConsumerState<UserListView> {
             ListTile(
               title: const Text('User'),
               onTap: () {
-                ref.read(adminProvider.notifier).updateUserRole(userId, 'user');
+                ref.read(adminStateProvider.notifier).updateUserRole(userId, 'user');
                 Navigator.pop(context);
               },
+
             ),
             ListTile(
               title: const Text('Admin'),
               onTap: () {
-                ref.read(adminProvider.notifier).updateUserRole(userId, 'admin');
+                ref.read(adminStateProvider.notifier).updateUserRole(userId, 'admin');
                 Navigator.pop(context);
               },
+
             ),
           ],
         ),
@@ -214,16 +220,18 @@ class _UserListViewState extends ConsumerState<UserListView> {
             ListTile(
               title: const Text('Free'),
               onTap: () {
-                ref.read(adminProvider.notifier).updateUserSubscription(userId, 'free');
+                ref.read(adminStateProvider.notifier).updateUserSubscription(userId, 'free');
                 Navigator.pop(context);
               },
+
             ),
             ListTile(
               title: const Text('Premium'),
               onTap: () {
-                ref.read(adminProvider.notifier).updateUserSubscription(userId, 'premium');
+                ref.read(adminStateProvider.notifier).updateUserSubscription(userId, 'premium');
                 Navigator.pop(context);
               },
+
             ),
           ],
         ),
@@ -244,11 +252,12 @@ class _UserListViewState extends ConsumerState<UserListView> {
           ),
           TextButton(
             onPressed: () {
-              ref.read(adminProvider.notifier).deleteUser(userId);
+              ref.read(adminStateProvider.notifier).deleteUser(userId);
               Navigator.pop(context);
             },
             child: const Text('Delete'),
           ),
+
         ],
       ),
     );
@@ -259,7 +268,8 @@ void editProfileDialog(BuildContext context, String userId, WidgetRef ref) {
 
     TextEditingController firstNameController = TextEditingController();
     TextEditingController lastNameController = TextEditingController();
-    final userNotifier = ref.read(userProvider.notifier);
+    final userNotifier = ref.read(userStateProvider.notifier);
+
 
     print('userId to edit: $userId');
     showDialog(
@@ -309,7 +319,8 @@ class UserDetailsView extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final userState = ref.watch(userProvider);
+    final userState = ref.watch(userStateProvider);
+
 
 
     return Scaffold(
@@ -340,9 +351,10 @@ class UserDetailsView extends ConsumerWidget {
             ElevatedButton(
               onPressed: () {
                 // Implement upgrade subscription logic
-                ref.read(userProvider.notifier).upgradeSubscription('premium');
+                ref.read(userStateProvider.notifier).upgradeSubscription('premium');
               },
               child: const Text('Upgrade Subscription'),
+
             ),
           ],
         ),
@@ -354,7 +366,8 @@ class UserDetailsView extends ConsumerWidget {
 class ReviewMembershipPage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final userState = ref.watch(userProvider);
+    final userState = ref.watch(userStateProvider);
+
 
     return Scaffold(
       appBar: AppBar(
@@ -378,10 +391,11 @@ class ReviewMembershipPage extends ConsumerWidget {
            const SizedBox(height: 16),
             ElevatedButton(
               onPressed: () {
-                ref.read(userProvider.notifier).upgradeSubscription('premium');
+                ref.read(userStateProvider.notifier).upgradeSubscription('premium');
               },
               child: Text('Upgrade to Premium'),
             ),
+
           ],
         ),
       ),
@@ -414,9 +428,10 @@ class CreateUserPage extends ConsumerWidget {
             ElevatedButton(
               onPressed: () async {
                 try {
-                  await ref.read(adminProvider.notifier)
+                  await ref.read(adminStateProvider.notifier)
                       .inviteUser(emailController.text);
                   Navigator.pop(context);
+
                 } catch (e) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(content: Text(e.toString())),

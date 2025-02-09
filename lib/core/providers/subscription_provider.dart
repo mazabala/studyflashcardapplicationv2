@@ -1,6 +1,7 @@
 // lib/core/providers/subscription_provider.dart
 
 import 'package:flashcardstudyapplication/core/providers/auth_provider.dart';
+import 'package:flashcardstudyapplication/core/providers/provider_config.dart';
 import 'package:flashcardstudyapplication/core/providers/supabase_provider.dart';
 
 import 'package:flashcardstudyapplication/core/providers/user_provider.dart';
@@ -99,30 +100,3 @@ Future<void> renewSubscription(String userId) async {
 
 
 }
-
-final subscriptionServiceProvider = Provider<SubscriptionService>((ref) {
-
-
-  final supabaseClient = ref.read(supabaseServiceProvider);
-  final userService = ref.read(userProvider);
-
-  return SubscriptionService(
-    supabaseClient.client,
-    userService,
-  );
-});
-
-final subscriptionProvider = StateNotifierProvider<SubscriptionNotifier, SubscriptionState>((ref) {
-  final subscriptionService = ref.watch(subscriptionServiceProvider);
-  return SubscriptionNotifier(subscriptionService);
-});
-
-final safeSubscriptionProvider = Provider<SubscriptionState>((ref) {
-  final authState = ref.watch(authProvider);
-  
-  if (!authState.isAuthenticated) {
-    return SubscriptionState(); // Return default state
-  }
-  
-  return ref.watch(subscriptionProvider);
-});

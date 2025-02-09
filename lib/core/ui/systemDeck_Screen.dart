@@ -1,4 +1,5 @@
 import 'package:flashcardstudyapplication/core/providers/deck_provider.dart';
+import 'package:flashcardstudyapplication/core/providers/provider_config.dart';
 import 'package:flashcardstudyapplication/core/providers/user_provider.dart';
 import 'package:flashcardstudyapplication/core/services/deck/deck_service.dart';
 import 'package:flutter/material.dart';
@@ -30,8 +31,9 @@ class _SystemDeckScreenState extends ConsumerState<SystemDeckScreen> {
   Future<void> _loadInitialData() async {
     try {
       final difficulties = await _getDeckDifficulty();
-      final categories = await ref.read(deckProvider.notifier).getDeckCategory();
+      final categories = await ref.read(deckStateProvider.notifier).getDeckCategory();
       
+
       if (mounted) {
         setState(() {
           _difficulties = difficulties;
@@ -52,9 +54,10 @@ class _SystemDeckScreenState extends ConsumerState<SystemDeckScreen> {
   Future<List<String>> _getDeckDifficulty() async {
     final deckReader = ref.read(deckServiceProvider);
     final userReader = ref.read(userServiceProvider);
-    final userService = ref.read(userProvider);
+    final userService = ref.read(userStateProvider);
     final subscriptionId = userService.subscriptionPlanID;
     return await deckReader.getDeckDifficulty(subscriptionId);
+
   }
 
   void _toggleCategory(String category) {
@@ -72,8 +75,8 @@ class _SystemDeckScreenState extends ConsumerState<SystemDeckScreen> {
   Future<void> _addCategory(String newCategory) async {
     if (newCategory.isEmpty) return;
     
-    await ref.read(deckProvider.notifier).addDeckCategory(newCategory);
-    final categories = await ref.read(deckProvider.notifier).getDeckCategory();
+    await ref.read(deckStateProvider.notifier).addDeckCategory(newCategory);
+    final categories = await ref.read(deckStateProvider.notifier).getDeckCategory();
     
     if (mounted) {
       setState(() {

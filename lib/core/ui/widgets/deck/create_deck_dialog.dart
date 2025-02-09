@@ -1,4 +1,5 @@
 import 'package:flashcardstudyapplication/core/providers/deck_provider.dart';
+import 'package:flashcardstudyapplication/core/providers/provider_config.dart';
 import 'package:flashcardstudyapplication/core/providers/user_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -51,7 +52,7 @@ class _CreateDeckDialogState extends ConsumerState<CreateDeckDialog> {
     try {
       final deckReader = ref.read(deckServiceProvider);
       final userReader = ref.read(userServiceProvider);
-      final subscriptionId = ref.watch(userProvider).subscriptionPlanID;
+      final subscriptionId = ref.watch(userStateProvider).subscriptionPlanID;
       final deckDifficulty = await deckReader.getDeckDifficulty(subscriptionId);
 
       if (mounted) {

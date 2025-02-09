@@ -35,7 +35,8 @@ class DeckService implements IDeckService {
 
 
 
-Future<List<Flashcard>> getFlashcards(String deckid) async{
+@override
+  Future<List<Flashcard>> getFlashcards(String deckid) async{
 
 // Fetch associated flashcards for the deck (list result)
     
@@ -62,8 +63,6 @@ Future<List<Flashcard>> getFlashcards(String deckid) async{
       rethrow;}
 }
 
-
- 
   // Implement missing method getDeckDetails
   @override
   Future<List<Deck>> getDeckDetails(List<String> deckId) async {   
@@ -125,6 +124,7 @@ Future<List<Deck>> getUserDecks(String userId) async {
   }
 }
 
+ @override
 Future<List<Deck>> loadDeckPool (String userId) async {
 
 try {
@@ -190,7 +190,7 @@ Future <Map<String, dynamic>> _getModelConfig(String deckDifficultyIds) async {
 
 }
 
-
+ @override
 Future<void>flagFlashcard (String flashcardId) async {
     try {
             final response = await _supabaseClient.from('flashcards')
@@ -575,6 +575,7 @@ Future<List<String>> getDeckCategory() async
    return (deckCategory as List)
    .map((deckCat) => deckCat['name'].toString())
    .toList();
+   
     }catch (e)
     {print (e);
       throw ErrorHandler.handle(e);}
@@ -631,10 +632,11 @@ Future<String> _getDeckCategoryID(String categoryName) async
 
 
 }
-
+@override
 Future<void> addDeckCategory(String category) async {
   try{
   final PostgrestMap response = await _supabaseClient.from('categories').insert(
+
     {'name': category})
     .select()
     .single();

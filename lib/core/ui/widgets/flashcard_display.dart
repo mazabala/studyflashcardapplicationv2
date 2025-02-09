@@ -2,7 +2,8 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flashcardstudyapplication/core/providers/flashcard_provider.dart';
+import 'package:flashcardstudyapplication/core/providers/provider_config.dart';
+
 
 class FlashcardDisplay extends ConsumerWidget {
   final String deckId;
@@ -15,9 +16,10 @@ class FlashcardDisplay extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
-    final flashcardState = ref.watch(flashcardProvider);
+    final flashcardState = ref.watch(flashcardStateProvider);
     final flashcards = flashcardState.flashcardsByDeck[deckId] ?? [];
     
+
     if (flashcards.isEmpty) {
       return const Center(child: Text('No flashcards available'));
     }
@@ -69,9 +71,10 @@ class FlashcardDisplay extends ConsumerWidget {
                       // Report Button
                   GestureDetector(
                     onTap: () async {
-                      await ref.read(flashcardProvider.notifier).reportCard(currentFlashcard);
+                      await ref.read(flashcardStateProvider.notifier).reportCard(currentFlashcard);
                       if (flashcardState.currentCardIndex >= 0) {
-                        ref.read(flashcardProvider.notifier).nextCard(deckId, flashcardState.currentCardIndex);
+                        ref.read(flashcardStateProvider.notifier).nextCard(deckId, flashcardState.currentCardIndex);
+
                       }
                     },
                     child: Container(
@@ -121,7 +124,7 @@ class FlashcardDisplay extends ConsumerWidget {
             Expanded(
               child: GestureDetector(
                 onTap: () {
-                  ref.read(flashcardProvider.notifier).toggleFlip();
+                  ref.read(flashcardStateProvider.notifier).toggleFlip();
                 },
                 child: Container(
                   margin: const EdgeInsets.all(16),

@@ -1,3 +1,4 @@
+import 'package:flashcardstudyapplication/core/interfaces/i_auth_service.dart';
 import 'package:flashcardstudyapplication/core/providers/user_provider.dart';
 import 'package:flashcardstudyapplication/core/services/authentication/authentication_service.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -8,7 +9,7 @@ import 'package:flashcardstudyapplication/core/services/deck/deck_service.dart';
 
 class AdminService implements IAdminService {
   final SupabaseClient _supabaseClient;
-  final AuthService _authService;
+  final IAuthService _authService;
 
 
   AdminService(this._supabaseClient, this._authService);

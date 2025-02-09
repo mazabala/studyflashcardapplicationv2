@@ -2,6 +2,7 @@
 
 import 'dart:developer';
 
+import 'package:flashcardstudyapplication/core/providers/provider_config.dart';
 import 'package:flashcardstudyapplication/core/providers/user_provider.dart';
 import 'package:flashcardstudyapplication/core/services/revenuecat/revenuecat_service.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -11,9 +12,7 @@ import 'package:purchases_flutter/models/offering_wrapper.dart';
 import 'package:purchases_ui_flutter/purchases_ui_flutter.dart'; // Import ApiClient
 import 'package:flashcardstudyapplication/core/services/api/api_manager.dart'; // Add this import
 
-final revenueCatClientProvider = StateNotifierProvider<RevenueCatNotifier, RevenueCatService>((ref) {
-  return RevenueCatNotifier(ref);
-});
+
 
 class RevenueCatNotifier extends StateNotifier<RevenueCatService> {
   final Ref ref;
@@ -24,7 +23,7 @@ class RevenueCatNotifier extends StateNotifier<RevenueCatService> {
   Future<void> initialize(String apiKey) async {
     try {
 
-      final user = ref.read(userProvider);
+      final user = ref.read(userStateProvider);
       final userId = user.userId;
 
       print('revenuecat initialized');

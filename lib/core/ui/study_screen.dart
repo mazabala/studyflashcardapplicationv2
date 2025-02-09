@@ -5,10 +5,11 @@ import 'package:flashcardstudyapplication/core/ui/widgets/CustomScaffold.dart';
 import 'package:flashcardstudyapplication/core/ui/widgets/navigation_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flashcardstudyapplication/core/providers/flashcard_provider.dart';
+import 'package:flashcardstudyapplication/core/providers/provider_config.dart';
 import 'package:flashcardstudyapplication/core/ui/widgets/flashcard_display.dart';
 import 'package:flashcardstudyapplication/core/ui/widgets/progress_indicator.dart';
 import 'package:flashcardstudyapplication/core/ui/widgets/progress_button.dart';
+
 
 
 class StudyScreen extends ConsumerWidget {
@@ -26,9 +27,10 @@ class StudyScreen extends ConsumerWidget {
 
     final controller = StudyScreenController(ref: ref, deckId: deckId);
    
-    final flashcardState = ref.watch(flashcardProvider);
+    final flashcardState = ref.watch(flashcardStateProvider);
     final flashcards = flashcardState.flashcardsByDeck[deckId] ?? [];
     final String currentRoute = ModalRoute.of(context)?.settings.name ?? '/';
+
     return CustomScaffold(
       currentRoute: currentRoute,
       body: Column(

@@ -1,4 +1,6 @@
+import 'package:flashcardstudyapplication/core/interfaces/i_user_service.dart';
 import 'package:flashcardstudyapplication/core/providers/auth_provider.dart';
+import 'package:flashcardstudyapplication/core/providers/provider_config.dart';
 import 'package:flashcardstudyapplication/core/providers/supabase_provider.dart';
 import 'package:flashcardstudyapplication/core/services/api/api_manager.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -54,7 +56,7 @@ class UserState {
 
 // UserNotifier to manage user-related state
 class UserNotifier extends StateNotifier<UserState> {
-  final UserService userService;
+  final IUserService userService;
   final Ref ref;
 
   UserNotifier(this.userService, this.ref) : super(UserState());
@@ -62,7 +64,7 @@ class UserNotifier extends StateNotifier<UserState> {
   Future<void> initializeUser() async {
     try {
       print('in the user provider, initialize');
-      final authState = ref.read(authProvider);
+      final authState = ref.read(authStateProvider);
       if (!authState.isAuthenticated) {
         print('user is not authenticated in the user provider');
         state = UserState(); // Reset state if not authenticated
@@ -160,17 +162,5 @@ class UserNotifier extends StateNotifier<UserState> {
 
 }
 
-// Define the Riverpod provider for the user
-final userProvider = StateNotifierProvider<UserNotifier, UserState>((ref) {
-  final userService = ref.read(userServiceProvider);
-  return UserNotifier(userService, ref);
-});
 
 
-
-// Define a provider for UserService
-final userServiceProvider = Provider<UserService>((ref) {
-  final supabaseClient = ref.read(supabaseServiceProvider);
-  final apiService = ref.read(apiClientProvider); // This assumes you have an apiClientProvider
-  return UserService(supabaseClient.client, apiService);
-});

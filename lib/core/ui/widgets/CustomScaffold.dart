@@ -1,9 +1,11 @@
 import 'dart:math';
 
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flashcardstudyapplication/core/providers/auth_provider.dart';
+import 'package:flashcardstudyapplication/core/providers/provider_config.dart';
 import 'dart:io' show Platform;
+
 
 class CustomScaffold extends ConsumerStatefulWidget {
   final String currentRoute;
@@ -38,8 +40,8 @@ class _CustomScaffoldState extends ConsumerState<CustomScaffold> {
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     
-    final authNotifier = ref.watch(authProvider.notifier);
-    final bool isLoggedIn = ref.watch(authProvider).isAuthenticated;
+    final authNotifier = ref.watch(authStateProvider.notifier);
+    final bool isLoggedIn = ref.watch(authStateProvider).isAuthenticated;
     final bool isSmallScreen = MediaQuery.of(context).size.width < 600;
 
     return Scaffold(
@@ -65,7 +67,7 @@ class _CustomScaffoldState extends ConsumerState<CustomScaffold> {
               ),
               child: isSmallScreen 
                 ? _buildMobileHeader()
-                : _buildWebHeader(isLoggedIn, authNotifier),
+                : _buildWebHeader(isLoggedIn, ref),
             ),
             Expanded(
               child: widget.useScroll
@@ -80,7 +82,7 @@ class _CustomScaffoldState extends ConsumerState<CustomScaffold> {
           ],
         ),
       ),
-      endDrawer: isSmallScreen ? _buildDrawer(isLoggedIn, authNotifier) : null,
+      endDrawer: isSmallScreen ? _buildDrawer(isLoggedIn, ref) : null,
     );
   }
 
@@ -107,7 +109,7 @@ class _CustomScaffoldState extends ConsumerState<CustomScaffold> {
     );
   }
 
-  Widget _buildWebHeader(bool isLoggedIn, AuthNotifier authNotifier) {
+  Widget _buildWebHeader(bool isLoggedIn, WidgetRef ref) {
     return Row(
       children: [
         Image.asset(
@@ -123,9 +125,8 @@ class _CustomScaffoldState extends ConsumerState<CustomScaffold> {
               _buildNavLink('Decks & Flashcards', '/deck'),
               _buildNavLink('Pricing', '/prices'),
               if (isLoggedIn) ...[
-               
                 _buildNavLink('My Decks', '/myDecks'),
-                _buildNavButton('Logout', null, authNotifier),
+                _buildNavButton('Logout', null, ref),
               ] else ...[
                 _buildNavLink('Login', '/login'),
               ]
@@ -148,13 +149,13 @@ class _CustomScaffoldState extends ConsumerState<CustomScaffold> {
     );
   }
 
-  Widget _buildNavButton(String label, String? route, AuthNotifier auth) {
+  Widget _buildNavButton(String label, String? route, WidgetRef ref) {
     return TextButton(
       onPressed: () async {
         if (route != null) {
           _navigateWithoutAnimation(context, route);
         } else {
-          await auth.signOut();
+          await ref.read(authStateProvider.notifier).signOut();
           if (mounted) {
             _navigateWithoutAnimation(context, '/');
           }
@@ -168,7 +169,7 @@ class _CustomScaffoldState extends ConsumerState<CustomScaffold> {
     );
   }
 
-  Widget _buildDrawer(bool isLoggedIn, AuthNotifier auth) {
+  Widget _buildDrawer(bool isLoggedIn, WidgetRef ref) {
     return Drawer(
       child: ListView(
         padding: EdgeInsets.zero,
@@ -197,7 +198,7 @@ class _CustomScaffoldState extends ConsumerState<CustomScaffold> {
               title: const Text('Logout'),
               onTap: () async {
                 Navigator.pop(context);
-                await auth.signOut();
+                await ref.read(authStateProvider.notifier).signOut();
                 if (mounted) {
                   _navigateWithoutAnimation(context, '/');
                 }

@@ -1,10 +1,12 @@
 import 'package:flashcardstudyapplication/core/ui/widgets/CustomDialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flashcardstudyapplication/core/providers/auth_provider.dart';
+
+import 'package:flashcardstudyapplication/core/providers/provider_config.dart';
 import 'package:flashcardstudyapplication/core/ui/widgets/CustomScaffold.dart';
 import 'package:flashcardstudyapplication/core/ui/widgets/CustomTextField.dart';
 import 'package:flashcardstudyapplication/core/ui/widgets/CustomButton.dart';
+
 
 class LoginScreen extends ConsumerStatefulWidget {
   @override
@@ -47,10 +49,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   }
 
 Future<void> _signWithGoogle() async {
-    final authNotifier = ref.read(authProvider.notifier);
+    final authNotifier = ref.read(authStateProvider.notifier);
     await authNotifier.googleSignin();
 
-    final isAuthed = ref.read(authProvider).isAuthenticated;
+
+    final isAuthed = ref.read(authStateProvider).isAuthenticated;
+
 
     if (isAuthed) {
       Navigator.pushReplacementNamed(context, '/myDecks');
@@ -58,10 +62,12 @@ Future<void> _signWithGoogle() async {
   }
 
   Future<void> _signInWithApple() async {
-    final authNotifier = ref.read(authProvider.notifier);
+    final authNotifier = ref.read(authStateProvider.notifier);
     await authNotifier.signInWithApple();
 
-    final isAuthed = ref.read(authProvider).isAuthenticated;
+
+    final isAuthed = ref.read(authStateProvider).isAuthenticated;
+
 
     if (isAuthed) {
       Navigator.pushReplacementNamed(context, '/myDecks');
@@ -78,8 +84,9 @@ Future<void> _signWithGoogle() async {
 
     final email = _emailController.text.trim();
     final password = _passwordController.text.trim();
-    final authNotifier = ref.read(authProvider.notifier);
+    final authNotifier = ref.read(authStateProvider.notifier);
   
+
 
     try {
       if (isSignUp) {
@@ -146,7 +153,8 @@ Future<void> _signWithGoogle() async {
             // Add a small delay to ensure initialization
       await Future.delayed(const Duration(milliseconds: 500));
 
-      final authState = ref.read(authProvider);
+      final authState = ref.read(authStateProvider);
+
       if (authState.isAuthenticated) {
         if (mounted) {
           Navigator.pushReplacementNamed(context, '/myDecks');
@@ -161,9 +169,10 @@ else dispose();
   }
 
 void _onForgotPasswordTapped() {
-    final authWatcher = ref.watch(authProvider.notifier);
-    final authState = ref.watch(authProvider);
+    final authWatcher = ref.watch(authStateProvider.notifier);
+    final authState = ref.watch(authStateProvider);
     final resetEmailController = TextEditingController();
+
 
     showDialog(
       context: context,
@@ -196,8 +205,9 @@ void _onForgotPasswordTapped() {
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
     final isWeb = size.width > 800;
-    final authState = ref.watch(authProvider);
+    final authState = ref.watch(authStateProvider);
  
+
 
     Widget loginForm = Form(
       key: _formKey,
