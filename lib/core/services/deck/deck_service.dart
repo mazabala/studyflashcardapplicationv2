@@ -2,6 +2,7 @@
 
 
 import 'dart:convert';
+import 'dart:developer';
 
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flashcardstudyapplication/core/models/deck.dart';
@@ -161,34 +162,113 @@ rethrow;
 }
 
 Future <Map<String, dynamic>> _getModelConfig(String deckDifficultyIds) async {
-  
-  try
-  {
-  final  deckDifficultyId = await _supabaseClient
-  .from('api_model')
-  .select()
-  .single();
-  //.eq(column, value) in the future, this can be a adjusted by the subscription if needed.
+  try {
+    final deckDifficultyId = await _supabaseClient
+      .from('api_model')
+      .select()
+      .single();
+    
 
 
-  final config = {
 
+    final config = {
       'model': deckDifficultyId['model'],
-      'top_p':deckDifficultyId['top_p'],
+      'top_p': deckDifficultyId['top_p'],
       'temperature': await _getDeckTemp(deckDifficultyIds),
-      'max_tokens': await _getDeckMaxTokens(deckDifficultyIds)
+      'max_tokens': await _getDeckMaxTokens(deckDifficultyIds),
+      'cost_prompt': deckDifficultyId['cost_prompt'],
+      'cost_flashcard': deckDifficultyId['cost_flashcard']
 
+    };
+    
+    log('Final config: $config');
+    return config;
+  } catch (e) {
+    print('Error setting modelconfig: $e');
+    rethrow;
+  }
+}
 
-  };
-  print ('config: $config');
-  return config;
-  } catch (e)
-  {print ('Error setting modelconfig: $e');
-  rethrow;
+int _getDeckCost(int cardCount, int flashcardcost, int promptcost) {
+    int totalTokens = (cardCount * flashcardcost) + promptcost;
+
+    return totalTokens;
   }
 
+  int _getbatches(int deckcost, int maxTokens) {
+    int batches = (deckcost / maxTokens).ceil();
 
-}
+    return batches;
+  }
+Future<Map<String, dynamic>> _generateBody(String difficultyLevel,
+      int cardCount, String topic, String focus, String category) async {
+    // 1. Get the system prompt and API model configuration based on difficulty level
+
+    final deckdifficulty = await _getDeckDifficultyID(difficultyLevel);
+
+    final systemPrompt = await _getDifficultyPrompt(deckdifficulty);
+
+    final apiModel = await _getModelConfig(deckdifficulty);
+
+    final model = apiModel
+      ..remove('cost_prompt')
+      ..remove('cost_flashcard');
+
+    late final num bodycards;
+
+    final deckcost = _getDeckCost(
+        cardCount, apiModel['cost_flashcard'], apiModel['cost_prompt']);
+
+    log('Deck cost: $deckcost');
+
+    final batches = _getbatches(deckcost, apiModel['max_tokens']);
+
+    log('Batches: $batches');
+
+    if (deckcost > apiModel['max_tokens']) {
+      bodycards = cardCount / batches;
+    } else {
+      bodycards = cardCount;
+    }
+
+// 2. Construct the request body
+
+    final body = {
+      ...model,
+      'deckcost': [deckcost],
+      'batches': [batches],
+      'max_tokens': [apiModel['max_tokens']],
+      'messages': [
+        {
+          'role': 'system',
+          'content': systemPrompt,
+        },
+        {
+          'role': 'user',
+          'content':
+              '''Create exactly $bodycards $difficultyLevel-level questions and answers based on $topic with focus on $focus. 
+            The flashcards should include clinical applications, disease mechanisms, pathophysiology, and differential diagnoses based on reliable, evidence-based medical knowledge from trusted sources such as textbooks, clinical guidelines, and peer-reviewed literature. 
+            Ensure the content is challenging yet relevant to a clinical student at this level. 
+            Category: $category
+            Return ONLY a JSON array in this exact format: [{\"front\":\"question text\", \"back\":\"answer text\"}]
+            Note: If a concept cannot be verified through academic sources, exclude it.'''
+        }
+      ],
+    };
+
+    return body;
+  }
+
+  Future<Map<String, dynamic>> _apiPost(Map<String, dynamic> body) async {
+    try {
+      final response = await _apiService.post('', body: jsonEncode(body));
+
+
+      return response;
+    } catch (e) {
+      throw ErrorHandler.handle(e);
+    }
+  }
 
  @override
 Future<void>flagFlashcard (String flashcardId) async {
@@ -215,94 +295,111 @@ Future<List<Flashcard>> _generateFlashcards({
     required String deckid,
   }) async {
     try {
-      // 1. Get the system prompt and API model configuration based on difficulty level
-      final deckdifficulty = await _getDeckDifficultyID(difficultyLevel);
-      
-      
-      final systemPrompt = await _getDifficultyPrompt(deckdifficulty);
-      final apiModel = await _getModelConfig(deckdifficulty);
+      // 1. Generate the body
 
-      
-      
-      // 2. Construct the request body
-      final body = {
-        ...apiModel,
-        'messages': [
-          {
-            'role': 'system',
-            'content': systemPrompt,
-          },
-          {
-            'role': 'user',
-            'content': '''Create exactly $cardCount flashcards about $topic include $focus generate the content for a $difficultyLevel-level clinical students. 
-            The flashcards should include clinical applications, disease mechanisms, pathophysiology, and differential diagnoses based on reliable, evidence-based medical knowledge from trusted sources such as textbooks, clinical guidelines, and peer-reviewed literature. 
-            Ensure the content is challenging yet relevant to a clinical student at this level. 
-            
-            Category: $category
+      final body = await _generateBody(
+          difficultyLevel, cardCount, topic, focus, category);
+
+      // 2. Make the POST request to generate flashcards
+
+      final deckcost = body['deckcost'][0];
+
+      final batches = body['batches'][0];
+
+      final maxTokens = body['max_tokens'][0];
+
+      List<Flashcard> allFlashcards = [];
+
+      if (deckcost > maxTokens) {
+        // Remove batch-related fields from body
+
+        body.remove('deckcost');
+
+        body.remove('batches');
+
+        body.remove('max_tokens');
 
 
-            Return ONLY a JSON array in this exact format: [{\"front\":\"question text\", \"back\":\"answer text\"}]
-            
-            Note: If a concept cannot be verified through academic sources, exclude it.'''
-          }
-        ],
-      };
 
-   
- 
-      print('body: $body');
+        // Generate flashcards in batches
 
-      final bodyJson = jsonEncode(body);
-      // 3. Make the POST request to generate flashcards
-      final response = await _apiService.post('', body: bodyJson);
-      
-     
-      // 4. Handle the response and convert it to a list of Flashcards
-      //final data = jsonDecode(response);
-      final content = response['choices'][0]['message']['content'].trim();
+        for (var i = 0; i < batches; i++) {
+          final response = await _apiPost(body);
 
-      
-      if (content.length>1) {
-        List<dynamic> cards;
-               try {
-                 
-                 cards = jsonDecode(content) as List;
-               } catch (e) {
-                 print('JSON parsing error: $e');
-                 print('Problematic content: $content end of content');
-                 throw Exception('Failed to parse API response as JSON. Response was not a valid JSON array.');
-               }
+          final batchFlashcards =
+              await _processApiResponse(response, deckid, difficultyLevel);
+
+          allFlashcards.addAll(batchFlashcards);
+
+          // If we've generated enough cards, break
+
+          if (allFlashcards.length >= cardCount) break;
+        }
+      } else {
+        final response = await _apiPost(body);
+
+        allFlashcards =
+            await _processApiResponse(response, deckid, difficultyLevel);
+      }
+
+      // Ensure we don't return more cards than requested
+
+      return allFlashcards.take(cardCount).toList();
+    } catch (e) {
+      print('Error generating flashcards: $e');
+
+      rethrow;
+    }
+  }
+
+  Future<List<Flashcard>> _processApiResponse(Map<String, dynamic> response,
+      String deckid, String difficultyLevel) async {
+    final content = response['choices'][0]['message']['content'].trim();
+
+    // Clean the content by removing markdown code block indicators
+
+    final cleanContent =
+        content.replaceAll('```json', '').replaceAll('```', '').trim();
+
+    log('Cleaned content: $cleanContent');
+
+    if (cleanContent.length > 1) {
+      List<dynamic> cards;
+
+      try {
+        cards = jsonDecode(cleanContent) as List;
+      } catch (e) {
+        log('JSON parsing error: $e');
+
+        log('Problematic content: $cleanContent');
+
+        throw Exception(
+            'Failed to parse API response as JSON. Response was not a valid JSON array.');
+      }
 
       // Validate and convert cards
+
       return cards.map((card) {
         if (!card.containsKey('front') || !card.containsKey('back')) {
           throw Exception('Invalid card format: Missing front or back field');
         }
-        
+
         return Flashcard(
-          id: DateTime.now().millisecondsSinceEpoch.toString(),
-          deckid: deckid,
-          front: card['front'].toString(),
-          back: card['back'].toString(),
-          difficultyLevel: difficultyLevel,
-          created_at: DateTime.now().millisecondsSinceEpoch.toString(),
-          last_reviewed: DateTime.now().millisecondsSinceEpoch.toString()
-        );
+            id: DateTime.now().millisecondsSinceEpoch.toString(),
+            deckid: deckid,
+            front: card['front'].toString(),
+            back: card['back'].toString(),
+            difficultyLevel: difficultyLevel,
+            created_at: DateTime.now().millisecondsSinceEpoch.toString(),
+            last_reviewed: DateTime.now().millisecondsSinceEpoch.toString());
       }).toList();
-
-
-
-      } else {
-        throw Exception('Failed to generate flashcards');
-      }
-      
-
-
-    } catch (e) {
-      print('Error generating flashcards: $e');
-      rethrow;
+    } else {
+      throw Exception('Failed to generate flashcards');
     }
   }
+
+
+
 
   // Add a flashcard to a specific deck
   @override
@@ -645,42 +742,6 @@ Future<void> addDeckCategory(String category) async {
 
 }
 
-// In deck_service.dart
-
-// Add this method to the DeckService class
-
-//   @override
-//   Future<void> systemCreateDeck(List<SystemDeckConfig> configs, String userId) async {
-//   try {
-
-
-//     // Create decks using existing createDeck method
-//     for (var config in configs) {
-
-       
-//        print('Category: ${config.category}');
-//        print('Description: ${config.description}');
-
-//       // Generate system-specific title
-//       final title = '${config.category} - ${config.description}';
-      
-//       // Use existing createDeck method but add system-specific handling
-//       await createDeck(
-//         title,
-//         config.category,
-//         config.description,
-//         config.difficultyLevel,
-//         userId,
-//         config.cardCount
-//       );
-
-
-//     }
-//   } catch (e) {
-//     print('Error in systemCreateDeck: $e');
-//     throw ErrorHandler.handle(e);
-//   }
-// }
 
 
 }
