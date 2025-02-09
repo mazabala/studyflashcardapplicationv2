@@ -1,5 +1,5 @@
-import 'package:flashcardstudyapplication/core/providers/auth_provider.dart';
-import 'package:flashcardstudyapplication/core/providers/revenuecat_provider.dart';
+
+
 import 'package:flutter/material.dart';
 import 'package:flashcardstudyapplication/core/services/api/api_client.dart';
 import 'package:flashcardstudyapplication/core/themes/app_theme.dart';
