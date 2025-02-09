@@ -188,12 +188,13 @@ _setupAuthListener();
     }
   }
 
-  Future<void> signUp(String email, String password) async {
+  Future<void> signUp(String email, String password, String firstName, String lastName) async {
     state = state.copyWith(isLoading: true, errorMessage: null);
     
     try {
       // Sign the user up
-     final AuthResponse response = await _authService.signUp(email, password);
+     final AuthResponse response = await _authService.signUp(email, password, firstName, lastName);
+
 
      if (response.user != null) {
       // Update the authentication state only if we have a valid user

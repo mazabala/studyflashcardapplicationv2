@@ -58,11 +58,18 @@ class AuthService implements IAuthService {
   }
 
   @override
-  Future<AuthResponse> signUp(String useremail, String userpassword) async {
+  Future<AuthResponse> signUp(String useremail, String userpassword, String firstName, String lastName) async {
     try {
       final response = await _supabaseClient.auth.signUp(
         email: useremail,
-        password: userpassword );
+        password: userpassword,
+        data: {
+          'first_name': firstName,
+          'last_name': lastName,
+        },
+      );
+
+
 
       // Since email confirmation is disabled, we should have both user and session
       if (response.user == null || response.session == null) {
