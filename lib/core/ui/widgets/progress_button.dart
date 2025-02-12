@@ -1,4 +1,5 @@
 import 'package:flashcardstudyapplication/core/ui/study_screen_controller.dart';
+import 'package:flashcardstudyapplication/core/ui/widgets/CustomButton.dart';
 import 'package:flutter/material.dart';
 
 
@@ -12,14 +13,20 @@ class ProgressButtonWidget extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        ElevatedButton(
+        CustomButton(
+          text: 'Incorrect',
+          isLoading: false,
+          icon: Icons.close,
           onPressed: () => controller.handleIncorrect(),  // Correct answer
-          child: const Text('Incorrect'),
+          
         ),
         const SizedBox(width: 16),
-        ElevatedButton(
+        CustomButton(
+          text: 'Correct',
+          isLoading: false,
+          icon: Icons.check,
           onPressed: () => controller.handleCorrect(),  // Incorrect answer
-          child: const Text('Correct'),
+          
         ),
       ],
     );

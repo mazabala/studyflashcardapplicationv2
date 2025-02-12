@@ -5,6 +5,7 @@ class CustomButton extends StatelessWidget {
   final bool isLoading;
   final VoidCallback? onPressed;
   final IconData? icon;
+  final IconData? postIcon;
   final bool iconOnly;
   final String? tooltip;
 
@@ -14,6 +15,7 @@ class CustomButton extends StatelessWidget {
     required this.isLoading,
     required this.onPressed,
     this.icon,
+    this.postIcon,
     this.iconOnly = false,
     this.tooltip,
   }) : assert(
@@ -40,9 +42,13 @@ class CustomButton extends StatelessWidget {
               children: [
                 if (icon != null) ...[
                   Icon(icon),
-                  const SizedBox(width: 8),
+                  const SizedBox(width: 2),
                 ],
                 Text(text!),
+                if (postIcon != null) ...[
+                  const SizedBox(width: 2),
+                  Icon(postIcon),
+                ],
               ],
             ),
     );

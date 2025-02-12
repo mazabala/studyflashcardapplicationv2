@@ -1,4 +1,5 @@
 import 'package:flashcardstudyapplication/core/ui/study_screen_controller.dart';
+import 'package:flashcardstudyapplication/core/ui/widgets/CustomButton.dart';
 import 'package:flutter/material.dart';
 
 class NavigationButtonsWidget extends StatelessWidget {
@@ -25,22 +26,24 @@ class NavigationButtonsWidget extends StatelessWidget {
               
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  ElevatedButton(
+                  CustomButton(
+                    text: 'Card',
+                    icon: Icons.skip_previous,
+                    isLoading: false,
                     onPressed: flashcardState.currentCardIndex > 0
                         ? () => controller.previousCard()
                         : null,
-                    child: const Row(
-                      children: [Icon(Icons.skip_previous), Text('Previous Card')],
-                    ),
                   ),
-                  const SizedBox(width: 8),
-                  ElevatedButton(
+                  const SizedBox(width: 15),
+                  CustomButton(
+                    
+                    postIcon: Icons.skip_next,
+                    text: 'Card',
+                    
+                    isLoading: false,
                     onPressed: flashcardState.currentCardIndex < flashcards.length - 1
                         ? () => controller.nextCard(context)
-                        : () => controller.nextCard(context),
-                    child: const Row(
-                      children: [Text('Next Card'), Icon(Icons.skip_next)],
-                    ),
+                        : null,
                   ),
                 ],
               ),

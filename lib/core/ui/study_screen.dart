@@ -40,16 +40,19 @@ class StudyScreen extends ConsumerWidget {
 
           // Flashcard Display - Displays current card
           FlashcardDisplay(deckTitle, deckDescription, deckDifficulty, deckId: deckId),
-           // Pass deckId here
-
-          // Navigation Buttons (Next, Previous)
-          NavigationButtonsWidget(controller: controller),
           
-          CustomButton(text: 'Go back',isLoading: false,icon: Icons.transit_enterexit, onPressed: () { Navigator.pushNamed(context, '/myDecks');}),  // Pass controller here
-
-          // Progress Button (Correct / Incorrect)
-          if (flashcardState.isFlipped)
-            ProgressButtonWidget(controller: controller),  // Pass controller here
+          // Show either Navigation Buttons or Progress Buttons based on card state
+          if (!flashcardState.isFlipped)
+            NavigationButtonsWidget(controller: controller)
+          else
+            ProgressButtonWidget(controller: controller),
+          
+          CustomButton(
+            text: 'Go back',
+            isLoading: false,
+            icon: Icons.transit_enterexit, 
+            onPressed: () { Navigator.pushNamed(context, '/myDecks');}
+          ),
         ],
       ),
     );
