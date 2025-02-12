@@ -49,7 +49,7 @@ class FlashcardNotifier extends StateNotifier<FlashcardState> {
       return state.flashcardsByDeck[deckId]!;
     }
 
-    state = state.copyWith(isLoading: true, error: '');
+    state = state.copyWith(isLoading: true, error: '', currentCardIndex: 0);  // Reset index when loading new deck
 
     try {
       final flashcards = await _deckService.getFlashcards(deckId);
@@ -118,5 +118,6 @@ Future<void> reportCard(Flashcard flashcard) async{
   // Method to reset the study session (start from the first card)
   void resetSession() {
     state = state.copyWith(currentCardIndex: 0, isFlipped: false);
+    state = state.copyWith(flashcardsByDeck: const {});
   }
 }

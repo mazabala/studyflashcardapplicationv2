@@ -62,7 +62,7 @@ TextEditingController _cardCountController = TextEditingController();
 
   Future<void> _initializeServices() async {
     try {
-      print('in the my deck screen ui, initializeServices');
+
       // First check if user is authenticated
       final userState = ref.read(authStateProvider);
       

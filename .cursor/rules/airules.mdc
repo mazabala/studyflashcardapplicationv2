@@ -1,0 +1,184 @@
+---
+description: mainrule
+globs: *.dart
+---
+// 1. Key Principles
+const keyPrinciples = `
+- Write concise, technical Dart code with clear, accurate examples.
+- Use functional and declarative programming patterns where possible.
+- Prefer composition over inheritance.
+- Use descriptive variable names with auxiliary verbs (e.g., isLoading, hasError).
+`;
+
+// 2. Dart/Flutter Guidelines
+
+// 2.1 Code Structure
+const dartFlutterCodeStructure = `
+- Use const constructors for immutable widgets.
+- Prefer expression bodies for one-line getters and setters.
+- Use trailing commas for better formatting and diffing.
+`;
+
+// 2.2 Error Handling and Validation
+const dartFlutterErrorHandling = `
+- Implement error handling in views using SelectableText.rich instead of SnackBars.
+- Display errors in SelectableText.rich with red color for visibility.
+- Handle empty states within the screen display.
+- Use AsyncValue for error handling and loading states.
+`;
+
+// 2.3 Performance Optimization
+const dartFlutterPerformance = `
+- Use const widgets for optimization (minimizing rebuilds).
+- Use ListView.builder for efficient list rendering.
+- Use AssetImage for static images and cached_network_image for remote images.
+- Handle Supabase operations with appropriate error handling, especially for network errors.
+`;
+
+
+// 3. Riverpod-Specific Guidelines
+
+// 3.1 Provider Management
+const riverpodProviderManagement = `
+- Use @riverpod annotation for generating providers.
+- Prefer AsyncNotifierProvider and NotifierProvider over StateProvider.
+- Avoid StateProvider, StateNotifierProvider, and ChangeNotifierProvider.
+- Use ref.invalidate() to trigger provider updates manually.
+- Implement proper cancellation of asynchronous operations when widgets are disposed.
+`;
+
+// 3.2 State Management
+const riverpodStateManagement = `
+- Use ConsumerWidget for state-dependent widgets.
+- Use HookConsumerWidget for combining Riverpod and Flutter Hooks.
+`;
+
+
+// 4. UI and Styling
+
+// 4.1 Widget Usage
+const uiWidgetUsage = `
+- Use Flutter's built-in widgets; create custom widgets when necessary.
+- Ensure responsiveness with proper logic for different screen sizes.
+- Themes should be used for consistent styling across the app.
+- Prefer textTheme.titleLarge instead of headline6, and headlineSmall instead of headline5 for consistent text styling.
+`;
+
+// 4.2 Widgets and UI Components
+const uiWidgetsAndComponents = `
+- Create small, private widget classes instead of methods like Widget _build....
+- Use RefreshIndicator for pull-to-refresh functionality.
+- Set appropriate properties for TextFields (textCapitalization, keyboardType, textInputAction).
+- Always include an errorBuilder when using Image.network.
+`;
+
+// 4.3 Miscellaneous UI Guidelines
+const uiMiscellaneous = `
+- Use log instead of print for debugging.
+- Flutter Hooks / Riverpod Hooks can be used where appropriate.
+- Keep lines under 80 characters; add commas before closing brackets for multi-parameter functions.
+`;
+
+
+// 5. Code Generation
+const codeGeneration = `
+- Use build_runner for code generation (e.g., Freezed, Riverpod, JSON serialization).
+- Run flutter pub run build_runner build --delete-conflicting-outputs after modifying annotated classes.
+`;
+
+
+// 6. Functions
+
+// 6.1 Function Structure
+const functionStructure = `
+- Write short functions (less than 20 instructions) with a single purpose.
+- Name functions with a verb and meaningful description.
+- Avoid nesting by:
+    - Using early checks and returns.
+    - Extracting logic into utility functions.
+- Use higher-order functions (e.g., map, filter, reduce) to reduce nesting.
+- Use arrow functions for simple functions (less than 3 instructions).
+- Use named functions for more complex functions.
+- Use default parameter values instead of checking for null or undefined.
+- Reduce function parameters by applying the RO-RO pattern (using objects for multiple parameters).
+- Declare input arguments and output types clearly.
+`;
+
+// 6.2 Abstraction
+const functionAbstraction = `
+- Maintain a single level of abstraction in functions.
+`;
+
+
+// 7. Exceptions
+
+const exceptionsHandling = `
+- Use exceptions for unexpected errors.
+- If catching an exception:
+    - Add context.
+    - Fix the problem if expected.
+    - Otherwise, rely on global handlers.
+`;
+
+
+// 8. Performance Guidelines
+
+// 8.1 General Performance
+const performanceGeneral = `
+- Implement image caching techniques.
+- Optimize list views with efficient rendering strategies.
+- Follow state management patterns that optimize performance.
+- Use proper memory management strategies.
+- Use platform channels when necessary for performance.
+`;
+
+// 8.2 Compilation Optimization
+const performanceCompilation = `
+- Follow best practices for compilation optimization.
+`;
+
+
+// 9. Widget Guidelines
+
+const widgetGuidelines = `
+- Keep widgets small and focused.
+- Use const constructors when possible to improve performance.
+- Implement widget keys for better state management.
+- Follow proper layout principles for consistency.
+- Use appropriate widget lifecycle methods.
+- Implement error boundaries for better error management.
+- Optimize widget performance with the best techniques available.
+- Adhere to accessibility guidelines to ensure inclusivity.
+`;
+
+// 10. Documentation
+
+const documentationBestPractices = `
+- Document complex logic and non-obvious decisions in the code.
+- Always refer to official documentation for Flutter, Riverpod, and Supabase for best practices.
+`;
+
+
+// 11. Performance Guidelines (Detailed)
+
+const performanceGuidelines = `
+1. Use proper image caching
+2. Implement proper list view optimization
+3. Use proper build methods optimization
+4. Follow proper state management patterns
+5. Implement proper memory management
+6. Use proper platform channels when needed
+7. Follow proper compilation optimization techniques
+`;
+
+const widgetGuidelinesDetailed = `
+1. Keep widgets small and focused
+2. Use const constructors when possible
+3. Implement proper widget keys
+4. Follow proper layout principles
+5. Use proper widget lifecycle methods
+6. Implement proper error boundaries
+7. Use proper performance optimization techniques
+8. Follow proper accessibility guidelines
+`;
+

@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flashcardstudyapplication/core/ui/widgets/CustomDialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -85,8 +87,6 @@ Future<void> _signWithGoogle() async {
     final email = _emailController.text.trim();
     final password = _passwordController.text.trim();
     final authNotifier = ref.read(authStateProvider.notifier);
-  
-
 
     try {
       if (isSignUp) {
@@ -95,62 +95,60 @@ Future<void> _signWithGoogle() async {
         final signUpNameController = TextEditingController();
         final signUpLastNameController = TextEditingController();
 
+        showDialog(
+          context: context,
+          builder: (context) => CustomDialogWidget(
+            title: 'Register',
+            dialogContent: [
+              const Text('Enter your name:'),
+              CustomTextField(
+                controller: signUpNameController,
+                label: 'Name',
+                hint: 'Enter your name here',
+              ),
+              const Text('Enter your last name:'),
+              CustomTextField(
+                controller: signUpLastNameController,
+                label: 'Last Name',
+                hint: 'Enter your last name here',
+              ),
+              const Text('Enter your email address:'),
+              CustomTextField(
+                controller: signUpEmailController,
+                label: 'Email Address',
+                hint: 'Enter your email address here',
+              ),
+              const Text('Enter password:'),
+              CustomTextField(
+                controller: signUpPasswordController,
+                label: 'Password',
+                hint: 'Enter your password here',
+              ),
+              const SizedBox(width: 10),
+              CustomButton(
+                text: 'Finish',
+                isLoading: false,
+                onPressed: () async {
+                  await authNotifier.signUp(
+                      signUpEmailController.text,
+                      signUpPasswordController.text,
+                      signUpNameController.text,
+                      signUpLastNameController.text); //TODO: VERIFY THIS WORKS
 
-    showDialog(
-      context: context,
-      builder: (context) => CustomDialogWidget(
-        title: 'Register',
-        dialogContent: [
-          const Text('Enter your name:'),
-          CustomTextField(
-            controller: signUpNameController,
-            label: 'Name',
-            hint: 'Enter your name here',
-
-          ),
-          const Text('Enter your last name:'),
-          CustomTextField(
-            controller: signUpLastNameController,
-            label: 'Last Name',
-            hint: 'Enter your last name here',
-          ),
-
-          const Text('Enter your email address:'),
-          CustomTextField(
-            controller: signUpEmailController,
-            label: 'Email Address',
-            hint: 'Enter your email address here',
-          ),
-           const Text('Enter password:'),
-          CustomTextField(
-            controller: signUpPasswordController,
-            label: 'Password',
-            hint: 'Enter your password here',
-          ),
-           const SizedBox(width: 10),
-          CustomButton(
-            text: 'Finish',
-            isLoading: false,
-            onPressed: () async {
-              await authNotifier.signUp(signUpEmailController.text, signUpPasswordController.text, signUpNameController.text, signUpLastNameController.text); //TODO: VERIFY THIS WORKS
-              
-              if (mounted) {
-                 Navigator.of(context).pop(); 
+                  if (mounted) {
+                    Navigator.of(context).pop();
                   }
 // Close the dialog after reset
-            },
+                },
+              ),
+            ],
           ),
-        ],
-      ),
-    );
-
-
-        
+        );
       } else {
         await authNotifier.signIn(email, password);
       }
 
-            // Add a small delay to ensure initialization
+      // Add a small delay to ensure initialization
       await Future.delayed(const Duration(milliseconds: 500));
 
       final authState = ref.read(authStateProvider);
@@ -162,9 +160,11 @@ Future<void> _signWithGoogle() async {
       }
     } catch (e) {
       if (mounted) {
-  ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString())));
-}
-else dispose();
+        log(e.toString());
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(e.toString())));
+      } else
+        dispose();
     }
   }
 
