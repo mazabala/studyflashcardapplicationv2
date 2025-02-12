@@ -59,7 +59,9 @@ Future<void> _signWithGoogle() async {
 
 
     if (isAuthed) {
-      Navigator.pushReplacementNamed(context, '/myDecks');
+      if (mounted) {
+        Navigator.pushReplacementNamed(context, '/myDecks');
+      }
     }
   }
 
@@ -164,7 +166,7 @@ Future<void> _signWithGoogle() async {
         ScaffoldMessenger.of(context)
             .showSnackBar(SnackBar(content: Text(e.toString())));
       } else
-        dispose();
+        {dispose();}
     }
   }
 

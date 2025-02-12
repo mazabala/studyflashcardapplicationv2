@@ -1,6 +1,7 @@
 // lib/core/services/authentication/auth_service.dart
 
 import 'dart:convert';
+import 'dart:developer';
 
 import 'package:flashcardstudyapplication/core/interfaces/i_auth_service.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -69,10 +70,16 @@ class AuthService implements IAuthService {
         },
       );
 
+      final userData= await _supabaseClient.from('users').update({
+        'first_name': firstName,
+        'last_name': lastName,
+      }).eq('id', response.user?.id ?? '');
+
+      log('userData: $userData');
 
 
       // Since email confirmation is disabled, we should have both user and session
-      if (response.user == null || response.session == null) {
+      if (response.user == null || response.session == null || userData == null) {
         throw Exception('Authentication failed after signup');
       }
       

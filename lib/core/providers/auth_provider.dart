@@ -213,14 +213,7 @@ _setupAuthListener();
     }
     
      
-     await _authService.signIn(email, password);
-      
-      // Update the authentication state
-      state = state.copyWith(
-        user: response.user,
-        isAuthenticated: true,
-        isLoading: false,
-      );
+
 
       // Fetch the subscription status for the user
       // if (user != null) {
