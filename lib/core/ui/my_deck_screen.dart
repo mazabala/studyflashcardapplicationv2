@@ -152,10 +152,9 @@ TextEditingController _cardCountController = TextEditingController();
       final decks = await ref.read(deckStateProvider.notifier).loadAvailableDecks();
       if (mounted) { // Ensure the widget is still mounted before calling setState
         setState(() {
-          print('decks: $decks');
 
           if (decks.isEmpty || decks == []) {
-            print('decks is empty');
+
             isSearchingNewDecks = false;
             _filteredDecks = decks;
             _loadUserDecks();
@@ -231,8 +230,8 @@ TextEditingController _cardCountController = TextEditingController();
     if (userId != null) {
         print('(inside the if statement) loading users decks with user id: $userId');
         
-      await ref.read(deckStateProvider.notifier).loadUserDecks(userId);
-      final decks = ref.read(deckStateProvider).decks;
+      //await ref.read(deckStateProvider.notifier).loadUserDecks(userId);
+      final decks = await ref.read(deckStateProvider.notifier).loadUserDecks(userId);
 
       if (mounted) { // Ensure the widget is still mounted before calling setState
         setState(() {

@@ -1,4 +1,4 @@
-
+import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:flashcardstudyapplication/core/services/api/api_client.dart';
@@ -8,6 +8,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flashcardstudyapplication/core/ui/home_screen.dart';
 import 'package:flashcardstudyapplication/core/services/api/api_manager.dart';
+import 'package:flashcardstudyapplication/core/providers/provider_config.dart';
 
 // Add a loading state provider
 final initializationProvider = StateProvider<bool>((ref) => false);
@@ -45,7 +46,7 @@ class _MyAppState extends ConsumerState<MyApp> {
       // Initialize API client first
       final apiClient = ApiClient();
       await apiClient.initialize();
-      print('API client initialized');
+
       
       // Get Supabase credentials
       final supabaseUrl = apiClient.getSupabaseUrl();
@@ -57,28 +58,29 @@ class _MyAppState extends ConsumerState<MyApp> {
         anonKey: supabaseAnonKey,
       );
 
-      print('Supabase initialized');
 
       // Initialize ApiManager
       await ApiManager.instance.initialize();
-      print('ApiManager initialized');
 
-      // Initialize RevenueCat
-      //await ref.read(revenueCatClientProvider.notifier).initialize();
-      print('RevenueCat initialized');
+
+      // // Initialize PostHog
+       final posthogService = ref.read(posthogServiceProvider);
+       await posthogService.initialize();
+       log('PostHog initialized');
+
+
       
       final response = await Supabase.instance.client.from('api_resources').select('*').eq('name', 'ChatGPT').single();
       final baseKey = response['api_key'];
       final baseUrl = response['Other'];
 
-      print('baseKey: $baseKey');
-      print('baseUrl: $baseUrl');
 
       await apiClient.setupOpenAI(baseUrl, baseKey);
 
-      print('OpenAI initialized');
       
+      // Reset analytics on sign out
       Supabase.instance.client.auth.signOut();
+     // ref.read(analyticsProvider.notifier).reset();
 
       // Mark initialization as complete
       if (mounted) {

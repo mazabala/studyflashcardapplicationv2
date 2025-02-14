@@ -5,6 +5,7 @@ import 'package:flashcardstudyapplication/core/models/flashcard.dart';
 import 'package:flashcardstudyapplication/core/providers/deck_provider.dart';
 import 'package:flashcardstudyapplication/core/services/deck/deck_service.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'provider_config.dart';
 
 class FlashcardState {
   final bool isLoading;
@@ -40,8 +41,9 @@ class FlashcardState {
 
 class FlashcardNotifier extends StateNotifier<FlashcardState> {
   final IDeckService _deckService;
+  final Ref _ref;
 
-  FlashcardNotifier(this._deckService) : super(const FlashcardState());
+  FlashcardNotifier(this._deckService, this._ref) : super(FlashcardState());
 
   Future<List<Flashcard>> getFlashcardsForDeck(String deckId) async {
     // If we already have the flashcards cached, return them
@@ -78,16 +80,35 @@ class FlashcardNotifier extends StateNotifier<FlashcardState> {
 
 
 
+  Future<void> reportCard(Flashcard flashcard) async {
+    try {
+      final flashcardId = flashcard.id;
+      await _deckService.flagFlashcard(flashcardId);
 
+      _ref.read(analyticsProvider.notifier).trackEvent(
+        'flashcard_reported',
+        properties: {
+          'flashcard_id': flashcardId,
+        },
+      );
+    } catch (e) {
+      print('Error reporting flashcard: $e');
+    }
+  }
 
-Future<void> reportCard(Flashcard flashcard) async{
-
-    final flashcardId = flashcard.id;
-   
-    await _deckService.flagFlashcard(flashcardId);
-    
-
-}
+  void recordAnswer(String flashcardId, bool isCorrect) {
+    try {
+      _ref.read(analyticsProvider.notifier).trackEvent(
+        'flashcard_answered',
+        properties: {
+          'flashcard_id': flashcardId,
+          'is_correct': isCorrect,
+        },
+      );
+    } catch (e) {
+      print('Error tracking flashcard answer: $e');
+    }
+  }
 
   // Method to flip the card
   void toggleFlip() {

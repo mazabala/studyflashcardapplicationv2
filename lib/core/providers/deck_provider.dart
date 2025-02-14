@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flashcardstudyapplication/core/interfaces/i_deck_service.dart';
 import 'package:flashcardstudyapplication/core/interfaces/i_user_service.dart';
 import 'package:flashcardstudyapplication/core/models/flashcard.dart';
@@ -9,6 +11,7 @@ import 'package:flashcardstudyapplication/core/models/deck.dart';
 import 'package:flashcardstudyapplication/core/services/deck/deck_service.dart';
 import 'package:flashcardstudyapplication/core/services/api/api_client.dart';
 import 'package:flashcardstudyapplication/core/services/users/users_service.dart';
+import 'provider_config.dart';
 
 
 
@@ -50,24 +53,11 @@ class DeckState {
 class DeckNotifier extends StateNotifier<DeckState> {
   final IDeckService _deckService;
   final IUserService _userService;
-  final Ref ref;
+  final Ref _ref;
 
-  DeckNotifier(this._deckService, this._userService, this.ref) : super( DeckState()) {
-    // Listen to auth state changes
- 
- 
-  }   
+  DeckNotifier(this._deckService, this._userService, this._ref) : super(DeckState());
 
-  Future<void> _loadUserDecks(String ?userId) async {
-    if (userId == null) {
-      final usernewId = await _userService.getCurrentUserInfo();
-      if (usernewId == null) {
-        throw Exception("User is not logged in");
-      }
-      userId = usernewId['id'];
-    }
-    await loadUserDecks(userId);
-  }
+
 
 Future<void> flagCard(String flashcardId) async{
 
@@ -102,7 +92,7 @@ Future<List<Flashcard>> getDeckFlashcards (String deckid) async
     }
 }
 
-  Future<void> createDeck(String subject,String concept,String category, String difficultyLevel, String userid,int cardCount) async {
+  Future<void> createDeck(String subject, String concept, String category, String difficultyLevel, String userid, int cardCount) async {
     state = state.copyWith(isLoading: true, error: '');
     try {
       final userId = _userService.getCurrentUserInfo();
@@ -111,13 +101,20 @@ Future<List<Flashcard>> getDeckFlashcards (String deckid) async
       }
 
       final userSubscription = _userService.getCurrentUserInfo();
+      final deck = await _deckService.createDeck(subject, concept, category, difficultyLevel, userid, cardCount);
 
-      await _deckService.createDeck(subject, concept,  category, difficultyLevel, userid, cardCount);  
-      
-      //final decks = await _deckService.getUserDecks(userId);
-      //state = state.copyWith(decks: decks);
+      _ref.read(analyticsProvider.notifier).trackEvent(
+        'deck_created',
+        properties: {
+          'subject': subject,
+          'concept': concept,
+          'category': category,
+          'difficulty_level': difficultyLevel,
+          'card_count': cardCount,
+        },
+      );
     } catch (e) {
-      print (e);
+      print(e);
       state = state.copyWith(error: e.toString());
     } finally {
       state = state.copyWith(isLoading: false);
@@ -125,7 +122,7 @@ Future<List<Flashcard>> getDeckFlashcards (String deckid) async
   }
 
  Future<List<Deck>> loadAvailableDecks() async {
-  state = state.copyWith(isLoading: true, error: '');
+  state = state.copyWith(isLoading: true, error: '',decks: []);
 
   try {
 
@@ -134,8 +131,10 @@ Future<List<Flashcard>> getDeckFlashcards (String deckid) async
       throw Exception("User is not logged in");
     }
 
-
+ 
     final decks = await _deckService.loadDeckPool(userId['id']);
+    log('decks: $decks');
+
     if (decks != null) {
           state = state.copyWith(decks: decks);
           return decks; 
@@ -152,8 +151,7 @@ Future<List<Flashcard>> getDeckFlashcards (String deckid) async
 }
 
 Future<void>addDecktoUser(String deckId) async {
-
-try{
+try {
     state = state.copyWith(isLoading: true, error: '');
     
     final userId = await _userService.getCurrentUserInfo();
@@ -161,21 +159,21 @@ try{
       throw Exception("User is not logged in");
     }
 
-    
     await _deckService.decktoUser(deckId, userId['id']);
-
-
+    
+    // First update user decks
+    await loadUserDecks(userId['id']);
+    
+    // Then load available decks to get fresh data
+    await loadAvailableDecks();
   }
-  catch (e)
-  {
+  catch (e) {
       print(e);
       rethrow;
-
   }
-  finally{  
+  finally {  
     state = state.copyWith(isLoading: false);
-    }
-
+  }
 }
 
  Future<List<Deck>> loadUserDecks(String? userId) async {
@@ -236,13 +234,18 @@ try{
       final userId = await _userService.getCurrentUserInfo();
       if (userId == null) {
         throw Exception("User is not logged in");
-
       }
 
       await _deckService.removeDeck(deckId);
       final decks = await _deckService.getUserDecks(userId['id']);
       state = state.copyWith(decks: decks);
 
+      _ref.read(analyticsProvider.notifier).trackEvent(
+        'deck_deleted',
+        properties: {
+          'deck_id': deckId,
+        },
+      );
     } catch (e) {
       state = state.copyWith(error: e.toString());
     } finally {

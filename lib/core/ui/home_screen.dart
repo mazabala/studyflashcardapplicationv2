@@ -1,17 +1,36 @@
-import 'package:flashcardstudyapplication/core/providers/revenuecat_provider.dart';
+import 'package:flashcardstudyapplication/core/providers/provider_config.dart';
 import 'package:flutter/material.dart';
 import 'package:flashcardstudyapplication/core/ui/widgets/CustomScaffold.dart';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
+
+  @override
+  ConsumerState<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends ConsumerState<HomeScreen> {
+  @override
+  void initState() {
+    super.initState();
+    // Track screen view in the next frame to ensure context is available
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _captureScreenView();
+    });
+  }
+
+  void _captureScreenView() {
+    ref.read(analyticsProvider.notifier).trackScreenView('HomeScreen');
+  }
 
   @override
   Widget build(BuildContext context) {
     final currentRoute = ModalRoute.of(context)?.settings.name ?? '/';
     final theme = Theme.of(context);
 
+  
 
     
     return CustomScaffold(

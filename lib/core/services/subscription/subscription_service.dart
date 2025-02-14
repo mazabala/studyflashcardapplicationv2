@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flashcardstudyapplication/core/providers/user_provider.dart';
 import 'package:flutter/foundation.dart';
 import 'package:purchases_flutter/purchases_flutter.dart';
@@ -255,12 +257,15 @@ await _supabaseClient
           .eq('user_id', userId)
           .single();
 
-      if (response['end_date'] < DateTime.now()) {
+
+ 
+      if (DateTime.parse(response['end_date']).isBefore(DateTime.now())) {
         return 'Active';
       } else {
         return 'Expired';
       }
     } catch (e) {
+      log('error getting subscription status: $e');
       throw ErrorHandler.handle(e,
           message: 'Failed to get subscription status',
           specificType: ErrorType.subscription);

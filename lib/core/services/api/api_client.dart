@@ -43,20 +43,12 @@ class ApiClient implements IApiService {
       final yamlMap = loadYaml(yamlString);
       _config = Map<String, dynamic>.from(yamlMap['api']);
 
-      // Validate the required fields exist
-      // if (!_config.containsKey('openai') || 
-      //     !_config['openai'].containsKey('base_url') ||
-      //     !_config['openai'].containsKey('openai_key')) {
-      //   throw Exception('Missing required OpenAI configuration');
-      // }
+
 
       // Set Supabase credentials
       _supabaseUrl = _config['supabase']['supabase_url'];
       _supabaseAnonKey = _config['supabase']['supabase_key'];
 
-      // // Set base URL (e.g., for OpenAI API)
-      // _baseUrl = _config['openai']['base_url'];
-      // _baseKey = _config['openai']['openai_key'];
 
       _initialized = true;
       print('ApiClient initialized successfully');

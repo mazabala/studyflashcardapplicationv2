@@ -42,7 +42,7 @@ dependencies:
   purchases_ui_flutter: ^8.4.4
   url_launcher: ^6.0.0
   google_sign_in_android: ^6.1.33
-
+  posthog_flutter: ^4.0.0
   flutter_launcher_icons: ^0.13.1
 
   

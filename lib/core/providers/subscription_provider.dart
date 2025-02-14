@@ -1,5 +1,7 @@
 // lib/core/providers/subscription_provider.dart
 
+import 'dart:developer';
+
 import 'package:flashcardstudyapplication/core/providers/auth_provider.dart';
 import 'package:flashcardstudyapplication/core/providers/provider_config.dart';
 import 'package:flashcardstudyapplication/core/providers/supabase_provider.dart';
@@ -73,6 +75,7 @@ class SubscriptionNotifier extends StateNotifier<SubscriptionState> {
         isLoading: false,
       );
     } catch (e) {
+      log('error fetching subscription status: $e');
       state = state.copyWith(
         errorMessage: e.toString(),
         isLoading: false,

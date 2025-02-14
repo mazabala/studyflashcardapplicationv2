@@ -1,10 +1,12 @@
 import 'package:flashcardstudyapplication/core/providers/admin_provider.dart';
+import 'package:flashcardstudyapplication/core/providers/analytics_provider.dart';
 import 'package:flashcardstudyapplication/core/providers/auth_provider.dart';
 import 'package:flashcardstudyapplication/core/providers/deck_provider.dart';
 import 'package:flashcardstudyapplication/core/providers/flashcard_provider.dart';
 import 'package:flashcardstudyapplication/core/providers/revenuecat_provider.dart';
 import 'package:flashcardstudyapplication/core/providers/subscription_provider.dart';
 import 'package:flashcardstudyapplication/core/providers/user_provider.dart';
+import 'package:flashcardstudyapplication/core/services/analytics/posthog_service.dart';
 import 'package:flashcardstudyapplication/core/services/revenuecat/revenuecat_service.dart';
 import 'package:flashcardstudyapplication/core/services/users/users_service.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -21,6 +23,7 @@ import '../interfaces/i_supabase_service.dart';
 import '../interfaces/i_api_service.dart';
 import '../interfaces/i_api_manager.dart';
 import '../interfaces/i_billing_service.dart';
+import '../interfaces/i_posthog_service.dart';
 
 // Services
 import '../services/authentication/authentication_service.dart';
@@ -88,6 +91,16 @@ final adminServiceProvider = Provider<IAdminService>((ref) {
   );
 });
 
+final analyticsProvider = StateNotifierProvider<AnalyticsNotifier, void>((ref) {
+  final posthogService = ref.watch(posthogServiceProvider);
+  return AnalyticsNotifier(posthogService, ref);
+}); 
+
+final posthogServiceProvider = Provider<IPostHogService>((ref) {
+  final supabase = Supabase.instance.client;
+  return PostHogService(supabase);
+});
+
 // State Management Layer
 final authStateProvider = StateNotifierProvider<AuthNotifier, AuthenthicationState>((ref) {
   return AuthNotifier(ref.watch(authServiceProvider), ref);
@@ -113,7 +126,7 @@ final deckStateProvider = StateNotifierProvider<DeckNotifier, DeckState>((ref) {
 
 
 final flashcardStateProvider = StateNotifierProvider<FlashcardNotifier, FlashcardState>((ref) {
-  return FlashcardNotifier(ref.watch(deckServiceProvider));
+  return FlashcardNotifier(ref.watch(deckServiceProvider), ref);
 });
 
 final adminStateProvider = StateNotifierProvider<AdminNotifier, AdminState>((ref) {

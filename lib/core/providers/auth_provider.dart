@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:developer';
 
 import 'package:flashcardstudyapplication/core/providers/CatSub_Manager.dart';
 import 'package:flashcardstudyapplication/core/providers/provider_config.dart';
@@ -43,21 +44,19 @@ class AuthenthicationState {
 // StateNotifier to manage authentication state
 class AuthNotifier extends StateNotifier<AuthenthicationState> {
   final IAuthService _authService;
-
-  final Ref ref;
+  final Ref _ref;
   StreamSubscription? _authSubscription;
 
-  AuthNotifier(this._authService,  this.ref) : super(const AuthenthicationState()) {
+  AuthNotifier(this._authService, this._ref) : super(const AuthenthicationState()) {
     // Listen to auth state changes from Supabase
-_setupAuthListener();
+    _setupAuthListener();
   }
 
-   void _setupAuthListener() {
+  void _setupAuthListener() {
     _authSubscription = Supabase.instance.client.auth.onAuthStateChange.listen((data) {
       _handleAuthenthicationStateChange(data.event, data.session);
     });
   }
-
 
   Future<void> setupApiManager() async {
     final apiManager = ApiManager.instance;
@@ -67,10 +66,10 @@ _setupAuthListener();
   void _handleAuthenthicationStateChange(AuthChangeEvent event, Session? session) async {
     print('Auth state change event: $event');
 
-
     // Handle signOut and userDeleted first
     if (event == AuthChangeEvent.signedOut || event == AuthChangeEvent.userDeleted) {
-      print('User signed out or deleted');
+      _ref.read(analyticsProvider.notifier).trackEvent('user_signed_out');
+      _ref.read(analyticsProvider.notifier).reset();
       state = const AuthenthicationState();
       return;
     }
@@ -87,8 +86,6 @@ _setupAuthListener();
          event == AuthChangeEvent.tokenRefreshed) && 
         session?.user != null) {
       try {
-        
-        
         // Update state after API Manager initialization
         state = state.copyWith(
           user: session!.user,
@@ -96,19 +93,25 @@ _setupAuthListener();
           isLoading: false,
         );
         
+        _ref.read(analyticsProvider.notifier).identifyUser(
+          session!.user.id,
+          userProperties: {
+            'email': session.user.email,
+            'last_sign_in': DateTime.now().toIso8601String(),
+          },
+        );
+
         // Only proceed with other initializations if state is properly set
         if (state.isAuthenticated && state.user != null) {
           print('Proceeding with user initialization');
-          await ref.read(userStateProvider.notifier).initializeUser();
-
+          await _ref.read(userStateProvider.notifier).initializeUser();
+          await _ref.read(subscriptionStateProvider.notifier).fetchSubscriptionStatus(state.user!.id);
 
           if (state.user != null) {  // Double check user is still valid
-          print('initializing the api manager');
-          await setupApiManager();
-          print('initializing the cat sub manager');
-          //await ref.read(catSubManagerProvider.notifier).initialize(state.user!.id);
-            
-           print('API Manager initialized in auth provider');
+            print('initializing the api manager');
+            await setupApiManager();
+            print('initializing the cat sub manager');
+            print('API Manager initialized in auth provider');
           }
         }
       } catch (e) {
@@ -121,7 +124,6 @@ _setupAuthListener();
         );
       }
     } else {
-     
       state = const AuthenthicationState();
     }
   }
@@ -136,27 +138,22 @@ _setupAuthListener();
       isAuthenticated: true,
       isLoading: false,
     );
-
   }
 
   Future<void> googleSignin() async {
     state = state.copyWith(isLoading: true, errorMessage: null);
     await _authService.signInWithGoogle();
     final user = await _authService.getCurrentUser();
+      _ref.read(analyticsProvider.notifier).trackLogin(method: 'google');
+      _ref.read(analyticsProvider.notifier).identifyUser(
+        user?.id ?? ''  ,
+        userProperties: {'email': user?.email},
+      );
     state = state.copyWith(
       user: user,
       isAuthenticated: true,
       isLoading: false,
     );
-
-    if(state.isAuthenticated && user != null){
-      // Initialize API Manager first
-     // setupApiManager();
-     // print('API Manager initialized in google signin');
-      
-      //await ref.read(userProvider.notifier).initializeUser();
-      //await ref.read(catSubManagerProvider.notifier).initialize(user.id);
-    }
   }
 
   Future<void> signIn(String email, String password) async {
@@ -165,7 +162,7 @@ _setupAuthListener();
     try {
       await _authService.signIn(email, password);
       final user = await _authService.getCurrentUser();
-      
+      log('user: $user');
       state = state.copyWith(
         user: user,
         isAuthenticated: true,
@@ -174,14 +171,10 @@ _setupAuthListener();
 
       if(state.isAuthenticated && user != null){
         // Initialize API Manager first
-      
-        await ref.read(userStateProvider.notifier).initializeUser();
+       // await _ref.read(userStateProvider.notifier).initializeUser();
         
-
         // Initialize user details after successful sign in
-        await ref.read(subscriptionStateProvider.notifier).fetchSubscriptionStatus(user.id);
-        //await ref.read(catSubManagerProvider.notifier).initialize(user.id);  //causing the api error
-
+        await _ref.read(subscriptionStateProvider.notifier).fetchSubscriptionStatus(user.id);
       }
     } catch (e) {
       print('in the catch auth');
@@ -194,39 +187,36 @@ _setupAuthListener();
   }
 
   Future<void> signUp(String email, String password, String firstName, String lastName) async {
-    state = state.copyWith(isLoading: true, errorMessage: null);
-    
     try {
+      state = state.copyWith(isLoading: true);
+      
       // Sign the user up
-     final AuthResponse response = await _authService.signUp(email, password, firstName, lastName);
+      final AuthResponse response = await _authService.signUp(email, password, firstName, lastName);
 
+      if (response.user != null) {
+        state = state.copyWith(
+          isAuthenticated: true,
+          user: response.user,
+          isLoading: false,
+        );
 
-     if (response.user != null) {
-      // Update the authentication state only if we have a valid user
-      state = state.copyWith(
-        user: response.user,
-        isAuthenticated: true,
-        isLoading: false,
-      );
-    } else {
-      throw Exception('User signup failed - no user returned');
-    }
-    
-     
-
-
-      // Fetch the subscription status for the user
-      // if (user != null) {
-      //   await _subscriptionNotifier.fetchSubscriptionStatus(user.id);
-      // }
-
+        _ref.read(analyticsProvider.notifier).trackEvent(
+          'user_signed_up',
+          properties: {
+            'method': 'email',
+            'has_first_name': firstName.isNotEmpty,
+            'has_last_name': lastName.isNotEmpty,
+          },
+        );
+      } else {
+        throw Exception('User signup failed - no user returned');
+      }
     } catch (e) {
       state = state.copyWith(
         errorMessage: e.toString(),
         isLoading: false,
       );
-      throw Exception(e);
-      rethrow; // Allow UI to handle the error if needed
+      rethrow;
     }
   }
 
@@ -235,6 +225,8 @@ _setupAuthListener();
     
     try {
       await _authService.signOut();
+      _ref.read(analyticsProvider.notifier).trackLogout();
+      _ref.read(analyticsProvider.notifier).reset();
       state = const AuthenthicationState(); // Reset to initial state
     } catch (e) {
       state = state.copyWith(
@@ -295,10 +287,8 @@ _setupAuthListener();
       
       if (user != null) {
         // Initialize API Manager first if user exists
-       
-        
+        await setupApiManager();
       }
-
 
       // Update state
       state = state.copyWith(
@@ -309,8 +299,8 @@ _setupAuthListener();
 
       // Only proceed with other initializations if authenticated
       if (state.isAuthenticated && state.user != null) {
-        await ref.read(userStateProvider.notifier).initializeUser();
-        await ref.read(subscriptionStateProvider.notifier).fetchSubscriptionStatus(state.user!.id);
+        await _ref.read(userStateProvider.notifier).initializeUser();
+        await _ref.read(subscriptionStateProvider.notifier).fetchSubscriptionStatus(state.user!.id);
       }
     } catch (e) {
       print('Error during auth initialization: $e');

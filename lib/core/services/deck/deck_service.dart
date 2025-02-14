@@ -12,6 +12,8 @@ import 'package:flashcardstudyapplication/core/error/error_handler.dart';
 import 'package:flashcardstudyapplication/core/interfaces/i_api_service.dart';
 import 'package:flashcardstudyapplication/core/services/api/api_client.dart';
 import 'package:uuid/uuid.dart';
+import 'package:posthog_flutter/posthog_flutter.dart';
+
 
 
 class SystemDeckConfig {
@@ -134,8 +136,8 @@ try {
  
     final response = await _supabaseClient
         .from('available_decks')
-        .select('deck_id') 
-        .eq('user_id', userId);
+        .select('deck_id') ;
+        //.eq('user_id', userId);
         //inner join user_decks as ud on ud.userid?
         
         
@@ -149,6 +151,7 @@ try {
     // Extract deck IDs from the response
     final deckIds = List<String>.from(response.map((item) => item['deck_id']));
 
+   log('deckIds: $deckIds');
     // Fetch details for all decks
     final decks = await getDeckDetails(deckIds);
 
@@ -219,7 +222,7 @@ Future<Map<String, dynamic>> _generateBody(String difficultyLevel,
     final deckcost = _getDeckCost(
         cardCount, apiModel['cost_flashcard'], apiModel['cost_prompt']);
 
-    log('Deck cost: $deckcost');
+
 
     final batches = _getbatches(deckcost, apiModel['max_tokens']);
 
@@ -399,8 +402,6 @@ Future<List<Flashcard>> _generateFlashcards({
   }
 
 
-
-
   // Add a flashcard to a specific deck
   @override
   Future<void> decktoUser(String deckId, String userId) async {
@@ -414,7 +415,7 @@ Future<List<Flashcard>> _generateFlashcards({
         .select()
         .single();
   
-
+      
       if (response['error'] != null) {
         throw ErrorHandler.handle(response['error']);
       }
