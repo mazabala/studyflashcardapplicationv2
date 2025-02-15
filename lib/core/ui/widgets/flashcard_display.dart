@@ -1,5 +1,7 @@
 //import 'dart:ffi';
 
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flashcardstudyapplication/core/providers/provider_config.dart';
@@ -74,7 +76,7 @@ class FlashcardDisplay extends ConsumerWidget {
                       await ref.read(flashcardStateProvider.notifier).reportCard(currentFlashcard);
                       if (flashcardState.currentCardIndex >= 0) {
                         ref.read(flashcardStateProvider.notifier).nextCard(deckId, flashcardState.currentCardIndex);
-
+                        
                       }
                     },
                     child: Container(

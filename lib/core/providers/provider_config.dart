@@ -35,6 +35,7 @@ import '../services/deck/deck_service.dart';
 import '../services/admin/admin_service.dart';
 import '../services/supabase/supabase_service.dart';
 import '../services/billing/billing_service.dart';
+import '../services/progress/progress_service.dart';
 
 
 // Initialization Provider
@@ -124,9 +125,17 @@ final deckStateProvider = StateNotifierProvider<DeckNotifier, DeckState>((ref) {
   );
 });
 
+final progressServiceProvider = Provider<ProgressService>((ref) {
+  return ProgressService(ref.watch(supabaseClientProvider));
+});
 
 final flashcardStateProvider = StateNotifierProvider<FlashcardNotifier, FlashcardState>((ref) {
-  return FlashcardNotifier(ref.watch(deckServiceProvider), ref);
+  return FlashcardNotifier(
+    ref.watch(deckServiceProvider),
+    ref.watch(progressServiceProvider),
+    ref.watch(userServiceProvider),
+    ref,
+  );
 });
 
 final adminStateProvider = StateNotifierProvider<AdminNotifier, AdminState>((ref) {

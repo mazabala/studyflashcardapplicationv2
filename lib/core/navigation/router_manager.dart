@@ -9,44 +9,47 @@ import 'package:flashcardstudyapplication/core/ui/user_profile_screen.dart';
 import 'package:flashcardstudyapplication/core/ui/login_screen.dart';
 import 'package:flashcardstudyapplication/core/ui/home_screen.dart';
 import 'package:flashcardstudyapplication/core/ui/my_deck_screen.dart';
-
-
+import 'package:flashcardstudyapplication/core/ui/screens/user_preferences_screen.dart';
+import 'package:flashcardstudyapplication/core/ui/screens/progress_dashboard_screen.dart';
 
 class RouteManager {
   static Route<dynamic> generateRoute(RouteSettings settings) {
-
-   
-
-        // Handle routes that need arguments
+    // Handle routes that need arguments
     if (settings.name == '/study') {
       // Extract the deck ID from arguments
       final Deck? deck = settings.arguments as Deck?;
       if (deck == null) {
         throw ArgumentError('Deck ID is required for study screen');
       }
-     return _noAnimationRoute(StudyScreen(deck: deck));
+      return MaterialPageRoute(
+        builder: (context) => StudyScreen(deck: deck),
+        settings: settings,
+      );
     }
-    
     
     switch (settings.name) {
       case '/':
-        return _noAnimationRoute (const HomeScreen());
+        return _noAnimationRoute(const HomeScreen());
       case '/deck':
-             return _noAnimationRoute (const FlashcardPreviewScreen());
+        return _noAnimationRoute(const FlashcardPreviewScreen());
       case '/aboutUs':
-        return _noAnimationRoute (const AboutUsScreen());
+        return _noAnimationRoute(const AboutUsScreen());
       case '/userProfile':
-        return _noAnimationRoute (UserProfileScreen());
+        return _noAnimationRoute(UserProfileScreen());
       case '/prices':
-        return _noAnimationRoute ( PricingScreen());
+        return _noAnimationRoute(PricingScreen());
       case '/login':
-        return _noAnimationRoute (LoginScreen());
+        return _noAnimationRoute(LoginScreen());
       case '/myDecks':
         return _noAnimationRoute(const MyDeckScreen());
       case '/admin':
-        return _noAnimationRoute( AdminManagementScreen());
+        return _noAnimationRoute(AdminManagementScreen());
+      case '/preferences':
+        return _noAnimationRoute(const UserPreferencesScreen());
+      case '/progress':
+        return _noAnimationRoute(const ProgressDashboardScreen());
       default:
-        return _noAnimationRoute (const HomeScreen());  // Default route
+        return _noAnimationRoute(const HomeScreen());  // Default route
     }
   }
 
@@ -61,18 +64,19 @@ class RouteManager {
     );
   }
 
-
   // Optional: If you need static routes as a map for navigation or deep linking.
   static Map<String, Widget Function(BuildContext)> get routes {
     return {
       '/': (_) => const HomeScreen(),
-      '/deck': (_) => FlashcardPreviewScreen(),
+      '/deck': (_) => const FlashcardPreviewScreen(),
       '/userProfile': (_) => UserProfileScreen(),
       '/login': (_) => LoginScreen(),
-      '/mydecks': (_) =>MyDeckScreen(),
-      '/prices': (_) =>PricingScreen(),
-      '/aboutUs': (_) =>AboutUsScreen(),
-      '/admin': (_) =>AdminManagementScreen(),
+      '/mydecks': (_) => const MyDeckScreen(),
+      '/prices': (_) => PricingScreen(),
+      '/aboutUs': (_) => const AboutUsScreen(),
+      '/admin': (_) => AdminManagementScreen(),
+      '/preferences': (_) => const UserPreferencesScreen(),
+      '/progress': (_) => const ProgressDashboardScreen(),
     };
   }
 }
