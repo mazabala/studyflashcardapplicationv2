@@ -4,6 +4,7 @@ import 'package:flashcardstudyapplication/core/themes/colors.dart';
 import 'package:flashcardstudyapplication/core/ui/widgets/CustomButton.dart';
 import 'package:flashcardstudyapplication/core/ui/widgets/CustomScaffold.dart';
 import 'package:flashcardstudyapplication/core/models/user_preferences.dart';
+import 'package:flashcardstudyapplication/core/ui/widgets/progress_dashboard_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -14,6 +15,7 @@ class UserProfileScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final userState = ref.watch(userStateProvider);
+    final userPreferences = ref.read(userServiceProvider);
     
 
     final userNotifier = ref.read(userStateProvider.notifier);
@@ -29,7 +31,8 @@ class UserProfileScreen extends ConsumerWidget {
               child: Container(
                 padding: const EdgeInsets.all(16),
                 constraints: BoxConstraints(
-                  maxWidth: constraints.maxWidth > 600 ? 800 : constraints.maxWidth,
+                  maxWidth:
+                      constraints.maxWidth > 600 ? 800 : constraints.maxWidth,
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -41,224 +44,315 @@ class UserProfileScreen extends ConsumerWidget {
                         child: Column(
                           children: [
                             const CircleAvatar(
-                              radius: 50,
-                              child: Icon(Icons.person, size: 50),
+                              radius: 12,
+                              child: Icon(Icons.person, size: 12),
                             ),
                             const SizedBox(height: 16),
                             Text(
                               'Your Profile',
                               style: Theme.of(context).textTheme.headlineSmall,
                             ),
+                            const Divider(),
+                            Card(
+                              child: Padding(
+                                padding: const EdgeInsets.all(16.0),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      'Name:\n${userState.firstName} ${userState.lastName}',
+                                      style:
+                                          Theme.of(context).textTheme.bodyLarge,
+                                    ),
+                                    const SizedBox(height: 8),
+                                    Text(
+                                      'Current Plan:',
+                                      style:
+                                          Theme.of(context).textTheme.bodyLarge,
+                                    ),
+                                    Text(
+                                      userState.subscriptionPlan ??
+                                          'No active subscription',
+                                      style:
+                                          Theme.of(context).textTheme.bodyLarge,
+                                    ),
+                                    const SizedBox(height: 8),
+                                    Text(
+                                      'Status:',
+                                      style:
+                                          Theme.of(context).textTheme.bodyLarge,
+                                    ),
+                                    const SizedBox(height: 8),
+                                    Row(
+                                      children: [
+                                        Text(
+                                          userState.isExpired ?? true
+                                              ? 'Expired'
+                                              : 'Active',
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .bodyLarge,
+                                        ),
+                                        const SizedBox(width: 8),
+                                        Icon(
+                                          userState.isExpired ?? true
+                                              ? Icons.error_outline
+                                              : Icons.check_circle,
+                                          color: userState.isExpired ?? true
+                                              ? AppColors.errorColor
+                                              : Colors.green,
+                                        ),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 8),
+                                    Text(
+                                      'Expiration Date: ${userState.subscriptionExpiryDate}',
+                                      style:
+                                          Theme.of(context).textTheme.bodyLarge,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
                           ],
                         ),
                       ),
                     ),
-                    const SizedBox(height: 16),
 
-                    // Subscription Info Card
-                    Card(
-                      child: Padding(
-                        padding: const EdgeInsets.all(16.0),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Name:\n${userState.firstName} ${userState.lastName}',
-                              style: Theme.of(context).textTheme.bodyLarge,
-                            ),
-                               const SizedBox(height: 8),
-                            Text(
-                              'Current Plan:',
-                              style: Theme.of(context).textTheme.bodyLarge,
-                            ),
-                            Text(
-                              userState.subscriptionPlan ?? 'No active subscription',
-                              style: Theme.of(context).textTheme.bodyLarge,
-                            ),
-                              const SizedBox(height: 8),
-                            Text(
-                              'Status:',
-                              style: Theme.of(context).textTheme.bodyLarge,
-                            ),
-                            const SizedBox(height: 8),
-                            Row(
-                              children: [
-                                Text(
-                                  userState.isExpired ?? true
-                                      ? 'Expired'
-                                      : 'Active',
-                                  style: Theme.of(context).textTheme.bodyLarge,
-                                ),
-                                const SizedBox(width: 8),
-                                Icon(
-                                  userState.isExpired ?? true
-                                      ? Icons.error_outline
-                                      : Icons.check_circle,
-                                  color: userState.isExpired ?? true
-                                      ? AppColors.errorColor
-                                      : Colors.green,
-                                ),
-                                
-                                
-                              ],
-                            ),
-                            const SizedBox(height: 8),
-                              Text(
-                              'Expiration Date: ${userState.subscriptionExpiryDate}',
-                              style: Theme.of(context).textTheme.bodyLarge,
-                                ),
-                          ],
-                        ),
-                      ),
-                    ),
                     const SizedBox(height: 16),
+                    const ProgressDashboardWidget(),
 
+                    const SizedBox(height: 16),
                     // User Preferences Card
                     Card(
                       child: Padding(
                         padding: const EdgeInsets.all(16.0),
                         child: FutureBuilder<UserPreferences>(
-                          future: ref.read(userServiceProvider).getUserPreferences(userState.userId ?? ''),
+                          future: 
+                             userPreferences.getUserPreferences(userState.userId ?? ''),
                           builder: (context, snapshot) {
-                            if (snapshot.connectionState == ConnectionState.waiting) {
-                              return const Center(child: CircularProgressIndicator());
+                            if (snapshot.connectionState ==
+                                ConnectionState.waiting) {
+                              return const Center(
+                                  child: CircularProgressIndicator());
                             }
 
                             if (snapshot.hasError) {
                               return Text(
                                 'Error loading preferences: ${snapshot.error}',
-                                style: TextStyle(color: Theme.of(context).colorScheme.error),
+                                style: TextStyle(
+                                    color: Theme.of(context).colorScheme.error),
                               );
                             }
 
                             final preferences = snapshot.data!;
-                            
+
                             return Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
                                   'Study Preferences',
-                                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                    fontWeight: FontWeight.bold,
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .titleMedium
+                                      ?.copyWith(
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                ),
+                                const SizedBox(height: 16),
+
+                                // Theme Mode
+                                Container(
+                                  width: double.infinity,
+                                  child: Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Expanded(
+                                        child: Text('Theme Mode',
+                                            style: Theme.of(context)
+                                                .textTheme
+                                                .bodyLarge),
+                                      ),
+                                      DropdownButton<ThemeMode>(
+                                        value: preferences.themeMode,
+                                        items: ThemeMode.values.map((mode) {
+                                          return DropdownMenuItem(
+                                            value: mode,
+                                            child: Text(
+                                              mode.toString().split('.').last,
+                                              style: Theme.of(context)
+                                                  .textTheme
+                                                  .bodyMedium,
+                                            ),
+                                          );
+                                        }).toList(),
+                                        onChanged: (ThemeMode? newMode) {
+                                          if (newMode != null) {
+                                              userPreferences.updateUserPreferences(
+                                                  userState.userId!,
+                                                  preferences.copyWith(
+                                                      themeMode: newMode),
+                                                );
+                                          }
+                                        },
+                                      ),
+                                    ],
                                   ),
                                 ),
+
                                 const SizedBox(height: 16),
-                                
-                                // Theme Mode
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Text('Theme Mode', style: Theme.of(context).textTheme.bodyLarge),
-                                    DropdownButton<ThemeMode>(
-                                      value: preferences.themeMode,
-                                      items: ThemeMode.values.map((mode) {
-                                        return DropdownMenuItem(
-                                          value: mode,
-                                          child: Text(mode.toString().split('.').last),
-                                        );
-                                      }).toList(),
-                                      onChanged: (ThemeMode? newMode) {
-                                        if (newMode != null) {
-                                          ref.read(userServiceProvider).updateUserPreferences(
-                                            userState.userId!,
-                                            preferences.copyWith(themeMode: newMode),
-                                          );
-                                        }
-                                      },
-                                    ),
-                                  ],
-                                ),
-                                
-                                const SizedBox(height: 16),
-                                
+
                                 // Daily Goal
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Text('Daily Goal (cards)', style: Theme.of(context).textTheme.bodyLarge),
-                                    SizedBox(
-                                      width: 100,
-                                      child: TextFormField(
-                                        initialValue: preferences.dailyGoalCards.toString(),
-                                        keyboardType: TextInputType.number,
-                                        decoration: const InputDecoration(
-                                          border: OutlineInputBorder(),
-                                        ),
-                                        onChanged: (value) {
-                                          final newValue = int.tryParse(value);
-                                          if (newValue != null) {
-                                            ref.read(userServiceProvider).updateUserPreferences(
-                                              userState.userId!,
-                                              preferences.copyWith(dailyGoalCards: newValue),
-                                            );
-                                          }
-                                        },
+                                Container(
+                                  width: double.infinity,
+                                  child: Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Expanded(
+                                        child: Text('Daily Goal (cards)',
+                                            style: Theme.of(context)
+                                                .textTheme
+                                                .bodyLarge),
                                       ),
-                                    ),
-                                  ],
+                                      SizedBox(
+                                        width: 50,
+                                        child: TextFormField(
+                                          initialValue: preferences
+                                              .dailyGoalCards
+                                              .toString(),
+                                          keyboardType: TextInputType.number,
+                                          textAlign: TextAlign.center,
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .bodyMedium,
+                                          decoration: const InputDecoration(
+                                            border: OutlineInputBorder(),
+                                            contentPadding:
+                                                EdgeInsets.symmetric(
+                                                    horizontal: 8, vertical: 8),
+                                          ),
+                                          onChanged: (value) {
+                                            final newValue =
+                                                int.tryParse(value);
+                                            if (newValue != null) {
+                                              userPreferences.updateUserPreferences(
+                                                    userState.userId!,
+                                                    preferences.copyWith(
+                                                        dailyGoalCards:
+                                                            newValue),
+                                                  );
+                                            }
+                                          },
+                                        ),
+                                      ),
+                                    ],
+                                  ),
                                 ),
-                                
+
                                 const SizedBox(height: 16),
-                                
+
                                 // Session Duration
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Text('Session Duration (min)', style: Theme.of(context).textTheme.bodyLarge),
-                                    SizedBox(
-                                      width: 100,
-                                      child: TextFormField(
-                                        initialValue: preferences.studySessionDuration.toString(),
-                                        keyboardType: TextInputType.number,
-                                        decoration: const InputDecoration(
-                                          border: OutlineInputBorder(),
+                                Container(
+                                  width: double.infinity,
+                                  child: Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Expanded(
+                                        child: Text('Session Duration (min)',
+                                            style: Theme.of(context)
+                                                .textTheme
+                                                .bodyLarge),
+                                      ),
+                                      SizedBox(
+                                        width: 50,
+                                        child: TextFormField(
+                                          initialValue: preferences
+                                              .studySessionDuration
+                                              .toString(),
+                                          keyboardType: TextInputType.number,
+                                          textAlign: TextAlign.center,
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .bodyMedium,
+                                          decoration: const InputDecoration(
+                                            border: OutlineInputBorder(),
+                                            contentPadding:
+                                                EdgeInsets.symmetric(
+                                                    horizontal: 8, vertical: 8),
+                                          ),
+                                          onChanged: (value) {
+                                            final newValue =
+                                                int.tryParse(value);
+                                            if (newValue != null) {
+                                              userPreferences.updateUserPreferences(
+                                                    userState.userId!,
+                                                    preferences.copyWith(
+                                                        studySessionDuration:
+                                                            newValue),
+                                                  );
+                                            }
+                                          },
                                         ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+
+                                const SizedBox(height: 16),
+
+                                // Sound and Haptic Feedback
+                                Container(
+                                  width: double.infinity,
+                                  child: Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Expanded(
+                                        child: Text('Sound Effects',
+                                            style: Theme.of(context)
+                                                .textTheme
+                                                .bodyLarge),
+                                      ),
+                                      Switch(
+                                        value: preferences.soundEnabled,
                                         onChanged: (value) {
-                                          final newValue = int.tryParse(value);
-                                          if (newValue != null) {
-                                            ref.read(userServiceProvider).updateUserPreferences(
-                                              userState.userId!,
-                                              preferences.copyWith(studySessionDuration: newValue),
-                                            );
-                                          }
+                                          userPreferences.updateUserPreferences(
+                                                userState.userId!,
+                                                preferences.copyWith(
+                                                    soundEnabled: value),
+                                              );
                                         },
                                       ),
-                                    ),
-                                  ],
+                                    ],
+                                  ),
                                 ),
-                                
-                                const SizedBox(height: 16),
-                                
-                                // Sound and Haptic Feedback
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Text('Sound Effects', style: Theme.of(context).textTheme.bodyLarge),
-                                    Switch(
-                                      value: preferences.soundEnabled,
-                                      onChanged: (value) {
-                                        ref.read(userServiceProvider).updateUserPreferences(
-                                          userState.userId!,
-                                          preferences.copyWith(soundEnabled: value),
-                                        );
-                                      },
-                                    ),
-                                  ],
-                                ),
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Text('Haptic Feedback', style: Theme.of(context).textTheme.bodyLarge),
-                                    Switch(
-                                      value: preferences.hapticFeedback,
-                                      onChanged: (value) {
-                                        ref.read(userServiceProvider).updateUserPreferences(
-                                          userState.userId!,
-                                          preferences.copyWith(hapticFeedback: value),
-                                        );
-                                      },
-                                    ),
-                                  ],
+                                Container(
+                                  width: double.infinity,
+                                  child: Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Expanded(
+                                        child: Text('Haptic Feedback',
+                                            style: Theme.of(context)
+                                                .textTheme
+                                                .bodyLarge),
+                                      ),
+                                      Switch(
+                                        value: preferences.hapticFeedback,
+                                        onChanged: (value) {
+                                          userPreferences.updateUserPreferences(
+                                                userState.userId!,
+                                                preferences.copyWith(
+                                                    hapticFeedback: value),
+                                              );
+                                        },
+                                      ),
+                                    ],
+                                  ),
                                 ),
                               ],
                             );
@@ -266,7 +360,7 @@ class UserProfileScreen extends ConsumerWidget {
                         ),
                       ),
                     ),
-                    
+
                     const SizedBox(height: 16),
 
                     // Action Buttons

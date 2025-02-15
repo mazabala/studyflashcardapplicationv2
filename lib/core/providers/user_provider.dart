@@ -16,12 +16,13 @@ class UserState {
   final String? firstName;
   final String? lastName;
   final String? userStatus;
+  final String? email;
   final String? role;
   final bool? isAdmin;
   final String? subscriptionExpiryDate;
   late final String? subscriptionPlanID;
 
-  UserState({this.subscriptionPlan, this.isExpired, this.errorMessage, this.userId, this.firstName, this.lastName, this.userStatus, this.role, this.isAdmin, this.subscriptionPlanID, this.subscriptionExpiryDate});
+  UserState({this.subscriptionPlan, this.isExpired, this.errorMessage, this.userId, this.firstName, this.lastName, this.userStatus, this.email, this.role, this.isAdmin, this.subscriptionPlanID, this.subscriptionExpiryDate});
 
   // Create a new state with updated values
   UserState copyWith({
@@ -32,6 +33,7 @@ class UserState {
     String? firstName,
     String? lastName,
     String? userStatus,
+    String? email,
     String? role,
     bool? isAdmin,
     String? subscriptionPlanID,
@@ -44,6 +46,7 @@ class UserState {
       userId: userId ?? this.userId,
       firstName: firstName ?? this.firstName,
       lastName: lastName ?? this.lastName,
+      email: email ?? this.email,
       userStatus: userStatus ?? this.userStatus,
       role: role ?? this.role,
       isAdmin: isAdmin ?? this.isAdmin,

@@ -214,8 +214,30 @@ DateTime _getExpiryDateForPlan(String planType) {
           .from('user_preferences')
           .select()
           .eq('user_id', userId)
-          .single();
+          .maybeSingle();
       
+      if (response == null) {
+        // Create default preferences if none exist
+        final defaultPreferences = {
+          'user_id': userId,
+          'theme_mode': 'system',
+          'daily_goal_cards': 10,
+          'study_session_duration': 30,
+          'sound_enabled': true,
+          'haptic_feedback': true,
+          'created_at': DateTime.now().toIso8601String(),
+          'last_updated': DateTime.now().toIso8601String(),
+        };
+
+        final newResponse = await _supabaseClient
+            .from('user_preferences')
+            .insert(defaultPreferences)
+            .select()
+            .single();
+
+        return UserPreferences.fromJson(newResponse);
+      }
+
       return UserPreferences.fromJson(response);
     } catch (e) {
       throw ErrorHandler.handle(e,
@@ -273,6 +295,7 @@ DateTime _getExpiryDateForPlan(String planType) {
 
       return UserProgress.fromJson(response);
     } catch (e) {
+      log(e.toString());
       throw ErrorHandler.handle(e,
           message: 'Failed to get user progress',
           specificType: ErrorType.userProfile);
@@ -307,15 +330,19 @@ DateTime _getExpiryDateForPlan(String planType) {
       final now = DateTime.now();
       final thirtyDaysAgo = now.subtract(const Duration(days: 30));
 
-      // Calculate study statistics
-      final recentStudyTime = progress.studyTime.entries
-          .where((entry) => DateTime.parse(entry.key).isAfter(thirtyDaysAgo))
-          .fold<Duration>(Duration.zero, (prev, curr) => prev + curr.value);
+      // Calculate study statistics with null checks
+      Duration recentStudyTime = Duration.zero;
+      if (progress.studyTime.isNotEmpty) {
+        recentStudyTime = progress.studyTime.entries
+            .where((entry) => DateTime.parse(entry.key).isAfter(thirtyDaysAgo))
+            .fold<Duration>(Duration.zero, (prev, curr) => prev + curr.value);
+      }
 
       double averageConfidence = 0;
       if (progress.confidenceLevels.isNotEmpty) {
         final confidenceValues = progress.confidenceLevels.values
-            .expand((map) => map.values);
+            .expand((map) => map.values)
+            .toList();
         if (confidenceValues.isNotEmpty) {
           averageConfidence = confidenceValues.fold<double>(0, (sum, value) => sum + value) /
               confidenceValues.length;
@@ -324,22 +351,25 @@ DateTime _getExpiryDateForPlan(String planType) {
 
       double averageDailyCards = 0;
       if (progress.dailyCardsCovered.isNotEmpty) {
-        averageDailyCards = progress.dailyCardsCovered.values.fold<int>(0, (sum, value) => sum + value) /
-            progress.dailyCardsCovered.length;
+        final totalCards = progress.dailyCardsCovered.values.fold<int>(0, (sum, value) => sum + value);
+        final daysWithData = progress.dailyCardsCovered.length;
+        if (daysWithData > 0) {
+          averageDailyCards = totalCards / daysWithData;
+        }
       }
 
       return {
         'total_study_time': recentStudyTime.inMinutes,
-        'average_daily_cards': averageDailyCards,
+        'average_daily_cards': averageDailyCards.round(),
         'current_streak': progress.currentStreak,
         'longest_streak': progress.longestStreak,
-        'average_confidence': averageConfidence,
-        'recent_sessions': studySessions,
-        'achievements_earned': progress.achievements.length,
-        'performance_trends': progress.performanceMetrics,
+        'average_confidence': double.parse(averageConfidence.toStringAsFixed(2)),
+        'recent_sessions': studySessions ?? [],
+        'achievements_earned': progress.achievements?.length ?? 0,
+        'performance_trends': progress.performanceMetrics ?? {},
       };
     } catch (e) {
-      log (e.toString());
+      log(e.toString());
       throw ErrorHandler.handle(e,
           message: 'Failed to get study analytics',
           specificType: ErrorType.userProfile);

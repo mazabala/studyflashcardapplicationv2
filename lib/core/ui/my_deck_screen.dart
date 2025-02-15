@@ -321,11 +321,11 @@ TextEditingController _cardCountController = TextEditingController();
                 isLoading: false,
                 onPressed:   ()
                         {    
-                  print('?');
+                  
                   Navigator.pushReplacementNamed(context, '/admin');
                         },
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 8),
               const Divider(),
             ],
             
