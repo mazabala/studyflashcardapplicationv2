@@ -41,7 +41,7 @@ class NavigationButtonsWidget extends StatelessWidget {
                     text: 'Card',
                     
                     isLoading: false,
-                    onPressed: flashcardState.currentCardIndex < flashcards.length 
+                    onPressed: flashcardState.currentCardIndex < flashcards.length - 1
                         ? () => controller.nextCard(context)
                         : null,
                   ),

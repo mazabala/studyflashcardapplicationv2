@@ -1,9 +1,12 @@
+import 'dart:developer';
+
 import 'package:flashcardstudyapplication/core/error/error_handler.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flashcardstudyapplication/core/interfaces/i_user_service.dart';
 import 'package:flashcardstudyapplication/core/interfaces/i_api_service.dart';
 import 'package:flashcardstudyapplication/core/models/user_preferences.dart';
 import 'package:flashcardstudyapplication/core/models/user_progress.dart';
+import 'package:uuid/uuid.dart';
 
 class UserService implements IUserService {
   final SupabaseClient _supabaseClient;
@@ -242,8 +245,32 @@ DateTime _getExpiryDateForPlan(String planType) {
           .from('user_progress')
           .select()
           .eq('user_id', userId)
-          .single();
-      
+          .maybeSingle();
+
+      if (response == null) {
+        // Create default progress entry if none exists
+        final defaultProgress = {
+          
+          'user_id': userId,
+          'daily_cards_covered': {},
+          'study_time': {},
+          'confidence_levels': {},
+          'current_streak': 0,
+          'longest_streak': 0,
+          'last_study_date': DateTime.now().toIso8601String(),
+          'achievements': {},
+          'performance_metrics': {},
+        };
+
+        final newResponse = await _supabaseClient
+            .from('user_progress')
+            .insert(defaultProgress)
+            .select()
+            .single();
+
+        return UserProgress.fromJson(newResponse);
+      }
+
       return UserProgress.fromJson(response);
     } catch (e) {
       throw ErrorHandler.handle(e,
@@ -274,7 +301,7 @@ DateTime _getExpiryDateForPlan(String planType) {
           .from('study_sessions')
           .select()
           .eq('user_id', userId)
-          .order('created_at', ascending: false)
+          .order('updated_at', ascending: false)
           .limit(30);
 
       final now = DateTime.now();
@@ -285,15 +312,25 @@ DateTime _getExpiryDateForPlan(String planType) {
           .where((entry) => DateTime.parse(entry.key).isAfter(thirtyDaysAgo))
           .fold<Duration>(Duration.zero, (prev, curr) => prev + curr.value);
 
-      final averageConfidence = progress.confidenceLevels.values
-          .expand((map) => map.values)
-          .fold<double>(0, (sum, value) => sum + value) /
-          progress.confidenceLevels.length;
+      double averageConfidence = 0;
+      if (progress.confidenceLevels.isNotEmpty) {
+        final confidenceValues = progress.confidenceLevels.values
+            .expand((map) => map.values);
+        if (confidenceValues.isNotEmpty) {
+          averageConfidence = confidenceValues.fold<double>(0, (sum, value) => sum + value) /
+              confidenceValues.length;
+        }
+      }
+
+      double averageDailyCards = 0;
+      if (progress.dailyCardsCovered.isNotEmpty) {
+        averageDailyCards = progress.dailyCardsCovered.values.fold<int>(0, (sum, value) => sum + value) /
+            progress.dailyCardsCovered.length;
+      }
 
       return {
         'total_study_time': recentStudyTime.inMinutes,
-        'average_daily_cards': progress.dailyCardsCovered.values.fold<int>(0, (sum, value) => sum + value) / 
-            progress.dailyCardsCovered.length,
+        'average_daily_cards': averageDailyCards,
         'current_streak': progress.currentStreak,
         'longest_streak': progress.longestStreak,
         'average_confidence': averageConfidence,
@@ -302,6 +339,7 @@ DateTime _getExpiryDateForPlan(String planType) {
         'performance_trends': progress.performanceMetrics,
       };
     } catch (e) {
+      log (e.toString());
       throw ErrorHandler.handle(e,
           message: 'Failed to get study analytics',
           specificType: ErrorType.userProfile);

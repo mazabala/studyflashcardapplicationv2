@@ -17,6 +17,7 @@ import 'package:flashcardstudyapplication/core/providers/deck_provider.dart';
 import 'package:flashcardstudyapplication/core/providers/user_provider.dart';
 import 'package:flashcardstudyapplication/core/providers/subscription_provider.dart'; // Correct import
 import 'package:flashcardstudyapplication/core/services/api/api_manager.dart';
+import 'package:flashcardstudyapplication/core/ui/widgets/progress_dashboard_widget.dart';
 
 import 'widgets/deck/deck_search_bar.dart';
 
@@ -327,6 +328,10 @@ TextEditingController _cardCountController = TextEditingController();
               const SizedBox(height: 16),
               const Divider(),
             ],
+            
+            // Progress Dashboard Section
+            const ProgressDashboardWidget(),
+
             SearchBarWidget(
               controller: _searchController,
               onChanged: _searchDecks,

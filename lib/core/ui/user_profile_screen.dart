@@ -3,6 +3,7 @@ import 'package:flashcardstudyapplication/core/providers/user_provider.dart';
 import 'package:flashcardstudyapplication/core/themes/colors.dart';
 import 'package:flashcardstudyapplication/core/ui/widgets/CustomButton.dart';
 import 'package:flashcardstudyapplication/core/ui/widgets/CustomScaffold.dart';
+import 'package:flashcardstudyapplication/core/models/user_preferences.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -110,6 +111,162 @@ class UserProfileScreen extends ConsumerWidget {
                         ),
                       ),
                     ),
+                    const SizedBox(height: 16),
+
+                    // User Preferences Card
+                    Card(
+                      child: Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: FutureBuilder<UserPreferences>(
+                          future: ref.read(userServiceProvider).getUserPreferences(userState.userId ?? ''),
+                          builder: (context, snapshot) {
+                            if (snapshot.connectionState == ConnectionState.waiting) {
+                              return const Center(child: CircularProgressIndicator());
+                            }
+
+                            if (snapshot.hasError) {
+                              return Text(
+                                'Error loading preferences: ${snapshot.error}',
+                                style: TextStyle(color: Theme.of(context).colorScheme.error),
+                              );
+                            }
+
+                            final preferences = snapshot.data!;
+                            
+                            return Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Study Preferences',
+                                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                const SizedBox(height: 16),
+                                
+                                // Theme Mode
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text('Theme Mode', style: Theme.of(context).textTheme.bodyLarge),
+                                    DropdownButton<ThemeMode>(
+                                      value: preferences.themeMode,
+                                      items: ThemeMode.values.map((mode) {
+                                        return DropdownMenuItem(
+                                          value: mode,
+                                          child: Text(mode.toString().split('.').last),
+                                        );
+                                      }).toList(),
+                                      onChanged: (ThemeMode? newMode) {
+                                        if (newMode != null) {
+                                          ref.read(userServiceProvider).updateUserPreferences(
+                                            userState.userId!,
+                                            preferences.copyWith(themeMode: newMode),
+                                          );
+                                        }
+                                      },
+                                    ),
+                                  ],
+                                ),
+                                
+                                const SizedBox(height: 16),
+                                
+                                // Daily Goal
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text('Daily Goal (cards)', style: Theme.of(context).textTheme.bodyLarge),
+                                    SizedBox(
+                                      width: 100,
+                                      child: TextFormField(
+                                        initialValue: preferences.dailyGoalCards.toString(),
+                                        keyboardType: TextInputType.number,
+                                        decoration: const InputDecoration(
+                                          border: OutlineInputBorder(),
+                                        ),
+                                        onChanged: (value) {
+                                          final newValue = int.tryParse(value);
+                                          if (newValue != null) {
+                                            ref.read(userServiceProvider).updateUserPreferences(
+                                              userState.userId!,
+                                              preferences.copyWith(dailyGoalCards: newValue),
+                                            );
+                                          }
+                                        },
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                
+                                const SizedBox(height: 16),
+                                
+                                // Session Duration
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text('Session Duration (min)', style: Theme.of(context).textTheme.bodyLarge),
+                                    SizedBox(
+                                      width: 100,
+                                      child: TextFormField(
+                                        initialValue: preferences.studySessionDuration.toString(),
+                                        keyboardType: TextInputType.number,
+                                        decoration: const InputDecoration(
+                                          border: OutlineInputBorder(),
+                                        ),
+                                        onChanged: (value) {
+                                          final newValue = int.tryParse(value);
+                                          if (newValue != null) {
+                                            ref.read(userServiceProvider).updateUserPreferences(
+                                              userState.userId!,
+                                              preferences.copyWith(studySessionDuration: newValue),
+                                            );
+                                          }
+                                        },
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                
+                                const SizedBox(height: 16),
+                                
+                                // Sound and Haptic Feedback
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text('Sound Effects', style: Theme.of(context).textTheme.bodyLarge),
+                                    Switch(
+                                      value: preferences.soundEnabled,
+                                      onChanged: (value) {
+                                        ref.read(userServiceProvider).updateUserPreferences(
+                                          userState.userId!,
+                                          preferences.copyWith(soundEnabled: value),
+                                        );
+                                      },
+                                    ),
+                                  ],
+                                ),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text('Haptic Feedback', style: Theme.of(context).textTheme.bodyLarge),
+                                    Switch(
+                                      value: preferences.hapticFeedback,
+                                      onChanged: (value) {
+                                        ref.read(userServiceProvider).updateUserPreferences(
+                                          userState.userId!,
+                                          preferences.copyWith(hapticFeedback: value),
+                                        );
+                                      },
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            );
+                          },
+                        ),
+                      ),
+                    ),
+                    
                     const SizedBox(height: 16),
 
                     // Action Buttons

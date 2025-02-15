@@ -9,8 +9,7 @@ import 'package:flashcardstudyapplication/core/ui/user_profile_screen.dart';
 import 'package:flashcardstudyapplication/core/ui/login_screen.dart';
 import 'package:flashcardstudyapplication/core/ui/home_screen.dart';
 import 'package:flashcardstudyapplication/core/ui/my_deck_screen.dart';
-import 'package:flashcardstudyapplication/core/ui/screens/user_preferences_screen.dart';
-import 'package:flashcardstudyapplication/core/ui/screens/progress_dashboard_screen.dart';
+
 
 class RouteManager {
   static Route<dynamic> generateRoute(RouteSettings settings) {
@@ -44,10 +43,6 @@ class RouteManager {
         return _noAnimationRoute(const MyDeckScreen());
       case '/admin':
         return _noAnimationRoute(AdminManagementScreen());
-      case '/preferences':
-        return _noAnimationRoute(const UserPreferencesScreen());
-      case '/progress':
-        return _noAnimationRoute(const ProgressDashboardScreen());
       default:
         return _noAnimationRoute(const HomeScreen());  // Default route
     }
@@ -75,8 +70,7 @@ class RouteManager {
       '/prices': (_) => PricingScreen(),
       '/aboutUs': (_) => const AboutUsScreen(),
       '/admin': (_) => AdminManagementScreen(),
-      '/preferences': (_) => const UserPreferencesScreen(),
-      '/progress': (_) => const ProgressDashboardScreen(),
+
     };
   }
 }
