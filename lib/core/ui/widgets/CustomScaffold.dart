@@ -11,12 +11,14 @@ class CustomScaffold extends ConsumerStatefulWidget {
   final String currentRoute;
   final Widget body;
   final bool useScroll;
+  final bool showBottomNav;
 
   const CustomScaffold({
     Key? key,
     required this.currentRoute,
     required this.body,
     this.useScroll = true,
+    this.showBottomNav = true,
   }) : super(key: key);
 
   @override
@@ -83,6 +85,59 @@ class _CustomScaffoldState extends ConsumerState<CustomScaffold> {
         ),
       ),
       endDrawer: isSmallScreen ? _buildDrawer(isLoggedIn, ref) : null,
+      floatingActionButton: widget.showBottomNav ? FloatingActionButton(
+        onPressed: () {
+          // Show create deck dialog
+          Navigator.pushNamed(context, '/createDeck');
+        },
+        backgroundColor: theme.colorScheme.primary,
+        child: const Icon(Icons.add, size: 32),
+      ) : null,
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+      bottomNavigationBar: widget.showBottomNav ? BottomAppBar(
+        shape: const CircularNotchedRectangle(),
+        notchMargin: 8,
+        child: SizedBox(
+          height: 60,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              // Left side of FAB
+              Expanded(
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    _buildNavItem(
+                      context: context,
+                      icon: Icons.style,
+                      label: 'Decks',
+                      route: '/myDecks',
+                      isSelected: widget.currentRoute == '/myDecks',
+                    ),
+                  ],
+                ),
+              ),
+              // Space for FAB
+              const SizedBox(width: 80),
+              // Right side of FAB
+              Expanded(
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    _buildNavItem(
+                      context: context,
+                      icon: Icons.person,
+                      label: 'Profile',
+                      route: '/userProfile',
+                      isSelected: widget.currentRoute == '/userProfile',
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ) : null,
     );
   }
 
@@ -225,6 +280,38 @@ class _CustomScaffoldState extends ConsumerState<CustomScaffold> {
           }
         });
       },
+    );
+  }
+
+  Widget _buildNavItem({
+    required BuildContext context,
+    required IconData icon,
+    required String label,
+    required String route,
+    required bool isSelected,
+  }) {
+    final theme = Theme.of(context);
+    final color = isSelected ? theme.colorScheme.primary : Colors.grey;
+
+    return InkWell(
+      onTap: () {
+        if (route != widget.currentRoute) {
+          _navigateWithoutAnimation(context, route);
+        }
+      },
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, color: color),
+          Text(
+            label,
+            style: theme.textTheme.labelSmall?.copyWith(
+              color: color,
+              fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

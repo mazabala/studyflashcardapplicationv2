@@ -329,8 +329,7 @@ TextEditingController _cardCountController = TextEditingController();
               const Divider(),
             ],
             
-            // Progress Dashboard Section
-            const ProgressDashboardWidget(),
+
 
             SearchBarWidget(
               controller: _searchController,
