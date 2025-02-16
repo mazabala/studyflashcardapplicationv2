@@ -108,6 +108,7 @@ class _StudyScreenState extends ConsumerState<StudyScreen> {
     if (flashcardState.error.isNotEmpty) {
       return CustomScaffold(
         currentRoute: currentRoute,
+        showBottomNav: false,
         body: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -139,6 +140,7 @@ class _StudyScreenState extends ConsumerState<StudyScreen> {
 
     return CustomScaffold(
       currentRoute: currentRoute,
+      showBottomNav: false,
       body: SafeArea(
         child: LayoutBuilder(
           builder: (context, constraints) {

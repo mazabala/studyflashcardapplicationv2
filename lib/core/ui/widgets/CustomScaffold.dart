@@ -26,7 +26,14 @@ class CustomScaffold extends ConsumerStatefulWidget {
 }
 
 class _CustomScaffoldState extends ConsumerState<CustomScaffold> {
-  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  late final GlobalKey<ScaffoldState> _scaffoldKey;
+
+  @override
+  void initState() {
+    super.initState();
+    // Create a unique key for each instance
+    _scaffoldKey = GlobalKey<ScaffoldState>();
+  }
 
   void _navigateWithoutAnimation(BuildContext context, String route) {
     if (!mounted) return;
@@ -85,59 +92,64 @@ class _CustomScaffoldState extends ConsumerState<CustomScaffold> {
         ),
       ),
       endDrawer: isSmallScreen ? _buildDrawer(isLoggedIn, ref) : null,
-      floatingActionButton: widget.showBottomNav ? FloatingActionButton(
-        onPressed: () {
-          // Show create deck dialog
-          Navigator.pushNamed(context, '/createDeck');
-        },
-        backgroundColor: theme.colorScheme.primary,
-        child: const Icon(Icons.add, size: 32),
-      ) : null,
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-      bottomNavigationBar: widget.showBottomNav ? BottomAppBar(
-        shape: const CircularNotchedRectangle(),
-        notchMargin: 8,
-        child: SizedBox(
-          height: 60,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              // Left side of FAB
-              Expanded(
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    _buildNavItem(
-                      context: context,
-                      icon: Icons.style,
-                      label: 'Decks',
-                      route: '/myDecks',
-                      isSelected: widget.currentRoute == '/myDecks',
-                    ),
-                  ],
-                ),
-              ),
-              // Space for FAB
-              const SizedBox(width: 80),
-              // Right side of FAB
-              Expanded(
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    _buildNavItem(
-                      context: context,
-                      icon: Icons.person,
-                      label: 'Profile',
-                      route: '/userProfile',
-                      isSelected: widget.currentRoute == '/userProfile',
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
-      ) : null,
+      // floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+      // floatingActionButton: widget.showBottomNav ? Container(
+      //   height: 60,
+      //   width: 60,
+      //   margin: const EdgeInsets.only(top: 10),
+      //   child: FloatingActionButton(
+      //     shape: const CircleBorder(),
+      //     onPressed: () {},
+      //     backgroundColor: theme.colorScheme.primary,
+      //     elevation: 0,
+      //     child: const Icon(Icons.add, size: 32),
+      //   ),
+      // ) : null,
+      // bottomNavigationBar: widget.showBottomNav ? BottomAppBar(
+      //   color: theme.colorScheme.primary,
+      //   shape: const CircularNotchedRectangle(),
+      //   notchMargin: 8,
+      //   height: 60,
+      //   child: SizedBox(
+          
+      //     child: Row(
+      //       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      //       children: [
+      //         // Left side of FAB
+      //         Expanded(
+      //           child: Row(
+      //             mainAxisAlignment: MainAxisAlignment.center,
+      //             children: [
+      //               _buildNavItem(
+      //                 context: context,
+      //                 icon: Icons.style,
+      //                 route: '/myDecks',
+      //                 isSelected: widget.currentRoute == '/myDecks',
+      //               ),
+      //             ],
+      //           ),
+      //         ),
+      //         // Space for FAB
+      //         const SizedBox(width: 80),
+      //         // Right side of FAB
+      //         Expanded(
+      //           child: Row(
+      //             mainAxisAlignment: MainAxisAlignment.center,
+      //             children: [
+      //               _buildNavItem(
+                      
+      //                 context: context,
+      //                 icon: Icons.person,
+      //                 route: '/userProfile',
+      //                 isSelected: widget.currentRoute == '/userProfile',
+      //               ),
+      //             ],
+      //           ),
+      //         ),
+      //       ],
+      //     ),
+      //   ),
+      // ) : null,
     );
   }
 
@@ -286,7 +298,7 @@ class _CustomScaffoldState extends ConsumerState<CustomScaffold> {
   Widget _buildNavItem({
     required BuildContext context,
     required IconData icon,
-    required String label,
+     String? label,
     required String route,
     required bool isSelected,
   }) {
@@ -294,6 +306,7 @@ class _CustomScaffoldState extends ConsumerState<CustomScaffold> {
     final color = isSelected ? theme.colorScheme.primary : Colors.grey;
 
     return InkWell(
+      
       onTap: () {
         if (route != widget.currentRoute) {
           _navigateWithoutAnimation(context, route);
@@ -302,15 +315,17 @@ class _CustomScaffoldState extends ConsumerState<CustomScaffold> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, color: color),
-          Text(
-            label,
-            style: theme.textTheme.labelSmall?.copyWith(
-              color: color,
-              fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+          Icon(icon, color: color,size: 32),
+          if (label != null)
+            Text(
+              label,
+              style: theme.textTheme.labelSmall?.copyWith(
+                color: color,
+                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+              ),
             ),
-          ),
         ],
+        
       ),
     );
   }

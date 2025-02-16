@@ -128,55 +128,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         ],
                       ),
                     ),
-                    SizedBox(height: maxHeight * 0.03),
-                    // Features Section
-                    Container(
-                      padding: EdgeInsets.all(maxWidth * 0.04),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(maxWidth * 0.04),
-                      ),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Row(
-                            children: [
-                              Icon(Icons.auto_awesome, 
-                                color: Colors.blue, 
-                                size: featureIconSize
-                              ),
-                              SizedBox(width: maxWidth * 0.02),
-                              Expanded(
-                                child: Text(
-                                  'AI-powered flashcards for better learning',
-                                  style: theme.textTheme.bodyMedium?.copyWith(
-                                    fontSize: maxHeight * 0.018,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                          SizedBox(height: maxHeight * 0.015),
-                          Row(
-                            children: [
-                              Icon(Icons.school, 
-                                color: Colors.blue, 
-                                size: featureIconSize
-                              ),
-                              SizedBox(width: maxWidth * 0.02),
-                              Expanded(
-                                child: Text(
-                                  'Transform your study experience today',
-                                  style: theme.textTheme.bodyMedium?.copyWith(
-                                    fontSize: maxHeight * 0.018,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
+            
                     SizedBox(height: maxHeight * 0.03),
                     // Continue Button
                     SizedBox(
@@ -194,7 +146,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                           ),
                         ),
                         child: Text(
-                          'Continue',
+                          'Get Started',
                           style: TextStyle(
                             fontSize: maxHeight * 0.024,
                             fontWeight: FontWeight.bold,

@@ -135,7 +135,7 @@ Future<void> _signWithGoogle() async {
                       signUpEmailController.text,
                       signUpPasswordController.text,
                       signUpNameController.text,
-                      signUpLastNameController.text); //TODO: VERIFY THIS WORKS
+                      signUpLastNameController.text);
 
                   if (mounted) {
                     Navigator.of(context).pop();
@@ -359,6 +359,7 @@ void _onForgotPasswordTapped() {
 
     return CustomScaffold(
       currentRoute: '/login',
+      showBottomNav: false,
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 24),

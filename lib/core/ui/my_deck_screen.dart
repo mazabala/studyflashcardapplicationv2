@@ -11,6 +11,7 @@ import 'package:flashcardstudyapplication/core/ui/widgets/CustomTextField.dart';
 import 'package:flashcardstudyapplication/core/ui/widgets/deck/create_deck_dialog.dart';
 import 'package:flashcardstudyapplication/core/ui/widgets/deck/deck_action_buttons.dart';
 import 'package:flashcardstudyapplication/core/ui/widgets/deck/deck_display.dart';
+import 'package:flashcardstudyapplication/core/ui/widgets/myDeckToolBar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flashcardstudyapplication/core/providers/deck_provider.dart';
@@ -193,27 +194,26 @@ TextEditingController _cardCountController = TextEditingController();
 
   // Function to show the Create Deck dialog and create the deck
   void _createDeck() async {
-    final deckCategory = await _getDeckCategory();
-    final deckDifficulty = await _getDeckDifficulty();
-    final userService = ref.read(userStateProvider);
-    
 
+    final userService = ref.read(userStateProvider);
 
     showDialog(
       context: context,
       builder: (context) {
         return CreateDeckDialog(
-          onSubmit: (String subject, String concept,  String category, String difficultyLevel, int cardCount) async {
+          onSubmit: (String subject, String concept, String category,
+              String difficultyLevel, int cardCount) async {
             final userId = userService.userId;
             if (userId != null) {
-              await ref.read(deckStateProvider.notifier).createDeck(subject, concept, category, difficultyLevel, userId, cardCount);
+              await ref.read(deckStateProvider.notifier).createDeck(subject,
+                  concept, category, difficultyLevel, userId, cardCount);
 
-
-              if (mounted) { // Ensure the widget is still mounted before popping
+              if (mounted) {
+                // Ensure the widget is still mounted before popping
                 _loadUserDecks(); // Refresh the deck list
               }
             } else {
-              print('User ID not found');
+
             }
           },
         );
@@ -298,39 +298,21 @@ TextEditingController _cardCountController = TextEditingController();
     }
 
     // Regular screen if subscription is not expired
-    return CustomScaffold(
-      currentRoute: currentRoute,
+    var children = [
+      MyDeckToolBar(
+          isAdmin: isSystemUser,
+          onCreateDeck: _createDeck,
+          onSeachNewDecks: () {
+            if (!isSearchingNewDecks) {
+              _searchNewDecks(); 
+            } else {
+              _loadUserDecks();
+            }
+          },
+          isSearchingNewDecks: isSearchingNewDecks),
 
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-              CustomButton(
-          iconOnly: false,
-          icon: Icons.person,
-          text: 'My Profile',
-          tooltip: 'User Profile',
-          isLoading: false,
-          onPressed: () => Navigator.pushNamed(context, '/userProfile'),
-        ),
-            const SizedBox(height: 16),
-            if (isSystemUser) ...[
-              CustomButton(
-                text: 'Admin Panel',
-                iconOnly: false,
-                icon: Icons.admin_panel_settings,
-                isLoading: false,
-                onPressed:   ()
-                        {    
-                  
-                  Navigator.pushReplacementNamed(context, '/admin');
-                        },
-              ),
-              const SizedBox(height: 8),
-              const Divider(),
-            ],
+
             
-
-
             SearchBarWidget(
               controller: _searchController,
               onChanged: _searchDecks,
@@ -342,20 +324,40 @@ TextEditingController _cardCountController = TextEditingController();
               onDeckAdded: _resetSearchStateAndNavigate,
             ),
             // If subscription expired, disable the Deck buttons
-            if (!subscriptionStatus.isExpired)
-              DeckButtonsWidget(
-                isSearchingNewDecks: isSearchingNewDecks,
-                onSeachNewDecks: () {
-                  if (!isSearchingNewDecks) {
-                       _searchNewDecks(); CustomButton(text: 'Go back',isLoading: false,icon: Icons.transit_enterexit, onPressed: () { isSearchingNewDecks = false; _loadUserDecks();});  // Pass controller here
-                            }
-                  else {_loadUserDecks();}
-                  },
-                onCreateDeck: () {_createDeck();}, // Implement create deck logic here
-                onSignOut: () {_signOut();}, // Implement sign-out logic here
-              ),
+      if (!subscriptionStatus.isExpired)
+        DeckButtonsWidget(
+          isSearchingNewDecks: isSearchingNewDecks,
+          onSeachNewDecks: () {
+            if (!isSearchingNewDecks) {
+              _searchNewDecks();
+              CustomButton(
+                  text: 'Go back',
+                  isLoading: false,
+                  icon: Icons.transit_enterexit,
+                  onPressed: () {
+                    isSearchingNewDecks = false;
+                    _loadUserDecks();
+                  }); // Pass controller here
+            } else {
+              _loadUserDecks();
+            }
+          },
+          onCreateDeck: () {
+            _createDeck();
+          }, // Implement create deck logic here
+          onSignOut: () {
+            _signOut();
+          }, // Implement sign-out logic here
+        ),
              
-          ],
+          ];
+   
+    return CustomScaffold(
+      currentRoute: currentRoute,
+
+      body: SingleChildScrollView(
+        child: Column(
+          children: children,
         ),
       ),
     );
