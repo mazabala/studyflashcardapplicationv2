@@ -130,8 +130,10 @@ class CollectionService implements ICollectionService {
           'p_collection_id': collectionId,
         },
       );
+      log('Collection: $collectionId added to user: $response');
       return UserCollection.fromJson(response as Map<String, dynamic>);
     } catch (e) {
+      log('Error adding collection to user: $e');
       throw ErrorHandler.handle(e);
     }
   }
@@ -162,22 +164,7 @@ class CollectionService implements ICollectionService {
     }
   }
 
-  @override
-  Future<UserCollection> getUserCollection(String userCollectionId) async {
-    try {
-      final response = await _supabaseClient.rpc(
-        'get_user_collection',
-        params: {
-          'p_user_collection_id': userCollectionId,
-        },
-      );
-      return UserCollection.fromJson(response as Map<String, dynamic>);
-    } catch (e) {
-      log(e.toString());
-      throw ErrorHandler.handle(e);
-    }
-  }
-
+ 
   @override
   Future<double> getCollectionCompletionRate(String collectionId) async {
     try {
@@ -240,7 +227,9 @@ class CollectionService implements ICollectionService {
           'p_deck_id': deckId,
         },
       );
+      log('Deck: $deckId added to collection: $collectionId');
     } catch (e) {
+      log('Error adding deck to collection: $e');
       throw ErrorHandler.handle(e);
     }
   }

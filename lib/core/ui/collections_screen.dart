@@ -1,7 +1,9 @@
 import 'package:flashcardstudyapplication/core/models/collection.dart';
 import 'package:flashcardstudyapplication/core/models/user_collection.dart';
 import 'package:flashcardstudyapplication/core/providers/provider_config.dart';
+import 'package:flashcardstudyapplication/core/providers/collection_provider.dart';
 import 'package:flashcardstudyapplication/core/ui/widgets/CustomScaffold.dart';
+import 'package:flashcardstudyapplication/core/ui/widgets/collection/collection_deck_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -39,11 +41,16 @@ class _CollectionsScreenState extends ConsumerState<CollectionsScreen> with Sing
   Future<void> _initializeCollections() async {
     try {
       // Trigger loading of collections
-      ref.read(userCollectionsProvider);
-      ref.read(publicCollectionsProvider);
-      setState(() {
-        _isInitialized = true;
-      });
+      await Future.wait([
+        ref.read(userCollectionsProvider.future),
+        ref.read(publicCollectionsProvider.future),
+      ]);
+      
+      if (mounted) {
+        setState(() {
+          _isInitialized = true;
+        });
+      }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -147,14 +154,20 @@ class _CollectionsScreenState extends ConsumerState<CollectionsScreen> with Sing
     if (result == true) {
       try {
         final service = ref.read(collectionServiceProvider);
-        await service.createCollection(
+        final collection = await service.createCollection(
           name: name,
           subject: subject,
           description: description,
           deckIds: [],
           isPublic: isPublic,
         );
+        
+        // Automatically add the collection to the user
+        await service.addCollectionToUser(collection.id);
+        
+        // Invalidate both providers to refresh the UI
         ref.invalidate(userCollectionsProvider);
+        ref.invalidate(publicCollectionsProvider);
 
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -169,6 +182,78 @@ class _CollectionsScreenState extends ConsumerState<CollectionsScreen> with Sing
         }
       }
     }
+  }
+
+  Widget _buildCollectionList<T>(
+    AsyncValue<List<T>> collections, {
+    required String emptyMessage,
+    required Widget Function(T) itemBuilder,
+  }) {
+    return collections.when(
+      data: (items) {
+        if (items.isEmpty) {
+          return Center(child: Text(emptyMessage));
+        }
+        return ListView.builder(
+          padding: const EdgeInsets.all(8),
+          itemCount: items.length,
+          itemBuilder: (context, index) => Card(
+            margin: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+            child: itemBuilder(items[index]),
+          ),
+        );
+      },
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (error, stack) => Center(
+        child: SelectableText.rich(
+          TextSpan(
+            children: [
+              const TextSpan(text: 'Error loading collections: '),
+              TextSpan(
+                text: error.toString(),
+                style: const TextStyle(color: Colors.red),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _showAddDecksDialog(Collection collection) async {
+    await showDialog<void>(
+      context: context,
+      builder: (BuildContext context) {
+        return Dialog(
+          child: Container(
+            width: MediaQuery.of(context).size.width * 0.8,
+            height: MediaQuery.of(context).size.height * 0.8,
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'Add Decks to ${collection.name}',
+                      style: Theme.of(context).textTheme.titleLarge,
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.close),
+                      onPressed: () => Navigator.of(context).pop(),
+                    ),
+                  ],
+                ),
+                const Divider(),
+                Expanded(
+                  child: CollectionDeckManager(collection: collection),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
   }
 
   @override
@@ -205,12 +290,46 @@ class _CollectionsScreenState extends ConsumerState<CollectionsScreen> with Sing
                       _buildCollectionList(
                         userCollections,
                         emptyMessage: 'No collections yet. Create one or add from public collections.',
-                        itemBuilder: (collection) => ListTile(
-                          title: Text(collection.collectionId),
-                          subtitle: Text('${collection.decks.length} decks - ${(collection.completionRate * 100).toStringAsFixed(1)}% complete'),
-                          trailing: const Icon(Icons.chevron_right),
-                          onTap: () {
-                            // TODO: Navigate to collection details
+                        itemBuilder: (UserCollection userCollection) => Consumer(
+                          builder: (context, ref, child) {
+                            final collectionDetails = ref.watch(
+                              collectionDetailsProvider.notifier
+                            ).getCollectionDetails(userCollection.collectionId);
+                            
+                            return ListTile(
+                              title: FutureBuilder<Collection>(
+                                future: collectionDetails,
+                                builder: (context, snapshot) {
+                                  if (snapshot.hasData) {
+                                    return Text(snapshot.data!.name);
+                                  } else if (snapshot.hasError) {
+                                    return Text('Error loading collection: ${snapshot.error}');
+                                  }
+                                  return const Text('Loading...');
+                                },
+                              ),
+                              subtitle: Text('${userCollection.decks.length} decks - ${(userCollection.completionRate * 100).toStringAsFixed(1)}% complete'),
+                              trailing: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  IconButton(
+                                    icon: const Icon(Icons.add),
+                                    onPressed: () async {
+                                      final collection = await ref.read(collectionDetailsProvider.notifier)
+                                          .getCollectionDetails(userCollection.collectionId);
+                                      if (mounted) {
+                                        _showAddDecksDialog(collection);
+                                      }
+                                    },
+                                    tooltip: 'Add decks',
+                                  ),
+                                  const Icon(Icons.chevron_right),
+                                ],
+                              ),
+                              onTap: () {
+                                // TODO: Navigate to collection details
+                              },
+                            );
                           },
                         ),
                       ),
@@ -257,42 +376,6 @@ class _CollectionsScreenState extends ConsumerState<CollectionsScreen> with Sing
             ),
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildCollectionList<T>(
-    AsyncValue<List<T>> collections, {
-    required String emptyMessage,
-    required Widget Function(T) itemBuilder,
-  }) {
-    return collections.when(
-      data: (items) {
-        if (items.isEmpty) {
-          return Center(child: Text(emptyMessage));
-        }
-        return ListView.builder(
-          padding: const EdgeInsets.all(8),
-          itemCount: items.length,
-          itemBuilder: (context, index) => Card(
-            margin: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
-            child: itemBuilder(items[index]),
-          ),
-        );
-      },
-      loading: () => const Center(child: CircularProgressIndicator()),
-      error: (error, stack) => Center(
-        child: SelectableText.rich(
-          TextSpan(
-            children: [
-              const TextSpan(text: 'Error loading collections: '),
-              TextSpan(
-                text: error.toString(),
-                style: const TextStyle(color: Colors.red),
-              ),
-            ],
-          ),
-        ),
       ),
     );
   }
