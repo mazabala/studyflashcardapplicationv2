@@ -1,4 +1,5 @@
 import 'package:flashcardstudyapplication/core/providers/provider_config.dart';
+import 'package:flashcardstudyapplication/core/themes/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flashcardstudyapplication/core/ui/widgets/CustomScaffold.dart';
 
@@ -92,7 +93,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                               width: maxWidth * 0.25,
                               height: maxHeight * 0.2,
                               decoration: BoxDecoration(
-                                color: Colors.yellow,
+                                color: theme.colorScheme.tertiary,
                                 borderRadius: BorderRadius.circular(maxWidth * 0.04),
                               ),
                               child: Icon(Icons.person, size: maxWidth * 0.15),

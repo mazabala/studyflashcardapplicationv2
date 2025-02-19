@@ -1,3 +1,5 @@
+import 'package:flashcardstudyapplication/core/models/collection.dart';
+import 'package:flashcardstudyapplication/core/models/user_collection.dart';
 import 'package:flashcardstudyapplication/core/providers/admin_provider.dart';
 import 'package:flashcardstudyapplication/core/providers/analytics_provider.dart';
 import 'package:flashcardstudyapplication/core/providers/auth_provider.dart';
@@ -7,6 +9,7 @@ import 'package:flashcardstudyapplication/core/providers/revenuecat_provider.dar
 import 'package:flashcardstudyapplication/core/providers/subscription_provider.dart';
 import 'package:flashcardstudyapplication/core/providers/user_provider.dart';
 import 'package:flashcardstudyapplication/core/services/analytics/posthog_service.dart';
+import 'package:flashcardstudyapplication/core/services/collection/collection_service.dart';
 import 'package:flashcardstudyapplication/core/services/revenuecat/revenuecat_service.dart';
 import 'package:flashcardstudyapplication/core/services/users/users_service.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -155,3 +158,20 @@ final safeSubscriptionProvider = Provider<SubscriptionState>((ref) {
 final revenueCatClientProvider = StateNotifierProvider<RevenueCatNotifier, RevenueCatService>((ref) {
   return RevenueCatNotifier(ref);
 }); 
+
+// Collection Service Provider
+final collectionServiceProvider = Provider<CollectionService>((ref) {
+  return CollectionService(ref.watch(supabaseClientProvider));
+});
+
+// Collection State Providers
+final userCollectionsProvider = FutureProvider<List<UserCollection>>((ref) async {
+  final service = ref.watch(collectionServiceProvider);
+  return service.getUserCollections();
+});
+
+final publicCollectionsProvider = FutureProvider<List<Collection>>((ref) async {
+  final service = ref.watch(collectionServiceProvider);
+  return service.getCollectionPool();
+});
+

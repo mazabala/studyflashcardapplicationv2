@@ -1,3 +1,4 @@
+import 'package:flashcardstudyapplication/core/themes/app_theme.dart';
 import 'package:flutter/material.dart';
 
 class MyDeckToolBar extends StatelessWidget {
@@ -19,7 +20,7 @@ final bool isSearchingNewDecks;
     final double height = 50;
     final double width = 100;
 
-    final textColor = Theme.of(context).colorScheme.surface;
+    final textColor = Theme.of(context).colorScheme.primary;
 
     var children = [
       Expanded(
@@ -31,7 +32,7 @@ final bool isSearchingNewDecks;
         child: InkWell(
           borderRadius: BorderRadius.circular(20),
           onTap: isSearchingNewDecks ? onSeachNewDecks : onSeachNewDecks,
-          child: Text('Deck Pool', textAlign: TextAlign.center, style: TextStyle(color: textColor),),
+          child: Text('Deck    Pool', textAlign: TextAlign.center, style: TextStyle(color: textColor),),
         ),
       ),
       ),
@@ -82,6 +83,19 @@ final bool isSearchingNewDecks;
       ),
       ),
 
+      Expanded(
+        child: Container(
+          padding: EdgeInsets.all(5),
+          alignment: Alignment.center,
+          child: InkWell(
+            borderRadius: BorderRadius.circular(20),
+            onTap: () {
+              Navigator.pushNamed(context, '/collections');
+            },
+            child: Text('Collections', textAlign: TextAlign.center, style: TextStyle(color: textColor)),
+          ),
+        ),
+      ),
 
       ],
       
@@ -93,7 +107,7 @@ final bool isSearchingNewDecks;
         child: Container(
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(20),
-            color: Theme.of(context).colorScheme.secondary,
+            color: Theme.of(context).colorScheme.tertiary,
           ),
           child: Padding(
             padding: const EdgeInsets.all(1.0),

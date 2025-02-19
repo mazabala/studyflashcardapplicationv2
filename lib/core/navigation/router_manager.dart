@@ -1,6 +1,7 @@
 import 'package:flashcardstudyapplication/core/models/deck.dart';
 import 'package:flashcardstudyapplication/core/ui/about_us.dart';
 import 'package:flashcardstudyapplication/core/ui/admin_management_screen.dart';
+import 'package:flashcardstudyapplication/core/ui/collections_screen.dart';
 import 'package:flashcardstudyapplication/core/ui/study_screen.dart';
 import 'package:flashcardstudyapplication/core/ui/pricing_screen.dart';
 import 'package:flutter/material.dart';
@@ -43,6 +44,8 @@ class RouteManager {
         return _noAnimationRoute(const MyDeckScreen());
       case '/admin':
         return _noAnimationRoute(AdminManagementScreen());
+      case '/collections':
+        return _noAnimationRoute(CollectionsScreen());
       default:
         return _noAnimationRoute(const HomeScreen());  // Default route
     }
@@ -70,6 +73,7 @@ class RouteManager {
       '/prices': (_) => PricingScreen(),
       '/aboutUs': (_) => const AboutUsScreen(),
       '/admin': (_) => AdminManagementScreen(),
+      '/collections': (_) => CollectionsScreen(),
 
     };
   }

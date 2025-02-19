@@ -304,7 +304,7 @@ TextEditingController _cardCountController = TextEditingController();
           onCreateDeck: _createDeck,
           onSeachNewDecks: () {
             if (!isSearchingNewDecks) {
-              _searchNewDecks(); 
+              _searchNewDecks();  
             } else {
               _loadUserDecks();
             }
@@ -324,31 +324,7 @@ TextEditingController _cardCountController = TextEditingController();
               onDeckAdded: _resetSearchStateAndNavigate,
             ),
             // If subscription expired, disable the Deck buttons
-      if (!subscriptionStatus.isExpired)
-        DeckButtonsWidget(
-          isSearchingNewDecks: isSearchingNewDecks,
-          onSeachNewDecks: () {
-            if (!isSearchingNewDecks) {
-              _searchNewDecks();
-              CustomButton(
-                  text: 'Go back',
-                  isLoading: false,
-                  icon: Icons.transit_enterexit,
-                  onPressed: () {
-                    isSearchingNewDecks = false;
-                    _loadUserDecks();
-                  }); // Pass controller here
-            } else {
-              _loadUserDecks();
-            }
-          },
-          onCreateDeck: () {
-            _createDeck();
-          }, // Implement create deck logic here
-          onSignOut: () {
-            _signOut();
-          }, // Implement sign-out logic here
-        ),
+      
              
           ];
    

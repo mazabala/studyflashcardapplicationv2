@@ -8,7 +8,7 @@ import 'package:flashcardstudyapplication/core/interfaces/i_subscription_service
 import 'package:flashcardstudyapplication/core/services/users/users_service.dart';
 import 'package:flashcardstudyapplication/core/services/revenuecat/revenuecat_service.dart';
 import 'package:flashcardstudyapplication/core/error/error_handler.dart';
-import 'package:flashcardstudyapplication/core/classes/subscriptions.dart';
+import 'package:flashcardstudyapplication/core/models/subscriptions.dart';
 
 class SubscriptionService implements ISubscriptionService {
   final SupabaseClient _supabaseClient;

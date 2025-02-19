@@ -5,8 +5,8 @@ import 'package:flutter/material.dart';
 class AppColors {
   // Primary Colors
   static const Color primaryColor = Color(0xFF003366);  // Royal Navy - Bold and elegant
-  static const Color secondaryColor = Color(0xFFFFD700);  // Light Gold - Elegant contrast
-  static const Color accentColor = Color(0xFF008080);  // Teal - Vibrant accent
+  static const Color secondaryColor = Color.fromARGB(255, 255, 217, 0);  // Light Gold - Elegant contrast
+  static const Color accentColor = Color.fromARGB(255, 1, 117, 117);  // Teal - Vibrant accent
 
   // Background Colors
   static const Color backgroundColor = Color(0xFFF1F1F1);  // Off-White/Light Gray - Subtle and neutral
