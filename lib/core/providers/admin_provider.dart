@@ -17,6 +17,7 @@ class AdminState {
   final List<String> pendingInvites;
   final List<String> flaggedContent;
   final List<Map<String, dynamic>> users;
+  final bool isInitialized;
 
   const AdminState({
     this.isLoading = false,
@@ -25,6 +26,7 @@ class AdminState {
     this.pendingInvites = const [],
     this.flaggedContent = const [],
     this.users = const [],
+    this.isInitialized = false,
   });
 
   AdminState copyWith({
@@ -32,8 +34,9 @@ class AdminState {
     String? error,
     bool? isAdmin,
     List<String>? pendingInvites,
-    List<String>? flaggedContent, 
+    List<String>? flaggedContent,
     List<Map<String, dynamic>>? users,
+    bool? isInitialized,
   }) {
     return AdminState(
       isLoading: isLoading ?? this.isLoading,
@@ -42,6 +45,7 @@ class AdminState {
       pendingInvites: pendingInvites ?? this.pendingInvites,
       flaggedContent: flaggedContent ?? this.flaggedContent,
       users: users ?? this.users,
+      isInitialized: isInitialized ?? this.isInitialized,
     );
   }
 
@@ -59,6 +63,40 @@ class AdminNotifier extends StateNotifier<AdminState> {
     state = state.copyWith(users: []);
   }
 
+  Future<void> initializeAdminState() async {
+    if (state.isInitialized) return;
+
+    try {
+      state = state.copyWith(isLoading: true, error: '');
+
+      final isAdmin = await _adminService.isSystemAdmin();
+
+      print('admin notifier: isAdmin: $isAdmin');
+
+      if (isAdmin) {
+        //final flaggedContent = await _adminService.getFlaggedContent();
+        state = state.copyWith(
+          isAdmin: isAdmin,
+          //flaggedContent: flaggedContent,
+          isLoading: false,
+          isInitialized: true,
+        );
+      } else {
+        state = state.copyWith(
+          isAdmin: isAdmin,
+          isLoading: false,
+          isInitialized: true,
+        );
+      }
+    } catch (e) {
+      state = state.copyWith(
+        error: e.toString(),
+        isLoading: false,
+        isInitialized: true,
+      );
+    }
+  }
+
   Future<List<Map<String, dynamic>>> loadUsers({
     String? searchQuery,
     int? page,
@@ -66,13 +104,13 @@ class AdminNotifier extends StateNotifier<AdminState> {
   }) async {
     try {
       state = state.copyWith(isLoading: true);
-      
+
       final params = UserQueryParams(
         searchQuery: searchQuery,
         page: page,
         pageSize: pageSize,
       );
-      
+
       final users = await _adminService.getUsers(params: params);
 
       // Update state based on whether this is the first page or not
@@ -99,17 +137,7 @@ class AdminNotifier extends StateNotifier<AdminState> {
     }
   }
 
-  Future<void> _initializeAdminState() async {
-    await checkAdminStatus();
-    if (state.isAdmin) {
-      await Future.wait([
-
-        loadFlaggedContent(),
-      ]);
-    }
-  }
-
-  Future<void> checkAdminStatus() async {
+  Future<void> refreshAdminStatus() async {
     try {
       state = state.copyWith(isLoading: true);
       final isAdmin = await _adminService.isSystemAdmin();
@@ -121,8 +149,9 @@ class AdminNotifier extends StateNotifier<AdminState> {
     }
   }
 
-
   Future<void> loadFlaggedContent() async {
+    if (!state.isAdmin) return;
+
     try {
       state = state.copyWith(isLoading: true);
       final content = await _adminService.getFlaggedContent();
@@ -138,7 +167,6 @@ class AdminNotifier extends StateNotifier<AdminState> {
     try {
       state = state.copyWith(isLoading: true);
       await _adminService.inviteUser(email);
-
     } catch (e) {
       state = state.copyWith(error: e.toString());
     } finally {

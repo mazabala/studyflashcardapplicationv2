@@ -1,9 +1,12 @@
+import 'dart:developer';
+
 import 'package:flashcardstudyapplication/core/interfaces/i_auth_service.dart';
+
 import 'package:flashcardstudyapplication/core/providers/user_provider.dart';
-import 'package:flashcardstudyapplication/core/services/authentication/authentication_service.dart';
+
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flashcardstudyapplication/core/interfaces/i_admin_service.dart';
-import 'package:flashcardstudyapplication/core/interfaces/i_auth_service.dart';
+
 import 'package:flashcardstudyapplication/core/error/error_handler.dart';
 import 'package:flashcardstudyapplication/core/services/deck/deck_service.dart';
 import 'package:flashcardstudyapplication/core/models/user_query_params.dart';
@@ -11,30 +14,19 @@ import 'package:flashcardstudyapplication/core/models/user_query_params.dart';
 class AdminService implements IAdminService {
   final SupabaseClient _supabaseClient;
   final IAuthService _authService;
+  final UserState _userState;
 
-
-  AdminService(this._supabaseClient, this._authService);
+  AdminService(this._supabaseClient, this._authService, this._userState);
 
   @override
   Future<bool> isSystemAdmin() async {
     try {
-      final userId = _supabaseClient.auth.currentUser?.id;
-      if (userId == null) {
-        return false;
-      }
-
-      final userRole = await _supabaseClient
-          .from('user_roles')
-          .select('role')
-          .eq('user_id', userId)
-          .maybeSingle();
-
-      return userRole?['role'] == 'superAdmin';
+      print('admin service: userState: ${_userState.role}');
+      return _userState.role == 'admin' || _userState.role == 'superAdmin';
     } catch (e) {
-      throw ErrorHandler.handle(e, 
-        message: 'Failed to check admin status',
-        specificType: ErrorType.authorization
-      );
+      throw ErrorHandler.handle(e,
+          message: 'Failed to check admin status',
+          specificType: ErrorType.authorization);
     }
   }
 
@@ -47,7 +39,6 @@ class AdminService implements IAdminService {
 
       for (var config in configs) {
         await _supabaseClient.from('decks').insert({
-          
           'category': config.category,
           'difficulty_level': config.difficultyLevel,
           'is_system': true,
@@ -55,10 +46,9 @@ class AdminService implements IAdminService {
         });
       }
     } catch (e) {
-      throw ErrorHandler.handle(e, 
-        message: 'Failed to create system decks',
-        specificType: ErrorType.deckManagement
-      );
+      throw ErrorHandler.handle(e,
+          message: 'Failed to create system decks',
+          specificType: ErrorType.deckManagement);
     }
   }
 
@@ -74,26 +64,23 @@ class AdminService implements IAdminService {
         'created_at': DateTime.now().toIso8601String(),
       });
     } catch (e) {
-      throw ErrorHandler.handle(e, 
-        message: 'Failed to add deck category',
-        specificType: ErrorType.deckManagement
-      );
+      throw ErrorHandler.handle(e,
+          message: 'Failed to add deck category',
+          specificType: ErrorType.deckManagement);
     }
   }
 
   @override
   Future<List<String>> getDeckCategories() async {
     try {
-      final result = await _supabaseClient
-          .from('deck_categories')
-          .select('name');
+      final result =
+          await _supabaseClient.from('deck_categories').select('name');
 
       return (result as List).map((e) => e['name'] as String).toList();
     } catch (e) {
-      throw ErrorHandler.handle(e, 
-        message: 'Failed to get deck categories',
-        specificType: ErrorType.deckManagement
-      );
+      throw ErrorHandler.handle(e,
+          message: 'Failed to get deck categories',
+          specificType: ErrorType.deckManagement);
     }
   }
 
@@ -108,13 +95,13 @@ class AdminService implements IAdminService {
         'user_id': userId,
         'subscriptionID': tier,
         'start_date': DateTime.now().toIso8601String(),
-        'end_date': DateTime.now().add(const Duration(days: 30)).toIso8601String(),
+        'end_date':
+            DateTime.now().add(const Duration(days: 30)).toIso8601String(),
       });
     } catch (e) {
-      throw ErrorHandler.handle(e, 
-        message: 'Failed to update user subscription',
-        specificType: ErrorType.subscription
-      );
+      throw ErrorHandler.handle(e,
+          message: 'Failed to update user subscription',
+          specificType: ErrorType.subscription);
     }
   }
 
@@ -130,10 +117,9 @@ class AdminService implements IAdminService {
           .delete()
           .eq('user_id', userId);
     } catch (e) {
-      throw ErrorHandler.handle(e, 
-        message: 'Failed to cancel user subscription',
-        specificType: ErrorType.subscription
-      );
+      throw ErrorHandler.handle(e,
+          message: 'Failed to cancel user subscription',
+          specificType: ErrorType.subscription);
     }
   }
 
@@ -148,14 +134,12 @@ class AdminService implements IAdminService {
           .from('flagged_content')
           .select()
           .eq('reviewed', false);
-          
 
       return (result as List).map((e) => e['content_id'] as String).toList();
     } catch (e) {
-      throw ErrorHandler.handle(e, 
-        message: 'Failed to get flagged content',
-        specificType: ErrorType.contentModeration
-      );
+      throw ErrorHandler.handle(e,
+          message: 'Failed to get flagged content',
+          specificType: ErrorType.contentModeration);
     }
   }
 
@@ -173,10 +157,9 @@ class AdminService implements IAdminService {
         'reviewed_by': _supabaseClient.auth.currentUser?.id,
       }).eq('content_id', contentId);
     } catch (e) {
-      throw ErrorHandler.handle(e, 
-        message: 'Failed to review flagged content',
-        specificType: ErrorType.contentModeration
-      );
+      throw ErrorHandler.handle(e,
+          message: 'Failed to review flagged content',
+          specificType: ErrorType.contentModeration);
     }
   }
 
@@ -193,10 +176,9 @@ class AdminService implements IAdminService {
         'updated_at': DateTime.now().toIso8601String(),
       });
     } catch (e) {
-      throw ErrorHandler.handle(e, 
-        message: 'Failed to update user role',
-        specificType: ErrorType.userManagement
-      );
+      throw ErrorHandler.handle(e,
+          message: 'Failed to update user role',
+          specificType: ErrorType.userManagement);
     }
   }
 
@@ -207,20 +189,18 @@ class AdminService implements IAdminService {
         throw ErrorHandler.handleUnauthorized();
       }
 
-      dynamic query = _supabaseClient
-          .from('users_view')
-          .select();
+      dynamic query = _supabaseClient.from('users_view').select();
 
       // Apply search if provided
       if (params?.searchQuery != null && params!.searchQuery!.isNotEmpty) {
         query = query.or(
-          'firstname.ilike.%${params.searchQuery}%,lastname.ilike.%${params.searchQuery}%,email.ilike.%${params.searchQuery}%'
-        );
+            'firstname.ilike.%${params.searchQuery}%,lastname.ilike.%${params.searchQuery}%,email.ilike.%${params.searchQuery}%');
       }
 
       // Apply sorting
       if (params?.sortBy != null) {
-        query = query.order(params!.sortBy!, ascending: params.ascending ?? true);
+        query =
+            query.order(params!.sortBy!, ascending: params.ascending ?? true);
       } else {
         query = query.order('created_at', ascending: false);
       }
@@ -236,9 +216,8 @@ class AdminService implements IAdminService {
       return List<Map<String, dynamic>>.from(result);
     } catch (e) {
       throw ErrorHandler.handle(e,
-        message: 'Failed to get users',
-        specificType: ErrorType.userManagement
-      );
+          message: 'Failed to get users',
+          specificType: ErrorType.userManagement);
     }
   }
 
@@ -249,23 +228,19 @@ class AdminService implements IAdminService {
         throw ErrorHandler.handleUnauthorized();
       }
 
-      var query = _supabaseClient
-          .from('users_view')
-          .select('id');
+      var query = _supabaseClient.from('users_view').select('id');
 
       if (searchQuery != null && searchQuery.isNotEmpty) {
         query = query.or(
-          'firstname.ilike.%${searchQuery}%,lastname.ilike.%${searchQuery}%,email.ilike.%${searchQuery}%'
-        );
+            'firstname.ilike.%${searchQuery}%,lastname.ilike.%${searchQuery}%,email.ilike.%${searchQuery}%');
       }
 
       final response = await query;
       return (response as List).length;
     } catch (e) {
       throw ErrorHandler.handle(e,
-        message: 'Failed to get users count',
-        specificType: ErrorType.userManagement
-      );
+          message: 'Failed to get users count',
+          specificType: ErrorType.userManagement);
     }
   }
 
@@ -287,32 +262,25 @@ class AdminService implements IAdminService {
       // After successful data deletion, delete the auth user
       await _supabaseClient.auth.admin.deleteUser(userId);
     } catch (e) {
-      throw ErrorHandler.handle(e, 
-        message: 'Failed to delete user data',
-        specificType: ErrorType.userManagement
-      );
+      throw ErrorHandler.handle(e,
+          message: 'Failed to delete user data',
+          specificType: ErrorType.userManagement);
     }
   }
 
-
   @override
-  Future<void> inviteUser(String email ) async {
+  Future<void> inviteUser(String email) async {
     try {
       if (!await isSystemAdmin()) {
         throw ErrorHandler.handleUnauthorized();
       }
 
-
-
       // You might want to add email sending logic here using your API service
-      await _authService.inviteUser(email); 
+      await _authService.inviteUser(email);
     } catch (e) {
-      throw ErrorHandler.handle(e, 
-        message: 'Failed to invite user',
-        specificType: ErrorType.userManagement
-      );
+      throw ErrorHandler.handle(e,
+          message: 'Failed to invite user',
+          specificType: ErrorType.userManagement);
     }
   }
-
-  
 }

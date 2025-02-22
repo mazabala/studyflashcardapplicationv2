@@ -94,13 +94,14 @@ final adminServiceProvider = Provider<IAdminService>((ref) {
   return AdminService(
     ref.watch(supabaseClientProvider),
     ref.watch(authServiceProvider),
+    ref.watch(userStateProvider),
   );
 });
 
 final analyticsProvider = StateNotifierProvider<AnalyticsNotifier, void>((ref) {
   final posthogService = ref.watch(posthogServiceProvider);
   return AnalyticsNotifier(posthogService, ref);
-}); 
+});
 
 final posthogServiceProvider = Provider<IPostHogService>((ref) {
   final supabase = Supabase.instance.client;
@@ -108,19 +109,19 @@ final posthogServiceProvider = Provider<IPostHogService>((ref) {
 });
 
 // State Management Layer
-final authStateProvider = StateNotifierProvider<AuthNotifier, AuthenthicationState>((ref) {
+final authStateProvider =
+    StateNotifierProvider<AuthNotifier, AuthenthicationState>((ref) {
   return AuthNotifier(ref.watch(authServiceProvider), ref);
 });
 
-
-final subscriptionStateProvider = StateNotifierProvider<SubscriptionNotifier, SubscriptionState>((ref) {
+final subscriptionStateProvider =
+    StateNotifierProvider<SubscriptionNotifier, SubscriptionState>((ref) {
   return SubscriptionNotifier(ref.watch(subscriptionServiceProvider));
 });
 
 final userStateProvider = StateNotifierProvider<UserNotifier, UserState>((ref) {
   return UserNotifier(ref.watch(userServiceProvider), ref);
 });
-
 
 final deckStateProvider = StateNotifierProvider<DeckNotifier, DeckState>((ref) {
   return DeckNotifier(
@@ -134,12 +135,13 @@ final progressServiceProvider = Provider<ProgressService>((ref) {
   return ProgressService(ref.watch(supabaseClientProvider));
 });
 
-final flashcardStateProvider = StateNotifierProvider<FlashcardNotifier, FlashcardState>((ref) {
+final flashcardStateProvider =
+    StateNotifierProvider<FlashcardNotifier, FlashcardState>((ref) {
   final deckService = ref.watch(deckServiceProvider);
   final progressService = ref.watch(progressServiceProvider);
   final userService = ref.watch(userServiceProvider);
   final spacedRepetitionService = ref.watch(spacedRepetitionServiceProvider);
-  
+
   return FlashcardNotifier(
     deckService,
     progressService,
@@ -149,7 +151,8 @@ final flashcardStateProvider = StateNotifierProvider<FlashcardNotifier, Flashcar
   );
 });
 
-final adminStateProvider = StateNotifierProvider<AdminNotifier, AdminState>((ref) {
+final adminStateProvider =
+    StateNotifierProvider<AdminNotifier, AdminState>((ref) {
   return AdminNotifier(ref.watch(adminServiceProvider));
 });
 
@@ -157,15 +160,16 @@ final adminStateProvider = StateNotifierProvider<AdminNotifier, AdminState>((ref
 final safeSubscriptionProvider = Provider<SubscriptionState>((ref) {
   final authState = ref.watch(authStateProvider);
   if (!authState.isAuthenticated) {
-    return  SubscriptionState();
+    return SubscriptionState();
   }
   return ref.watch(subscriptionStateProvider);
 });
 
 // RevenueCat Integration
-final revenueCatClientProvider = StateNotifierProvider<RevenueCatNotifier, RevenueCatService>((ref) {
+final revenueCatClientProvider =
+    StateNotifierProvider<RevenueCatNotifier, RevenueCatService>((ref) {
   return RevenueCatNotifier(ref);
-}); 
+});
 
 // Collection Service Provider
 final collectionServiceProvider = Provider<CollectionService>((ref) {
@@ -173,29 +177,34 @@ final collectionServiceProvider = Provider<CollectionService>((ref) {
 });
 
 // Cached collection providers with pagination
-final userCollectionsCacheProvider = StateProvider<Map<int, List<UserCollection>>>((ref) => {});
-final publicCollectionsCacheProvider = StateProvider<Map<int, List<Collection>>>((ref) => {});
+final userCollectionsCacheProvider =
+    StateProvider<Map<int, List<UserCollection>>>((ref) => {});
+final publicCollectionsCacheProvider =
+    StateProvider<Map<int, List<Collection>>>((ref) => {});
 
-final userCollectionsProvider = FutureProvider.family<List<UserCollection>, int>((ref, page) async {
+final userCollectionsProvider =
+    FutureProvider.family<List<UserCollection>, int>((ref, page) async {
   final cache = ref.watch(userCollectionsCacheProvider);
-  final pageSize = 20;
+  const pageSize = 20;
 
   if (cache.containsKey(page)) {
     return cache[page]!;
   }
 
   final service = ref.watch(collectionServiceProvider);
-  final collections = await service.getUserCollections(page: page, pageSize: pageSize);
-  
+  final collections =
+      await service.getUserCollections(page: page, pageSize: pageSize);
+
   ref.read(userCollectionsCacheProvider.notifier).update((state) => {
-    ...state,
-    page: collections,
-  });
+        ...state,
+        page: collections,
+      });
 
   return collections;
 });
 
-final publicCollectionsProvider = FutureProvider.family<List<Collection>, int>((ref, page) async {
+final publicCollectionsProvider =
+    FutureProvider.family<List<Collection>, int>((ref, page) async {
   final cache = ref.watch(publicCollectionsCacheProvider);
   final pageSize = 20;
 
@@ -204,12 +213,13 @@ final publicCollectionsProvider = FutureProvider.family<List<Collection>, int>((
   }
 
   final service = ref.watch(collectionServiceProvider);
-  final collections = await service.getCollectionPool(page: page, pageSize: pageSize);
-  
+  final collections =
+      await service.getCollectionPool(page: page, pageSize: pageSize);
+
   ref.read(publicCollectionsCacheProvider.notifier).update((state) => {
-    ...state,
-    page: collections,
-  });
+        ...state,
+        page: collections,
+      });
 
   return collections;
 });
@@ -230,16 +240,21 @@ final ankiServiceProvider = Provider<AnkiService>((ref) {
 });
 
 // User Preferences Provider
-final userPreferencesProvider = StateNotifierProvider<UserPreferencesNotifier, UserPreferences>((ref) {
+final userPreferencesProvider =
+    StateNotifierProvider<UserPreferencesNotifier, UserPreferences>((ref) {
   final userService = ref.watch(userServiceProvider);
   return UserPreferencesNotifier(userService);
 });
 
 // Spaced Repetition Service Provider
-final spacedRepetitionServiceProvider = Provider<SpacedRepetitionService>((ref) {
+final spacedRepetitionServiceProvider =
+    Provider<SpacedRepetitionService>((ref) {
   final userPrefs = ref.watch(userPreferencesProvider);
   final service = SpacedRepetitionService();
   service.toggleSpacedRepetition(userPrefs.isSpacedRepetitionEnabled);
   return service;
 });
 
+
+///TODO IS THIS EFFICIENT?
+///TODO, IS THIS CALLING TOO MANY TIMES?

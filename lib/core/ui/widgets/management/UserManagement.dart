@@ -12,11 +12,11 @@ class UserManagementPage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final userState = ref.watch(userStateProvider);
-    
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('User Management', style: Theme.of(context).textTheme.titleMedium),
+        title: Text('User Management',
+            style: Theme.of(context).textTheme.titleMedium),
       ),
       body: Column(
         children: [
@@ -50,7 +50,6 @@ class UserActions extends ConsumerWidget {
               final isAdmin = ref.watch(userStateProvider).isAdmin;
               if (isAdmin != null && isAdmin) {
                 _navigateTo(context, CreateUserPage());
-
               } else {
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(content: Text('Only admins can create users')),
@@ -93,9 +92,11 @@ class _UserListViewState extends ConsumerState<UserListView> {
   @override
   void initState() {
     super.initState();
-    _loadInitialUsers();
     _scrollController.addListener(_onScroll);
     _searchController.addListener(_onSearchChanged);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadUsers();
+    });
   }
 
   @override
@@ -116,15 +117,12 @@ class _UserListViewState extends ConsumerState<UserListView> {
   }
 
   void _onScroll() {
-    if (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent * 0.8 &&
+    if (_scrollController.position.pixels >=
+            _scrollController.position.maxScrollExtent * 0.8 &&
         !_isLoadingMore &&
         _hasMoreData) {
       _loadMoreUsers();
     }
-  }
-
-  Future<void> _loadInitialUsers() async {
-    await _loadUsers();
   }
 
   Future<void> _loadUsers() async {
@@ -134,10 +132,10 @@ class _UserListViewState extends ConsumerState<UserListView> {
 
     try {
       final users = await ref.read(adminStateProvider.notifier).loadUsers(
-        searchQuery: _searchQuery,
-        page: _currentPage,
-        pageSize: _pageSize,
-      );
+            searchQuery: _searchQuery,
+            page: _currentPage,
+            pageSize: _pageSize,
+          );
 
       setState(() {
         _hasMoreData = users.length == _pageSize;
@@ -176,7 +174,8 @@ class _UserListViewState extends ConsumerState<UserListView> {
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(10),
               ),
-              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              contentPadding:
+                  const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             ),
           ),
         ),
@@ -217,7 +216,8 @@ class _UserListViewState extends ConsumerState<UserListView> {
                     itemBuilder: (context) => [
                       PopupMenuItem(
                         child: const Text('Edit Profile'),
-                        onTap: () => editProfileDialog(context,user['id'], ref),
+                        onTap: () =>
+                            editProfileDialog(context, user['id'], ref),
                       ),
                       PopupMenuItem(
                         child: const Text('Update Role'),
@@ -225,11 +225,13 @@ class _UserListViewState extends ConsumerState<UserListView> {
                       ),
                       PopupMenuItem(
                         child: const Text('Update Subscription'),
-                        onTap: () => _showSubscriptionUpdateDialog(context, user['id']),
+                        onTap: () =>
+                            _showSubscriptionUpdateDialog(context, user['id']),
                       ),
                       PopupMenuItem(
                         child: const Text('Delete User'),
-                        onTap: () => _showDeleteConfirmation(context, user['id']),
+                        onTap: () =>
+                            _showDeleteConfirmation(context, user['id']),
                       ),
                     ],
                   ),
@@ -252,18 +254,20 @@ class _UserListViewState extends ConsumerState<UserListView> {
             ListTile(
               title: const Text('User'),
               onTap: () {
-                ref.read(adminStateProvider.notifier).updateUserRole(userId, 'user');
+                ref
+                    .read(adminStateProvider.notifier)
+                    .updateUserRole(userId, 'user');
                 Navigator.pop(context);
               },
-
             ),
             ListTile(
               title: const Text('Admin'),
               onTap: () {
-                ref.read(adminStateProvider.notifier).updateUserRole(userId, 'admin');
+                ref
+                    .read(adminStateProvider.notifier)
+                    .updateUserRole(userId, 'admin');
                 Navigator.pop(context);
               },
-
             ),
           ],
         ),
@@ -282,18 +286,20 @@ class _UserListViewState extends ConsumerState<UserListView> {
             ListTile(
               title: const Text('Free'),
               onTap: () {
-                ref.read(adminStateProvider.notifier).updateUserSubscription(userId, 'free');
+                ref
+                    .read(adminStateProvider.notifier)
+                    .updateUserSubscription(userId, 'free');
                 Navigator.pop(context);
               },
-
             ),
             ListTile(
               title: const Text('Premium'),
               onTap: () {
-                ref.read(adminStateProvider.notifier).updateUserSubscription(userId, 'premium');
+                ref
+                    .read(adminStateProvider.notifier)
+                    .updateUserSubscription(userId, 'premium');
                 Navigator.pop(context);
               },
-
             ),
           ],
         ),
@@ -319,7 +325,6 @@ class _UserListViewState extends ConsumerState<UserListView> {
             },
             child: const Text('Delete'),
           ),
-
         ],
       ),
     );
@@ -327,52 +332,44 @@ class _UserListViewState extends ConsumerState<UserListView> {
 }
 
 void editProfileDialog(BuildContext context, String userId, WidgetRef ref) {
+  TextEditingController firstNameController = TextEditingController();
+  TextEditingController lastNameController = TextEditingController();
+  final userNotifier = ref.read(userStateProvider.notifier);
 
-    TextEditingController firstNameController = TextEditingController();
-    TextEditingController lastNameController = TextEditingController();
-    final userNotifier = ref.read(userStateProvider.notifier);
+  print('userId to edit: $userId');
+  showDialog(
+    context: context,
+    builder: (context) => AlertDialog(
+      title: const Text('Edit Profile'),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          TextField(
+            controller: firstNameController,
+            decoration: const InputDecoration(labelText: 'First Name'),
+          ),
+          const SizedBox(height: 8),
+          TextField(
+            controller: lastNameController,
+            decoration: const InputDecoration(labelText: 'Last Name'),
+          ),
+          const SizedBox(height: 8),
+          CustomButton(
+            text: 'Save',
+            icon: Icons.save,
+            onPressed: () {
+              userNotifier.userService.updateUserProfile(
+                  firstNameController.text, lastNameController.text, userId);
 
-
-    print('userId to edit: $userId');
-    showDialog(
-      
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Edit Profile'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(
-              controller: firstNameController ,
-              decoration: const InputDecoration(labelText: 'First Name'),
-            ),
-            const SizedBox(height: 8),
-            TextField(
-              controller: lastNameController ,
-              decoration: const InputDecoration(labelText: 'Last Name'),
-            ),
-            const SizedBox(height: 8),
-            CustomButton(
-              text: 'Save',
-              icon: Icons.save,
-              onPressed: () {
-                userNotifier.userService.updateUserProfile(
-                   firstNameController.text,
-                   lastNameController.text,
-                   userId
-                );
-
-                  Navigator.pop(context);
-                
-              },
-              isLoading: false,
-            ),
-          ],
-        ),
+              Navigator.pop(context);
+            },
+            isLoading: false,
+          ),
+        ],
       ),
-    );
-  }
-
+    ),
+  );
+}
 
 class UserDetailsView extends ConsumerWidget {
   final String user;
@@ -383,11 +380,10 @@ class UserDetailsView extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final userState = ref.watch(userStateProvider);
 
-
-
     return Scaffold(
       appBar: AppBar(
-        title: Text('Edit $user', style: Theme.of(context).textTheme.labelLarge),
+        title:
+            Text('Edit $user', style: Theme.of(context).textTheme.labelLarge),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -398,12 +394,12 @@ class UserDetailsView extends ConsumerWidget {
               'User Details',
               style: Theme.of(context).textTheme.titleLarge,
             ),
-           const  SizedBox(height: 16),
+            const SizedBox(height: 16),
             Text(
               'Subscription Plan: ${userState.subscriptionPlan ?? "None"}',
               style: Theme.of(context).textTheme.bodyLarge,
             ),
-             const SizedBox(height: 8),
+            const SizedBox(height: 8),
             if (userState.isExpired == true)
               const Text(
                 'Subscription Expired',
@@ -413,10 +409,11 @@ class UserDetailsView extends ConsumerWidget {
             ElevatedButton(
               onPressed: () {
                 // Implement upgrade subscription logic
-                ref.read(userStateProvider.notifier).upgradeSubscription('premium');
+                ref
+                    .read(userStateProvider.notifier)
+                    .upgradeSubscription('premium');
               },
               child: const Text('Upgrade Subscription'),
-
             ),
           ],
         ),
@@ -430,10 +427,10 @@ class ReviewMembershipPage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final userState = ref.watch(userStateProvider);
 
-
     return Scaffold(
       appBar: AppBar(
-        title: Text('Review Membership', style: Theme.of(context).textTheme.titleLarge),
+        title: Text('Review Membership',
+            style: Theme.of(context).textTheme.titleLarge),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -444,20 +441,21 @@ class ReviewMembershipPage extends ConsumerWidget {
               'Current Plan: ${userState.subscriptionPlan ?? "None"}',
               style: Theme.of(context).textTheme.titleMedium,
             ),
-           const SizedBox(height: 8),
+            const SizedBox(height: 8),
             if (userState.isExpired == true)
               const Text(
                 'Your subscription has expired',
                 style: TextStyle(color: Colors.red),
               ),
-           const SizedBox(height: 16),
+            const SizedBox(height: 16),
             ElevatedButton(
               onPressed: () {
-                ref.read(userStateProvider.notifier).upgradeSubscription('premium');
+                ref
+                    .read(userStateProvider.notifier)
+                    .upgradeSubscription('premium');
               },
               child: Text('Upgrade to Premium'),
             ),
-
           ],
         ),
       ),
@@ -470,12 +468,12 @@ class CreateUserPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-
     final TextEditingController emailController = TextEditingController();
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Create User', style: Theme.of(context).textTheme.labelLarge),
+        title:
+            Text('Create User', style: Theme.of(context).textTheme.labelLarge),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -490,10 +488,10 @@ class CreateUserPage extends ConsumerWidget {
             ElevatedButton(
               onPressed: () async {
                 try {
-                  await ref.read(adminStateProvider.notifier)
+                  await ref
+                      .read(adminStateProvider.notifier)
                       .inviteUser(emailController.text);
                   Navigator.pop(context);
-
                 } catch (e) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(content: Text(e.toString())),

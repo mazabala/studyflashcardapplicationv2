@@ -1,11 +1,9 @@
-
 import 'package:flashcardstudyapplication/core/providers/provider_config.dart';
-
+import 'package:flashcardstudyapplication/core/ui/widgets/deck/deck_form.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flashcardstudyapplication/core/themes/app_theme.dart';
 import 'package:flashcardstudyapplication/core/models/deck.dart';
-
 
 class DeckManagementPage extends ConsumerWidget {
   const DeckManagementPage({super.key});
@@ -13,11 +11,11 @@ class DeckManagementPage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final deckState = ref.watch(deckStateProvider);
-    
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Deck Management', style: Theme.of(context).textTheme.labelLarge),
+        title: Text('Deck Management',
+            style: Theme.of(context).textTheme.labelLarge),
       ),
       body: Column(
         children: [
@@ -79,7 +77,6 @@ class DeckListView extends ConsumerWidget {
     final deckState = ref.watch(deckStateProvider);
     final decks = deckState.decks;
 
-
     if (decks.isEmpty) {
       return const Center(child: Text('No decks available'));
     }
@@ -89,7 +86,8 @@ class DeckListView extends ConsumerWidget {
       itemBuilder: (context, index) {
         final deck = decks[index];
         return ListTile(
-          title: Text(deck.title, style: Theme.of(context).textTheme.titleMedium),
+          title:
+              Text(deck.title, style: Theme.of(context).textTheme.titleMedium),
           subtitle: Text(
             'Difficulty: ${deck.difficultyLevel} • Category: ${deck.categoryid}',
             style: Theme.of(context).textTheme.bodySmall,
@@ -124,7 +122,6 @@ class DeckListView extends ConsumerWidget {
                 if (!context.mounted) return;
                 scaffoldMessenger.showSnackBar(
                   SnackBar(content: Text('${deck.title} deleted')),
-
                 );
               } catch (e) {
                 if (!context.mounted) return;
@@ -173,8 +170,8 @@ class _DeckDetailsViewState extends ConsumerState<DeckDetailsView> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Edit ${widget.deck.title}', 
-          style: Theme.of(context).textTheme.labelLarge),
+        title: Text('Edit ${widget.deck.title}',
+            style: Theme.of(context).textTheme.labelLarge),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -187,14 +184,15 @@ class _DeckDetailsViewState extends ConsumerState<DeckDetailsView> {
             ),
             const SizedBox(height: 16),
             FutureBuilder<List<String>>(
-              future: ref.read(deckStateProvider.notifier)
+              future: ref
+                  .read(deckStateProvider.notifier)
                   .getDeckDifficulty(widget.deck.id),
               builder: (context, snapshot) {
                 if (snapshot.hasData) {
-
                   return DropdownButtonFormField<String>(
                     value: _selectedDifficulty,
-                    decoration: const InputDecoration(labelText: 'Difficulty Level'),
+                    decoration:
+                        const InputDecoration(labelText: 'Difficulty Level'),
                     items: snapshot.data!.map((difficulty) {
                       return DropdownMenuItem(
                         value: difficulty,
@@ -216,11 +214,10 @@ class _DeckDetailsViewState extends ConsumerState<DeckDetailsView> {
                 final navigator = Navigator.of(context);
                 try {
                   await ref.read(deckStateProvider.notifier).updateDeck(
-                    widget.deck.id,
-                    _titleController.text,
-                    _selectedDifficulty ?? widget.deck.difficultyLevel,
-
-                  );
+                        widget.deck.id,
+                        _titleController.text,
+                        _selectedDifficulty ?? widget.deck.difficultyLevel,
+                      );
                   if (!context.mounted) return;
                   navigator.pop();
                   scaffoldMessenger.showSnackBar(
@@ -256,141 +253,142 @@ class CreateDeckPage extends ConsumerStatefulWidget {
 }
 
 class _CreateDeckPageState extends ConsumerState<CreateDeckPage> {
-  final _titleController = TextEditingController();
-  final _descriptionController = TextEditingController();
-  String? _selectedCategory;
-  String? _selectedDifficulty;
-  final _cardCountController = TextEditingController();
-  
+  final List<DeckFormData> _deckForms = [];
+  bool _isCreating = false;
 
   @override
-  Widget build(BuildContext context) {
-    final userSubPlan = ref.watch(userStateProvider).subscriptionPlanID;
-    
-
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Create Deck', style: Theme.of(context).textTheme.labelLarge),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              TextField(
-                controller: _titleController,
-                decoration: const InputDecoration(labelText: 'Deck Title'),
-              ),
-              const SizedBox(height: 16),
-              TextField(
-                controller: _descriptionController,
-                decoration: const InputDecoration(labelText: 'Description'),
-                maxLines: 3,
-              ),
-              const SizedBox(height: 16),
-              FutureBuilder<List<String>>(
-                future: ref.read(deckStateProvider.notifier).getDeckCategory(),
-                builder: (context, snapshot) {
-                  if (snapshot.hasData) {
-                    return DropdownButtonFormField<String>(
-
-                      value: _selectedCategory,
-                      decoration: const InputDecoration(labelText: 'Category'),
-                      items: snapshot.data!.map((category) {
-                        return DropdownMenuItem(
-                          value: category,
-                          child: Text(category),
-                        );
-                      }).toList(),
-                      onChanged: (value) {
-                        setState(() => _selectedCategory = value);
-                      },
-                    );
-                  }
-                  return const CircularProgressIndicator();
-                },
-              ),
-              const SizedBox(height: 16),
-              FutureBuilder<List<String>>(
-                future: ref.read(deckStateProvider.notifier)
-                    .getDeckDifficulty(userSubPlan as String),  // Replace with actual subscription ID
-                builder: (context, snapshot) {
-
-                  if (snapshot.hasData) {
-                    return DropdownButtonFormField<String>(
-                      value: _selectedDifficulty,
-                      decoration: const InputDecoration(labelText: 'Difficulty Level'),
-                      items: snapshot.data!.map((difficulty) {
-                        return DropdownMenuItem(
-                          value: difficulty,
-                          child: Text(difficulty),
-                        );
-                      }).toList(),
-                      onChanged: (value) {
-                        setState(() => _selectedDifficulty = value);
-                      },
-                    );
-                  }
-                  return const CircularProgressIndicator();
-                },
-              ),
-              const SizedBox(height: 16),
-              TextField(
-                controller: _cardCountController,
-                decoration: const InputDecoration(labelText: 'Number of Cards'),
-                keyboardType: TextInputType.number,
-              ),
-              const SizedBox(height: 24),
-              ElevatedButton(
-                onPressed: () async {
-                  final scaffoldMessenger = ScaffoldMessenger.of(context);
-                  final navigator = Navigator.of(context);
-                  if (_selectedCategory == null || _selectedDifficulty == null) {
-                    scaffoldMessenger.showSnackBar(
-                      const SnackBar(content: Text('Please fill all fields')),
-                    );
-                    return;
-                  }
-                  
-                  try {
-                    final userId = ref.watch(userStateProvider).userId;
-                    // await ref.read(deckProvider.notifier).createDeck(
-                    //   _titleController.text,
-                    //   _selectedCategory!,
-                    //   _descriptionController.text,
-                    //   _selectedDifficulty!,
-
-                    //   userId ?? '',
-                    //   int.parse(_cardCountController.text) as String,
-                    // );
-                    if (!context.mounted) return;
-                    navigator.pop();
-                    scaffoldMessenger.showSnackBar(
-                      const SnackBar(content: Text('Deck created successfully')),
-                    );
-                  } catch (e) {
-                    if (!context.mounted) return;
-                    scaffoldMessenger.showSnackBar(
-                      SnackBar(content: Text('Error creating deck: $e')),
-                    );
-                  }
-                },
-                child: const Text('Create Deck'),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
+  void initState() {
+    super.initState();
+    // Start with one deck form
+    _deckForms.add(DeckFormData());
   }
 
   @override
   void dispose() {
-    _titleController.dispose();
-    _descriptionController.dispose();
-    _cardCountController.dispose();
+    for (var form in _deckForms) {
+      form.dispose();
+    }
     super.dispose();
+  }
+
+  void _addNewDeckForm() {
+    setState(() {
+      _deckForms.add(DeckFormData());
+    });
+  }
+
+  void _removeDeckForm(int index) {
+    if (_deckForms.length > 1) {
+      setState(() {
+        _deckForms[index].dispose();
+        _deckForms.removeAt(index);
+      });
+    }
+  }
+
+  Future<void> _createDecks() async {
+    if (_isCreating) return;
+
+    final scaffoldMessenger = ScaffoldMessenger.of(context);
+    final navigator = Navigator.of(context);
+
+    // Validate all forms
+    bool allValid = _deckForms.every((form) => form.isValid());
+    if (!allValid) {
+      scaffoldMessenger.showSnackBar(
+        const SnackBar(
+            content: Text('Please fill all required fields in all decks')),
+      );
+      return;
+    }
+
+    setState(() => _isCreating = true);
+
+    try {
+      final userId = ref.watch(userStateProvider).userId;
+      if (userId == null) throw Exception('User not logged in');
+
+      // Create each deck sequentially
+      for (var form in _deckForms) {
+        await ref.read(deckStateProvider.notifier).createDeck(
+              form.topicController.text,
+              form.focusController.text,
+              form.selectedCategory!,
+              form.selectedDifficulty!,
+              userId,
+              int.parse(form.cardCountController.text),
+            );
+      }
+
+      if (!context.mounted) return;
+      navigator.pop();
+      scaffoldMessenger.showSnackBar(
+        SnackBar(
+          content: Text('${_deckForms.length} deck(s) created successfully'),
+        ),
+      );
+    } catch (e) {
+      if (!context.mounted) return;
+      scaffoldMessenger.showSnackBar(
+        SnackBar(content: Text('Error creating decks: $e')),
+      );
+    } finally {
+      if (mounted) {
+        setState(() => _isCreating = false);
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title:
+            Text('Create Decks', style: Theme.of(context).textTheme.labelLarge),
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          children: [
+            Expanded(
+              child: ListView.builder(
+                itemCount: _deckForms.length,
+                itemBuilder: (context, index) {
+                  return DeckFormCard(
+                    formData: _deckForms[index],
+                    index: index,
+                    canDelete: _deckForms.length > 1,
+                    onDelete: () => _removeDeckForm(index),
+                  );
+                },
+              ),
+            ),
+            const SizedBox(height: 16),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                ElevatedButton.icon(
+                  onPressed: _addNewDeckForm,
+                  icon: const Icon(Icons.add),
+                  label: const Text('Add Another Deck'),
+                ),
+                ElevatedButton.icon(
+                  onPressed: _isCreating ? null : _createDecks,
+                  icon: _isCreating
+                      ? const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : const Icon(Icons.save),
+                  label: Text(_isCreating ? 'Creating...' : 'Create All Decks'),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }
 
@@ -406,7 +404,8 @@ class _AddCategoryPageState extends ConsumerState<AddCategoryPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Add Category', style: Theme.of(context).textTheme.labelLarge),
+        title:
+            Text('Add Category', style: Theme.of(context).textTheme.labelLarge),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -422,12 +421,14 @@ class _AddCategoryPageState extends ConsumerState<AddCategoryPage> {
                 final scaffoldMessenger = ScaffoldMessenger.of(context);
                 final navigator = Navigator.of(context);
                 try {
-                  await ref.read(deckStateProvider.notifier)
+                  await ref
+                      .read(deckStateProvider.notifier)
                       .addDeckCategory(_categoryController.text);
                   if (!context.mounted) return;
                   navigator.pop();
                   scaffoldMessenger.showSnackBar(
-                    const SnackBar(content: Text('Category added successfully')),
+                    const SnackBar(
+                        content: Text('Category added successfully')),
                   );
                 } catch (e) {
                   if (!context.mounted) return;
