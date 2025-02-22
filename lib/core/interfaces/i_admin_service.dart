@@ -1,4 +1,5 @@
 import 'package:flashcardstudyapplication/core/services/deck/deck_service.dart';
+import 'package:flashcardstudyapplication/core/models/user_query_params.dart';
 
 abstract class IAdminService {
   /// Checks if the current user has admin privileges
@@ -21,11 +22,11 @@ abstract class IAdminService {
 
   /// User management operations
   Future<void> updateUserRole(String userId, String role);
-  Future<List<Map<String, dynamic>>> getUsers();
+  Future<List<Map<String, dynamic>>> getUsers({UserQueryParams? params});
 
   /// User deletion and data management
   Future<void> deleteUserAccount(String userId);
-  Future<void> deleteUserData(String userId);
+
 
 
   /// User invitation management

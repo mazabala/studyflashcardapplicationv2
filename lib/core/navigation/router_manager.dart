@@ -1,6 +1,9 @@
+import 'package:flashcardstudyapplication/core/models/collection.dart';
 import 'package:flashcardstudyapplication/core/models/deck.dart';
+import 'package:flashcardstudyapplication/core/models/user_collection.dart';
 import 'package:flashcardstudyapplication/core/ui/about_us.dart';
 import 'package:flashcardstudyapplication/core/ui/admin_management_screen.dart';
+import 'package:flashcardstudyapplication/core/ui/collection_study_screen.dart';
 import 'package:flashcardstudyapplication/core/ui/collections_screen.dart';
 import 'package:flashcardstudyapplication/core/ui/study_screen.dart';
 import 'package:flashcardstudyapplication/core/ui/pricing_screen.dart';
@@ -16,15 +19,24 @@ class RouteManager {
   static Route<dynamic> generateRoute(RouteSettings settings) {
     // Handle routes that need arguments
     if (settings.name == '/study') {
-      // Extract the deck ID from arguments
-      final Deck? deck = settings.arguments as Deck?;
-      if (deck == null) {
-        throw ArgumentError('Deck ID is required for study screen');
+      final args = settings.arguments;
+      if (args is Deck) {
+        return MaterialPageRoute(
+          builder: (context) => StudyScreen(deck: args),
+          settings: settings,
+        );
+      } else if (args is Map<String, dynamic>) {
+        final collection = args['collection'] as Collection;
+        final userCollection = args['userCollection'] as UserCollection;
+        return MaterialPageRoute(
+          builder: (context) => CollectionStudyScreen(
+            collection: collection,
+            userCollection: userCollection,
+          ),
+          settings: settings,
+        );
       }
-      return MaterialPageRoute(
-        builder: (context) => StudyScreen(deck: deck),
-        settings: settings,
-      );
+      throw ArgumentError('Invalid arguments for study screen');
     }
     
     switch (settings.name) {
@@ -45,7 +57,7 @@ class RouteManager {
       case '/admin':
         return _noAnimationRoute(AdminManagementScreen());
       case '/collections':
-        return _noAnimationRoute(CollectionsScreen());
+        return _noAnimationRoute(const CollectionsScreen());
       default:
         return _noAnimationRoute(const HomeScreen());  // Default route
     }

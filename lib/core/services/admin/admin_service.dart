@@ -3,9 +3,10 @@ import 'package:flashcardstudyapplication/core/providers/user_provider.dart';
 import 'package:flashcardstudyapplication/core/services/authentication/authentication_service.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flashcardstudyapplication/core/interfaces/i_admin_service.dart';
-
+import 'package:flashcardstudyapplication/core/interfaces/i_auth_service.dart';
 import 'package:flashcardstudyapplication/core/error/error_handler.dart';
 import 'package:flashcardstudyapplication/core/services/deck/deck_service.dart';
+import 'package:flashcardstudyapplication/core/models/user_query_params.dart';
 
 class AdminService implements IAdminService {
   final SupabaseClient _supabaseClient;
@@ -200,21 +201,69 @@ class AdminService implements IAdminService {
   }
 
   @override
-  Future<List<Map<String, dynamic>>> getUsers() async {
+  Future<List<Map<String, dynamic>>> getUsers({UserQueryParams? params}) async {
     try {
       if (!await isSystemAdmin()) {
         throw ErrorHandler.handleUnauthorized();
       }
 
-      final result = await _supabaseClient
+      dynamic query = _supabaseClient
           .from('users_view')
-          .select('*');
+          .select();
 
-      
+      // Apply search if provided
+      if (params?.searchQuery != null && params!.searchQuery!.isNotEmpty) {
+        query = query.or(
+          'firstname.ilike.%${params.searchQuery}%,lastname.ilike.%${params.searchQuery}%,email.ilike.%${params.searchQuery}%'
+        );
+      }
+
+      // Apply sorting
+      if (params?.sortBy != null) {
+        query = query.order(params!.sortBy!, ascending: params.ascending ?? true);
+      } else {
+        query = query.order('created_at', ascending: false);
+      }
+
+      // Apply pagination with defaults
+      final effectivePage = params?.page ?? 0;
+      final effectivePageSize = params?.pageSize ?? 20;
+      final start = effectivePage * effectivePageSize;
+      final end = start + effectivePageSize - 1;
+      query = query.range(start, end);
+
+      final result = await query;
       return List<Map<String, dynamic>>.from(result);
     } catch (e) {
-      throw ErrorHandler.handle(e, 
-        message: 'Failed to get users by role',
+      throw ErrorHandler.handle(e,
+        message: 'Failed to get users',
+        specificType: ErrorType.userManagement
+      );
+    }
+  }
+
+  @override
+  Future<int> getUsersCount({String? searchQuery}) async {
+    try {
+      if (!await isSystemAdmin()) {
+        throw ErrorHandler.handleUnauthorized();
+      }
+
+      var query = _supabaseClient
+          .from('users_view')
+          .select('id');
+
+      if (searchQuery != null && searchQuery.isNotEmpty) {
+        query = query.or(
+          'firstname.ilike.%${searchQuery}%,lastname.ilike.%${searchQuery}%,email.ilike.%${searchQuery}%'
+        );
+      }
+
+      final response = await query;
+      return (response as List).length;
+    } catch (e) {
+      throw ErrorHandler.handle(e,
+        message: 'Failed to get users count',
         specificType: ErrorType.userManagement
       );
     }
@@ -227,32 +276,16 @@ class AdminService implements IAdminService {
         throw ErrorHandler.handleUnauthorized();
       }
 
-
-      
-      // Then delete from auth
-      await _supabaseClient.auth.admin.deleteUser(userId);
-    } catch (e) {
-      throw ErrorHandler.handle(e, 
-        message: 'Failed to delete user account',
-        specificType: ErrorType.userManagement
+      // Call the server-side function to delete user data
+      await _supabaseClient.rpc(
+        'delete_user_data',
+        params: {
+          'p_user_id': userId,
+        },
       );
-    }
-  }
 
-  @override
-  Future<void> deleteUserData(String userId) async {
-    try {
-      if (!await isSystemAdmin()) {
-        throw ErrorHandler.handleUnauthorized();
-      }
-
-      // Delete user's data from various tables
-      await Future.wait([
-        _supabaseClient.from('user').delete().eq('user_id', userId), //TODO: Check if this is correct
-        _supabaseClient.from('user_decks').delete().eq('user_id', userId),
-        _supabaseClient.from('user_subscriptions').delete().eq('user_id', userId),
-        _supabaseClient.from('user_roles').delete().eq('user_id', userId),
-      ]);
+      // After successful data deletion, delete the auth user
+      await _supabaseClient.auth.admin.deleteUser(userId);
     } catch (e) {
       throw ErrorHandler.handle(e, 
         message: 'Failed to delete user data',

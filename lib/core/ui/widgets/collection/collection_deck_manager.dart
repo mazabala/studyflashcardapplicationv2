@@ -1,6 +1,7 @@
 import 'package:flashcardstudyapplication/core/models/collection.dart';
 import 'package:flashcardstudyapplication/core/models/deck.dart';
 import 'package:flashcardstudyapplication/core/providers/provider_config.dart';
+import 'package:flashcardstudyapplication/core/providers/collection_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -65,15 +66,31 @@ class _CollectionDeckManagerState extends ConsumerState<CollectionDeckManager> {
 
     try {
       final collectionService = ref.read(collectionServiceProvider);
+      
+      // Add deck to collection
       await collectionService.addDeckToCollection(widget.collection.id, deck.id);
+      
+      // Get user collection
+      final userCollections = await collectionService.getUserCollections();
+      final userCollection = userCollections.firstWhere(
+        (uc) => uc.collectionId == widget.collection.id,
+      );
+      
+      // Add deck to user collection
+      await collectionService.addDeckToUserCollection(userCollection.id, deck.id);
       
       // Remove the deck from available decks
       setState(() {
         _availableDecks.removeWhere((d) => d.id == deck.id);
       });
       
-      // Refresh the collections in the parent screen
+      // Get updated collection details and update cache
+      final updatedCollection = await collectionService.getCollection(widget.collection.id);
+      ref.read(collectionDetailsProvider.notifier).updateCollection(updatedCollection);
+      
+      // Refresh both providers to update UI
       ref.invalidate(userCollectionsProvider);
+      ref.invalidate(collectionDetailsProvider);
       
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Deck added to collection successfully')),

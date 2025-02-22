@@ -306,7 +306,24 @@ try{
 //   }
 // }
 
-
+Future<List<Deck>> getDecksForCollection(String collectionId) async {
+  try {
+    state = state.copyWith(isLoading: true);
+    final decks = await _deckService.getDeckDetails([collectionId]);
+    state = state.copyWith(
+      isLoading: false,
+      decks: decks,
+      deckloaded: true,
+    );
+    return decks;
+  } catch (e) {
+    state = state.copyWith(
+      isLoading: false,
+      error: e.toString(),
+    );
+    rethrow;
+  }
+}
 
 }
 

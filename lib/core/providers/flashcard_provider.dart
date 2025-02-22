@@ -7,6 +7,7 @@ import 'package:flashcardstudyapplication/core/models/study_session.dart';
 import 'package:flashcardstudyapplication/core/providers/deck_provider.dart';
 import 'package:flashcardstudyapplication/core/services/deck/deck_service.dart';
 import 'package:flashcardstudyapplication/core/services/progress/progress_service.dart';
+import 'package:flashcardstudyapplication/core/services/spaced_repetition/spaced_repetition_service.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'provider_config.dart';
 
@@ -71,10 +72,17 @@ class FlashcardNotifier extends StateNotifier<FlashcardState> {
   final IDeckService _deckService;
   final ProgressService _progressService;
   final IUserService _userService;
+  final SpacedRepetitionService _spacedRepetitionService;
   final Ref _ref;
   StudySession? _currentSession;
 
-  FlashcardNotifier(this._deckService, this._progressService, this._userService, this._ref) : super(FlashcardState());
+  FlashcardNotifier(
+    this._deckService,
+    this._progressService,
+    this._userService,
+    this._spacedRepetitionService,
+    this._ref,
+  ) : super(FlashcardState());
 
   Future<List<Flashcard>> getFlashcardsForDeck(String deckId) async {
     if (state.flashcardsByDeck.containsKey(deckId)) {
@@ -196,6 +204,14 @@ class FlashcardNotifier extends StateNotifier<FlashcardState> {
       final updatedConfidence = Map<String, String>.from(state.cardConfidence);
       updatedConfidence[flashcardId] = confidence;
       
+      // Get spaced repetition state from the service
+      final isSpacedRepetitionEnabled = _spacedRepetitionService.isEnabled;
+      
+      // Calculate next review date using spaced repetition if enabled
+      final nextReview = isSpacedRepetitionEnabled 
+          ? await _calculateNextReview(flashcardId, confidence)
+          : DateTime.now().add(const Duration(days: 1));
+      
       // Update progress in database
       await _progressService.updateFlashcardProgress(
         userId: userId,
@@ -215,6 +231,32 @@ class FlashcardNotifier extends StateNotifier<FlashcardState> {
       state = state.copyWith(cardConfidence: updatedConfidence);
     } catch (e) {
       print('Error recording confidence: $e');
+    }
+  }
+
+  Future<DateTime> _calculateNextReview(String flashcardId, String confidence) async {
+    try {
+      final userInfo = await _userService.getCurrentUserInfo();
+      if (userInfo == null) {
+        throw Exception('User not logged in');
+      }
+      final userId = userInfo['id'];
+
+      // Get card history
+      final history = await _progressService.getFlashcardHistory(userId, flashcardId);
+      
+      // Calculate next review using spaced repetition
+      return _spacedRepetitionService.calculateNextReview(
+        lastReview: DateTime.parse(history.lastReviewedAt),
+        repetitions: history.repetitions,
+        easeFactor: history.easeFactor,
+        interval: history.interval,
+        confidenceLevel: confidence,
+      );
+    } catch (e) {
+      print('Error calculating next review: $e');
+      // Return default next review time if calculation fails
+      return DateTime.now().add(const Duration(days: 1));
     }
   }
 

@@ -8,6 +8,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flashcardstudyapplication/core/services/admin/admin_service.dart';
 import 'package:flashcardstudyapplication/core/services/api/api_client.dart';
 import 'package:flashcardstudyapplication/core/providers/user_provider.dart';
+import 'package:flashcardstudyapplication/core/models/user_query_params.dart';
 
 class AdminState {
   final bool isLoading;
@@ -43,13 +44,59 @@ class AdminState {
       users: users ?? this.users,
     );
   }
+
+  static AdminState initial() {
+    return AdminState();
+  }
 }
 
 class AdminNotifier extends StateNotifier<AdminState> {
   final IAdminService _adminService;
 
-  AdminNotifier(this._adminService) : super(const AdminState()) {
-    _initializeAdminState();
+  AdminNotifier(this._adminService) : super(AdminState.initial());
+
+  void clearUsers() {
+    state = state.copyWith(users: []);
+  }
+
+  Future<List<Map<String, dynamic>>> loadUsers({
+    String? searchQuery,
+    int? page,
+    int? pageSize,
+  }) async {
+    try {
+      state = state.copyWith(isLoading: true);
+      
+      final params = UserQueryParams(
+        searchQuery: searchQuery,
+        page: page,
+        pageSize: pageSize,
+      );
+      
+      final users = await _adminService.getUsers(params: params);
+
+      // Update state based on whether this is the first page or not
+      final effectivePage = params.page ?? 0;
+      if (effectivePage == 0) {
+        state = state.copyWith(
+          users: users,
+          isLoading: false,
+        );
+      } else {
+        state = state.copyWith(
+          users: [...state.users, ...users],
+          isLoading: false,
+        );
+      }
+
+      return users;
+    } catch (e) {
+      state = state.copyWith(
+        error: e.toString(),
+        isLoading: false,
+      );
+      rethrow;
+    }
   }
 
   Future<void> _initializeAdminState() async {
@@ -92,20 +139,6 @@ class AdminNotifier extends StateNotifier<AdminState> {
       state = state.copyWith(isLoading: true);
       await _adminService.inviteUser(email);
 
-    } catch (e) {
-      state = state.copyWith(error: e.toString());
-    } finally {
-      state = state.copyWith(isLoading: false);
-    }
-  }
-
-  
-  Future<void> loadUsers() async {
-    try {
-      state = state.copyWith(isLoading: true);
-      final users = await _adminService.getUsers();
-
-      state = state.copyWith(users: users);
     } catch (e) {
       state = state.copyWith(error: e.toString());
     } finally {

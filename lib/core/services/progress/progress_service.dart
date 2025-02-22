@@ -3,6 +3,35 @@ import 'package:flashcardstudyapplication/core/models/flashcard_progress.dart';
 import 'package:flashcardstudyapplication/core/models/study_session.dart';
 import 'package:flashcardstudyapplication/core/error/error_handler.dart';
 
+class FlashcardHistory {
+  final String flashcardId;
+  final String userId;
+  final String lastReviewedAt;
+  final int repetitions;
+  final double easeFactor;
+  final int interval;
+
+  FlashcardHistory({
+    required this.flashcardId,
+    required this.userId,
+    required this.lastReviewedAt,
+    required this.repetitions,
+    required this.easeFactor,
+    required this.interval,
+  });
+
+  factory FlashcardHistory.fromJson(Map<String, dynamic> json) {
+    return FlashcardHistory(
+      flashcardId: json['flashcard_id'],
+      userId: json['user_id'],
+      lastReviewedAt: json['reviewed_at'],
+      repetitions: json['repetitions'] ?? 0,
+      easeFactor: (json['ease_factor'] ?? 2.5).toDouble(),
+      interval: json['interval'] ?? 1,
+    );
+  }
+}
+
 class ProgressService {
   final SupabaseClient _supabaseClient;
 
@@ -136,6 +165,31 @@ class ProgressService {
       };
     } catch (e) {
       throw ErrorHandler.handle('Failed to get deck progress: $e');
+    }
+  }
+
+  Future<FlashcardHistory> getFlashcardHistory(String userId, String flashcardId) async {
+    try {
+      final response = await _supabaseClient
+          .from('flashcard_history')
+          .select()
+          .eq('user_id', userId)
+          .eq('flashcard_id', flashcardId)
+          .order('reviewed_at', ascending: false)
+          .limit(1)
+          .single();
+
+      return FlashcardHistory.fromJson(response);
+    } catch (e) {
+      // If no history exists, return default values
+      return FlashcardHistory(
+        flashcardId: flashcardId,
+        userId: userId,
+        lastReviewedAt: DateTime.now().toIso8601String(),
+        repetitions: 0,
+        easeFactor: 2.5,
+        interval: 1,
+      );
     }
   }
 } 

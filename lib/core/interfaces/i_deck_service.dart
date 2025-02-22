@@ -25,7 +25,7 @@ abstract class IDeckService {
   // Create a new deck
   Future<void> createDeck(String topic, String focus, String category,
       String difficultyLevel, String userid, int cardCount);
-  // Update dec
+  // Update deck
   Future<void> updateDeck(
       String deckId, String title, String difficultyLevel, String userid);
 

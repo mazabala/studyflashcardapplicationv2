@@ -11,6 +11,12 @@ class UserPreferences {
   final bool hapticFeedback;
   final Map<String, dynamic> preferences;
   final DateTime lastUpdated;
+  final bool isDarkMode;
+  final bool isSpacedRepetitionEnabled;
+  final String defaultDifficulty;
+  final int cardsPerSession;
+  final int breakInterval;
+  final Map<String, dynamic> studySettings;
 
   UserPreferences({
     required this.id,
@@ -23,6 +29,12 @@ class UserPreferences {
     this.hapticFeedback = true,
     this.preferences = const {},
     required this.lastUpdated,
+    this.isDarkMode = false,
+    this.isSpacedRepetitionEnabled = true,
+    this.defaultDifficulty = 'medium',
+    this.cardsPerSession = 20,
+    this.breakInterval = 25,
+    this.studySettings = const {},
   }) : studyReminder = studyReminder ?? const TimeOfDay(hour: 18, minute: 0);
 
   factory UserPreferences.fromJson(Map<String, dynamic> json) {
@@ -44,6 +56,12 @@ class UserPreferences {
       hapticFeedback: json['haptic_feedback'] as bool? ?? true,
       preferences: json['preferences'] as Map<String, dynamic>? ?? {},
       lastUpdated: DateTime.parse(json['last_updated'] as String),
+      isDarkMode: json['isDarkMode'] ?? false,
+      isSpacedRepetitionEnabled: json['isSpacedRepetitionEnabled'] ?? true,
+      defaultDifficulty: json['defaultDifficulty'] ?? 'medium',
+      cardsPerSession: json['cardsPerSession'] ?? 20,
+      breakInterval: json['breakInterval'] ?? 25,
+      studySettings: json['studySettings'] ?? {},
     );
   }
 
@@ -58,6 +76,12 @@ class UserPreferences {
     'haptic_feedback': hapticFeedback,
     'preferences': preferences,
     'last_updated': lastUpdated.toIso8601String(),
+    'isDarkMode': isDarkMode,
+    'isSpacedRepetitionEnabled': isSpacedRepetitionEnabled,
+    'defaultDifficulty': defaultDifficulty,
+    'cardsPerSession': cardsPerSession,
+    'breakInterval': breakInterval,
+    'studySettings': studySettings,
   };
 
   T? getPreference<T>(String key) {
@@ -77,6 +101,12 @@ class UserPreferences {
     bool? hapticFeedback,
     Map<String, dynamic>? preferences,
     DateTime? lastUpdated,
+    bool? isDarkMode,
+    bool? isSpacedRepetitionEnabled,
+    String? defaultDifficulty,
+    int? cardsPerSession,
+    int? breakInterval,
+    Map<String, dynamic>? studySettings,
   }) {
     return UserPreferences(
       id: id ?? this.id,
@@ -89,6 +119,12 @@ class UserPreferences {
       hapticFeedback: hapticFeedback ?? this.hapticFeedback,
       preferences: preferences ?? this.preferences,
       lastUpdated: lastUpdated ?? this.lastUpdated,
+      isDarkMode: isDarkMode ?? this.isDarkMode,
+      isSpacedRepetitionEnabled: isSpacedRepetitionEnabled ?? this.isSpacedRepetitionEnabled,
+      defaultDifficulty: defaultDifficulty ?? this.defaultDifficulty,
+      cardsPerSession: cardsPerSession ?? this.cardsPerSession,
+      breakInterval: breakInterval ?? this.breakInterval,
+      studySettings: studySettings ?? this.studySettings,
     );
   }
 } 

@@ -40,10 +40,10 @@ class _CollectionsScreenState extends ConsumerState<CollectionsScreen> with Sing
 
   Future<void> _initializeCollections() async {
     try {
-      // Trigger loading of collections
+      // Initialize first page of collections
       await Future.wait([
-        ref.read(userCollectionsProvider.future),
-        ref.read(publicCollectionsProvider.future),
+        ref.read(userCollectionsProvider(0).future),
+        ref.read(publicCollectionsProvider(0).future),
       ]);
       
       if (mounted) {
@@ -166,8 +166,8 @@ class _CollectionsScreenState extends ConsumerState<CollectionsScreen> with Sing
         await service.addCollectionToUser(collection.id);
         
         // Invalidate both providers to refresh the UI
-        ref.invalidate(userCollectionsProvider);
-        ref.invalidate(publicCollectionsProvider);
+        ref.invalidate(userCollectionsProvider(0));
+        ref.invalidate(publicCollectionsProvider(0));
 
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -259,8 +259,8 @@ class _CollectionsScreenState extends ConsumerState<CollectionsScreen> with Sing
   @override
   Widget build(BuildContext context) {
     final String currentRoute = ModalRoute.of(context)?.settings.name ?? '/';
-    final userCollections = ref.watch(userCollectionsProvider);
-    final publicCollections = ref.watch(publicCollectionsProvider);
+    final AsyncValue<List<UserCollection>> userCollections = ref.watch(userCollectionsProvider(0));
+    final AsyncValue<List<Collection>> publicCollections = ref.watch(publicCollectionsProvider(0));
 
     if (!_isInitialized) {
       return CustomScaffold(
@@ -326,17 +326,42 @@ class _CollectionsScreenState extends ConsumerState<CollectionsScreen> with Sing
                                   const Icon(Icons.chevron_right),
                                 ],
                               ),
-                              onTap: () {
-                                // TODO: Navigate to collection details
+                              onTap: () async {
+                                try {
+                                  // Get collection details
+                                  final collection = await ref.read(collectionDetailsProvider.notifier)
+                                      .getCollectionDetails(userCollection.collectionId);
+                                      
+                                  // Pre-load flashcards
+                                  await ref.read(flashcardStateProvider.notifier)
+                                      .getFlashcardsForDeck(collection.deckIds.first);
+                                      
+                                  if (mounted) {
+                                    Navigator.pushNamed(
+                                      context,
+                                      '/study',
+                                      arguments: {
+                                        'collection': collection,
+                                        'userCollection': userCollection,
+                                      },
+                                    );
+                                  }
+                                } catch (e) {
+                                  if (mounted) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(content: Text('Error loading collection: $e')),
+                                    );
+                                  }
+                                }
                               },
                             );
                           },
                         ),
                       ),
-                      _buildCollectionList(
+                      _buildCollectionList<Collection>(
                         publicCollections,
                         emptyMessage: 'No public collections available.',
-                        itemBuilder: (collection) => ListTile(
+                        itemBuilder: (Collection collection) => ListTile(
                           title: Text(collection.name),
                           subtitle: Text('${collection.decks.length} decks - ${collection.subject}'),
                           trailing: const Icon(Icons.add),
@@ -344,7 +369,7 @@ class _CollectionsScreenState extends ConsumerState<CollectionsScreen> with Sing
                             try {
                               final service = ref.read(collectionServiceProvider);
                               await service.addCollectionToUser(collection.id);
-                              ref.invalidate(userCollectionsProvider);
+                              ref.invalidate(userCollectionsProvider(0));
                               
                               if (context.mounted) {
                                 ScaffoldMessenger.of(context).showSnackBar(

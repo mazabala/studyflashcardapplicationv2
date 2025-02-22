@@ -24,10 +24,10 @@ class CollectionDetailsNotifier extends AsyncNotifier<Map<String, Collection>> {
     final collectionService = ref.read(collectionServiceProvider);
     final collection = await collectionService.getCollection(collectionId);
 
-    // Update cache
+    // Update cache with proper ID mapping
     state = AsyncData({
       ...currentState,
-      collectionId: collection,
+      collection.id: collection,  // Use the collection's ID as the key
     });
 
     return collection;
@@ -38,6 +38,16 @@ class CollectionDetailsNotifier extends AsyncNotifier<Map<String, Collection>> {
       state = AsyncData({
         ...collections,
       }..remove(collectionId));
+    });
+  }
+
+  // Add method to update collection in cache
+  void updateCollection(Collection collection) {
+    state.whenData((collections) {
+      state = AsyncData({
+        ...collections,
+        collection.id: collection,
+      });
     });
   }
 

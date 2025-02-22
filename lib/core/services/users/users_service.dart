@@ -26,7 +26,7 @@ Future<Map<String, dynamic>?> getCurrentUserInfo() async {
     // Get the user info from our users table
     final userInfo = await _fetchUser(user.id);
     
-      print('userInfo: ${userInfo}');
+ 
     if (userInfo != null) {
       // Create a new map that combines auth user data and our custom user data
       return {
@@ -319,60 +319,34 @@ DateTime _getExpiryDateForPlan(String planType) {
   @override
   Future<Map<String, dynamic>> getStudyAnalytics(String userId) async {
     try {
-      final progress = await getUserProgress(userId);
-      final studySessions = await _supabaseClient
-          .from('study_sessions')
-          .select()
-          .eq('user_id', userId)
-          .order('updated_at', ascending: false)
-          .limit(30);
+      final response = await _supabaseClient.rpc(
+        'calculate_user_analytics',
+        params: {
+          'p_user_id': userId,
+          'p_days_ago': 30,
+        },
+      );
 
-      final now = DateTime.now();
-      final thirtyDaysAgo = now.subtract(const Duration(days: 30));
-
-      // Calculate study statistics with null checks
-      Duration recentStudyTime = Duration.zero;
-      if (progress.studyTime.isNotEmpty) {
-        recentStudyTime = progress.studyTime.entries
-            .where((entry) => DateTime.parse(entry.key).isAfter(thirtyDaysAgo))
-            .fold<Duration>(Duration.zero, (prev, curr) => prev + curr.value);
+      if (response == null) {
+        return {
+          'total_study_time': 0,
+          'average_daily_cards': 0,
+          'current_streak': 0,
+          'longest_streak': 0,
+          'average_confidence': 0.0,
+          'recent_sessions': [],
+          'achievements_earned': 0,
+          'performance_trends': {},
+        };
       }
 
-      double averageConfidence = 0;
-      if (progress.confidenceLevels.isNotEmpty) {
-        final confidenceValues = progress.confidenceLevels.values
-            .expand((map) => map.values)
-            .toList();
-        if (confidenceValues.isNotEmpty) {
-          averageConfidence = confidenceValues.fold<double>(0, (sum, value) => sum + value) /
-              confidenceValues.length;
-        }
-      }
-
-      double averageDailyCards = 0;
-      if (progress.dailyCardsCovered.isNotEmpty) {
-        final totalCards = progress.dailyCardsCovered.values.fold<int>(0, (sum, value) => sum + value);
-        final daysWithData = progress.dailyCardsCovered.length;
-        if (daysWithData > 0) {
-          averageDailyCards = totalCards / daysWithData;
-        }
-      }
-
-      return {
-        'total_study_time': recentStudyTime.inMinutes,
-        'average_daily_cards': averageDailyCards.round(),
-        'current_streak': progress.currentStreak,
-        'longest_streak': progress.longestStreak,
-        'average_confidence': double.parse(averageConfidence.toStringAsFixed(2)),
-        'recent_sessions': studySessions ?? [],
-        'achievements_earned': progress.achievements?.length ?? 0,
-        'performance_trends': progress.performanceMetrics ?? {},
-      };
+      return Map<String, dynamic>.from(response);
     } catch (e) {
       log(e.toString());
       throw ErrorHandler.handle(e,
-          message: 'Failed to get study analytics',
-          specificType: ErrorType.userProfile);
+        message: 'Failed to get study analytics',
+        specificType: ErrorType.userProfile
+      );
     }
   }
 

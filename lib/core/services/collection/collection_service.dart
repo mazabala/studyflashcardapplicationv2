@@ -111,9 +111,16 @@ class CollectionService implements ICollectionService {
   }
 
   @override
-  Future<List<Collection>> getCollectionPool() async {
+  Future<List<Collection>> getCollectionPool({int page = 0, int pageSize = 20}) async {
     try {
-      final response = await _supabaseClient.rpc('get_collection_pool');
+      final start = page * pageSize;
+      final response = await _supabaseClient
+          .from('collections')
+          .select()
+          .eq('is_public', true)
+          .range(start, start + pageSize - 1)
+          .order('created_at', ascending: false);
+
       if (response == null) return [];
       return (response as List).map((json) => Collection.fromJson(json)).toList();
     } catch (e) {
@@ -153,18 +160,22 @@ class CollectionService implements ICollectionService {
   }
 
   @override
-  Future<List<UserCollection>> getUserCollections() async {
+  Future<List<UserCollection>> getUserCollections({int page = 0, int pageSize = 20}) async {
     try {
-      final response = await _supabaseClient.rpc('get_user_collections');
+      final start = page * pageSize;
+      final response = await _supabaseClient
+          .from('user_collections')
+          .select()
+          .range(start, start + pageSize - 1)
+          .order('created_at', ascending: false);
+
       if (response == null) return [];
       return (response as List).map((json) => UserCollection.fromJson(json)).toList();
     } catch (e) {
-      log(e.toString());
       throw ErrorHandler.handle(e);
     }
   }
 
- 
   @override
   Future<double> getCollectionCompletionRate(String collectionId) async {
     try {

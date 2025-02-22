@@ -8,6 +8,8 @@ import 'package:flashcardstudyapplication/core/providers/flashcard_provider.dart
 import 'package:flashcardstudyapplication/core/providers/revenuecat_provider.dart';
 import 'package:flashcardstudyapplication/core/providers/subscription_provider.dart';
 import 'package:flashcardstudyapplication/core/providers/user_provider.dart';
+import 'package:flashcardstudyapplication/core/providers/user_preferences_provider.dart';
+import 'package:flashcardstudyapplication/core/models/user_preferences.dart';
 import 'package:flashcardstudyapplication/core/services/analytics/posthog_service.dart';
 import 'package:flashcardstudyapplication/core/services/collection/collection_service.dart';
 import 'package:flashcardstudyapplication/core/services/revenuecat/revenuecat_service.dart';
@@ -33,13 +35,13 @@ import '../services/authentication/authentication_service.dart';
 import '../services/subscription/subscription_service.dart';
 import '../services/api/api_client.dart';
 import '../services/api/api_manager.dart';
-
 import '../services/deck/deck_service.dart';
 import '../services/admin/admin_service.dart';
 import '../services/supabase/supabase_service.dart';
 import '../services/billing/billing_service.dart';
 import '../services/progress/progress_service.dart';
-
+import '../services/anki/anki_service.dart';
+import '../services/spaced_repetition/spaced_repetition_service.dart';
 
 // Initialization Provider
 final initializationProvider = StateProvider<bool>((ref) => false);
@@ -133,10 +135,16 @@ final progressServiceProvider = Provider<ProgressService>((ref) {
 });
 
 final flashcardStateProvider = StateNotifierProvider<FlashcardNotifier, FlashcardState>((ref) {
+  final deckService = ref.watch(deckServiceProvider);
+  final progressService = ref.watch(progressServiceProvider);
+  final userService = ref.watch(userServiceProvider);
+  final spacedRepetitionService = ref.watch(spacedRepetitionServiceProvider);
+  
   return FlashcardNotifier(
-    ref.watch(deckServiceProvider),
-    ref.watch(progressServiceProvider),
-    ref.watch(userServiceProvider),
+    deckService,
+    progressService,
+    userService,
+    spacedRepetitionService,
     ref,
   );
 });
@@ -164,14 +172,74 @@ final collectionServiceProvider = Provider<CollectionService>((ref) {
   return CollectionService(ref.watch(supabaseClientProvider));
 });
 
-// Collection State Providers
-final userCollectionsProvider = FutureProvider<List<UserCollection>>((ref) async {
+// Cached collection providers with pagination
+final userCollectionsCacheProvider = StateProvider<Map<int, List<UserCollection>>>((ref) => {});
+final publicCollectionsCacheProvider = StateProvider<Map<int, List<Collection>>>((ref) => {});
+
+final userCollectionsProvider = FutureProvider.family<List<UserCollection>, int>((ref, page) async {
+  final cache = ref.watch(userCollectionsCacheProvider);
+  final pageSize = 20;
+
+  if (cache.containsKey(page)) {
+    return cache[page]!;
+  }
+
   final service = ref.watch(collectionServiceProvider);
-  return service.getUserCollections();
+  final collections = await service.getUserCollections(page: page, pageSize: pageSize);
+  
+  ref.read(userCollectionsCacheProvider.notifier).update((state) => {
+    ...state,
+    page: collections,
+  });
+
+  return collections;
 });
 
-final publicCollectionsProvider = FutureProvider<List<Collection>>((ref) async {
+final publicCollectionsProvider = FutureProvider.family<List<Collection>, int>((ref, page) async {
+  final cache = ref.watch(publicCollectionsCacheProvider);
+  final pageSize = 20;
+
+  if (cache.containsKey(page)) {
+    return cache[page]!;
+  }
+
   final service = ref.watch(collectionServiceProvider);
-  return service.getCollectionPool();
+  final collections = await service.getCollectionPool(page: page, pageSize: pageSize);
+  
+  ref.read(publicCollectionsCacheProvider.notifier).update((state) => {
+    ...state,
+    page: collections,
+  });
+
+  return collections;
+});
+
+// Cache invalidation provider
+final collectionCacheInvalidationProvider = Provider((ref) {
+  ref.listen(userStateProvider, (previous, next) {
+    if (previous?.userId != next.userId) {
+      ref.invalidate(userCollectionsCacheProvider);
+      ref.invalidate(publicCollectionsCacheProvider);
+    }
+  });
+});
+
+// Anki Service Provider
+final ankiServiceProvider = Provider<AnkiService>((ref) {
+  return AnkiService();
+});
+
+// User Preferences Provider
+final userPreferencesProvider = StateNotifierProvider<UserPreferencesNotifier, UserPreferences>((ref) {
+  final userService = ref.watch(userServiceProvider);
+  return UserPreferencesNotifier(userService);
+});
+
+// Spaced Repetition Service Provider
+final spacedRepetitionServiceProvider = Provider<SpacedRepetitionService>((ref) {
+  final userPrefs = ref.watch(userPreferencesProvider);
+  final service = SpacedRepetitionService();
+  service.toggleSpacedRepetition(userPrefs.isSpacedRepetitionEnabled);
+  return service;
 });
 

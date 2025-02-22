@@ -83,26 +83,86 @@ class UserListView extends ConsumerStatefulWidget {
 
 class _UserListViewState extends ConsumerState<UserListView> {
   final TextEditingController _searchController = TextEditingController();
+  final ScrollController _scrollController = ScrollController();
   String _searchQuery = '';
+  int _currentPage = 0;
+  static const int _pageSize = 20;
+  bool _isLoadingMore = false;
+  bool _hasMoreData = true;
 
   @override
   void initState() {
     super.initState();
-    // Load users when the widget is initialized
-    Future.microtask(() => ref.read(adminStateProvider.notifier).loadUsers());
+    _loadInitialUsers();
+    _scrollController.addListener(_onScroll);
+    _searchController.addListener(_onSearchChanged);
   }
-
 
   @override
   void dispose() {
+    _scrollController.dispose();
     _searchController.dispose();
     super.dispose();
+  }
+
+  void _onSearchChanged() {
+    if (_searchController.text != _searchQuery) {
+      _currentPage = 0;
+      _hasMoreData = true;
+      _searchQuery = _searchController.text;
+      ref.read(adminStateProvider.notifier).clearUsers();
+      _loadUsers();
+    }
+  }
+
+  void _onScroll() {
+    if (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent * 0.8 &&
+        !_isLoadingMore &&
+        _hasMoreData) {
+      _loadMoreUsers();
+    }
+  }
+
+  Future<void> _loadInitialUsers() async {
+    await _loadUsers();
+  }
+
+  Future<void> _loadUsers() async {
+    if (_isLoadingMore) return;
+
+    setState(() => _isLoadingMore = true);
+
+    try {
+      final users = await ref.read(adminStateProvider.notifier).loadUsers(
+        searchQuery: _searchQuery,
+        page: _currentPage,
+        pageSize: _pageSize,
+      );
+
+      setState(() {
+        _hasMoreData = users.length == _pageSize;
+        _isLoadingMore = false;
+      });
+    } catch (e) {
+      setState(() => _isLoadingMore = false);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error loading users: $e')),
+        );
+      }
+    }
+  }
+
+  Future<void> _loadMoreUsers() async {
+    if (_isLoadingMore || !_hasMoreData) return;
+
+    _currentPage++;
+    await _loadUsers();
   }
 
   @override
   Widget build(BuildContext context) {
     final adminState = ref.watch(adminStateProvider);
-
 
     return Column(
       children: [
@@ -118,30 +178,32 @@ class _UserListViewState extends ConsumerState<UserListView> {
               ),
               contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             ),
-            onChanged: (value) {
-              setState(() {
-                _searchQuery = value.toLowerCase();
-              });
-            },
           ),
         ),
-        if (adminState.isLoading)
+        if (adminState.isLoading && adminState.users.isEmpty)
           const Expanded(child: Center(child: CircularProgressIndicator()))
         else if (adminState.users.isEmpty)
-          const Expanded(child: Center(child: Text('No users found')))
+          const Expanded(
+            child: Center(
+              child: Text('No users found'),
+            ),
+          )
         else
           Expanded(
             child: ListView.builder(
-              itemCount: adminState.users.where((user) {
-                final searchStr = '${user['firstname']} ${user['lastname']} ${user['email']}'.toLowerCase();
-                return searchStr.contains(_searchQuery);
-              }).length,
+              controller: _scrollController,
+              itemCount: adminState.users.length + (_hasMoreData ? 1 : 0),
               itemBuilder: (context, index) {
-                final filteredUsers = adminState.users.where((user) {
-                  final searchStr = '${user['firstname']} ${user['lastname']} ${user['email']}'.toLowerCase();
-                  return searchStr.contains(_searchQuery);
-                }).toList();
-                final user = filteredUsers[index];
+                if (index == adminState.users.length) {
+                  return const Center(
+                    child: Padding(
+                      padding: EdgeInsets.all(8.0),
+                      child: CircularProgressIndicator(),
+                    ),
+                  );
+                }
+
+                final user = adminState.users[index];
                 return ListTile(
                   title: Text(
                     'Name: ${user['firstname']} ${user['lastname']}\nEmail: ${user['email']}',

@@ -10,21 +10,25 @@
         },
     },
     "configurations": [
-
+        {
+            "name": "flashcardstudyapplication (web)",
+            "request": "launch",
+            "type": "dart",
+            "args": [
+                "-d",
+                "chrome"
+            ]
+        },
         {
             "name": "flashcardstudyapplication (Flutter emulator)",
             "request": "launch",
             "type": "dart",
             "deviceId": "emulator-555"
-            
-
         },
-
         {
             "name": "flashcardstudyapplication",
             "request": "launch",
             "type": "dart"
-            
         },
         {
             "name": "flashcardstudyapplication (profile mode)",
@@ -37,14 +41,12 @@
             "request": "launch",
             "type": "dart",
             "deviceId": "emulator-5554"
-            
         },
         {
             "name": "flashcardstudyapplication (C51 - usb)",
             "request": "launch",
             "type": "dart",
             "deviceId": "C51000000025364"
-            
         },
         {
             "name": "flashcardstudyapplication (release mode)",
@@ -52,8 +54,5 @@
             "type": "dart",
             "flutterMode": "release"
         }
-        
     ]
-    
-    
 }
