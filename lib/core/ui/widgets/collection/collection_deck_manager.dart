@@ -14,7 +14,8 @@ class CollectionDeckManager extends ConsumerStatefulWidget {
   });
 
   @override
-  ConsumerState<CollectionDeckManager> createState() => _CollectionDeckManagerState();
+  ConsumerState<CollectionDeckManager> createState() =>
+      _CollectionDeckManagerState();
 }
 
 class _CollectionDeckManagerState extends ConsumerState<CollectionDeckManager> {
@@ -65,48 +66,36 @@ class _CollectionDeckManagerState extends ConsumerState<CollectionDeckManager> {
     });
 
     try {
-      final collectionService = ref.read(collectionServiceProvider);
-      
-      // Add deck to collection
-      await collectionService.addDeckToCollection(widget.collection.id, deck.id);
-      
-      // Get user collection
-      final userCollections = await collectionService.getUserCollections();
-      final userCollection = userCollections.firstWhere(
-        (uc) => uc.collectionId == widget.collection.id,
-      );
-      
-      // Add deck to user collection
-      await collectionService.addDeckToUserCollection(userCollection.id, deck.id);
-      
-      // Remove the deck from available decks
+      final userNotifier = ref.read(userStateProvider.notifier);
+
+      // Add deck to collection through UserState
+      await userNotifier.addDeckToCollection(widget.collection.id, deck.id);
+
+      // Remove the deck from available decks locally
       setState(() {
         _availableDecks.removeWhere((d) => d.id == deck.id);
       });
-      
-      // Get updated collection details and update cache
-      final updatedCollection = await collectionService.getCollection(widget.collection.id);
-      ref.read(collectionDetailsProvider.notifier).updateCollection(updatedCollection);
-      
-      // Refresh both providers to update UI
-      ref.invalidate(userCollectionsProvider);
-      ref.invalidate(collectionDetailsProvider);
-      
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Deck added to collection successfully')),
-      );
-      
-      // Close the dialog if no more decks are available
-      if (_getFilteredDecks().isEmpty && mounted) {
-        Navigator.of(context).pop();
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+              content: Text('Deck added to collection successfully')),
+        );
+
+        // Close the dialog if no more decks are available
+        if (_getFilteredDecks().isEmpty) {
+          Navigator.of(context).pop();
+        }
       }
     } catch (e) {
       setState(() {
         _error = 'Error adding deck to collection: $e';
       });
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error adding deck to collection: $e')),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error adding deck to collection: $e')),
+        );
+      }
     } finally {
       setState(() {
         _isLoading = false;
@@ -179,7 +168,8 @@ class _CollectionDeckManagerState extends ConsumerState<CollectionDeckManager> {
               itemBuilder: (context, index) {
                 final deck = filteredDecks[index];
                 return Card(
-                  margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 4.0),
+                  margin: const EdgeInsets.symmetric(
+                      horizontal: 16.0, vertical: 4.0),
                   child: ListTile(
                     title: Text(deck.title),
                     subtitle: Text(
@@ -197,4 +187,4 @@ class _CollectionDeckManagerState extends ConsumerState<CollectionDeckManager> {
       ],
     );
   }
-} 
+}

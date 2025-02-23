@@ -14,7 +14,8 @@ class CollectionsScreen extends ConsumerStatefulWidget {
   ConsumerState<CollectionsScreen> createState() => _CollectionsScreenState();
 }
 
-class _CollectionsScreenState extends ConsumerState<CollectionsScreen> with SingleTickerProviderStateMixin {
+class _CollectionsScreenState extends ConsumerState<CollectionsScreen>
+    with SingleTickerProviderStateMixin {
   bool _isInitialized = false;
   late final TabController _tabController;
 
@@ -42,10 +43,10 @@ class _CollectionsScreenState extends ConsumerState<CollectionsScreen> with Sing
     try {
       // Initialize first page of collections
       await Future.wait([
-        ref.read(userCollectionsProvider(0).future),
+        ref.read(userStateProvider.notifier).loadUserCollections(),
         ref.read(publicCollectionsProvider(0).future),
       ]);
-      
+
       if (mounted) {
         setState(() {
           _isInitialized = true;
@@ -161,13 +162,9 @@ class _CollectionsScreenState extends ConsumerState<CollectionsScreen> with Sing
           deckIds: [],
           isPublic: isPublic,
         );
-        
-        // Automatically add the collection to the user
-        await service.addCollectionToUser(collection.id);
-        
-        // Invalidate both providers to refresh the UI
-        ref.invalidate(userCollectionsProvider(0));
-        ref.invalidate(publicCollectionsProvider(0));
+
+        // Add collection to user state
+        await ref.read(userStateProvider.notifier).addCollection(collection);
 
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -182,42 +179,6 @@ class _CollectionsScreenState extends ConsumerState<CollectionsScreen> with Sing
         }
       }
     }
-  }
-
-  Widget _buildCollectionList<T>(
-    AsyncValue<List<T>> collections, {
-    required String emptyMessage,
-    required Widget Function(T) itemBuilder,
-  }) {
-    return collections.when(
-      data: (items) {
-        if (items.isEmpty) {
-          return Center(child: Text(emptyMessage));
-        }
-        return ListView.builder(
-          padding: const EdgeInsets.all(8),
-          itemCount: items.length,
-          itemBuilder: (context, index) => Card(
-            margin: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
-            child: itemBuilder(items[index]),
-          ),
-        );
-      },
-      loading: () => const Center(child: CircularProgressIndicator()),
-      error: (error, stack) => Center(
-        child: SelectableText.rich(
-          TextSpan(
-            children: [
-              const TextSpan(text: 'Error loading collections: '),
-              TextSpan(
-                text: error.toString(),
-                style: const TextStyle(color: Colors.red),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
   }
 
   Future<void> _showAddDecksDialog(Collection collection) async {
@@ -256,11 +217,47 @@ class _CollectionsScreenState extends ConsumerState<CollectionsScreen> with Sing
     );
   }
 
+  Widget _buildCollectionList<T>(
+    AsyncValue<List<T>> collections, {
+    required String emptyMessage,
+    required Widget Function(T) itemBuilder,
+  }) {
+    return collections.when(
+      data: (items) {
+        if (items.isEmpty) {
+          return Center(child: Text(emptyMessage));
+        }
+        return ListView.builder(
+          padding: const EdgeInsets.all(8),
+          itemCount: items.length,
+          itemBuilder: (context, index) => Card(
+            margin: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+            child: itemBuilder(items[index]),
+          ),
+        );
+      },
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (error, stack) => Center(
+        child: SelectableText.rich(
+          TextSpan(
+            children: [
+              const TextSpan(text: 'Error loading collections: '),
+              TextSpan(
+                text: error.toString(),
+                style: const TextStyle(color: Colors.red),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final String currentRoute = ModalRoute.of(context)?.settings.name ?? '/';
-    final AsyncValue<List<UserCollection>> userCollections = ref.watch(userCollectionsProvider(0));
-    final AsyncValue<List<Collection>> publicCollections = ref.watch(publicCollectionsProvider(0));
+    final userState = ref.watch(userStateProvider);
+    final publicCollections = ref.watch(publicCollectionsProvider(0));
 
     if (!_isInitialized) {
       return CustomScaffold(
@@ -288,35 +285,40 @@ class _CollectionsScreenState extends ConsumerState<CollectionsScreen> with Sing
                   child: TabBarView(
                     children: [
                       _buildCollectionList(
-                        userCollections,
-                        emptyMessage: 'No collections yet. Create one or add from public collections.',
-                        itemBuilder: (UserCollection userCollection) => Consumer(
+                        AsyncValue.data(userState.collections),
+                        emptyMessage:
+                            'No collections yet. Create one or add from public collections.',
+                        itemBuilder: (UserCollection userCollection) =>
+                            Consumer(
                           builder: (context, ref, child) {
-                            final collectionDetails = ref.watch(
-                              collectionDetailsProvider.notifier
-                            ).getCollectionDetails(userCollection.collectionId);
-                            
+                            final collectionFuture = ref
+                                .read(collectionServiceProvider)
+                                .getCollection(userCollection.collectionId);
+
+                            print(
+                                'amount of decks: ${userCollection.decks.length}');
                             return ListTile(
                               title: FutureBuilder<Collection>(
-                                future: collectionDetails,
+                                future: collectionFuture,
                                 builder: (context, snapshot) {
                                   if (snapshot.hasData) {
                                     return Text(snapshot.data!.name);
                                   } else if (snapshot.hasError) {
-                                    return Text('Error loading collection: ${snapshot.error}');
+                                    return Text(
+                                        'Error loading collection: ${snapshot.error}');
                                   }
                                   return const Text('Loading...');
                                 },
                               ),
-                              subtitle: Text('${userCollection.decks.length} decks - ${(userCollection.completionRate * 100).toStringAsFixed(1)}% complete'),
+                              subtitle: Text(
+                                  '${userCollection.decks.length} decks - ${(userCollection.completionRate * 100).toStringAsFixed(1)}% complete'),
                               trailing: Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
                                   IconButton(
                                     icon: const Icon(Icons.add),
                                     onPressed: () async {
-                                      final collection = await ref.read(collectionDetailsProvider.notifier)
-                                          .getCollectionDetails(userCollection.collectionId);
+                                      final collection = await collectionFuture;
                                       if (mounted) {
                                         _showAddDecksDialog(collection);
                                       }
@@ -328,14 +330,8 @@ class _CollectionsScreenState extends ConsumerState<CollectionsScreen> with Sing
                               ),
                               onTap: () async {
                                 try {
-                                  // Get collection details
-                                  final collection = await ref.read(collectionDetailsProvider.notifier)
-                                      .getCollectionDetails(userCollection.collectionId);
-                                      
-                                  // Pre-load flashcards
-                                  await ref.read(flashcardStateProvider.notifier)
-                                      .getFlashcardsForDeck(collection.deckIds.first);
-                                      
+                                  final collection = await collectionFuture;
+
                                   if (mounted) {
                                     Navigator.pushNamed(
                                       context,
@@ -349,7 +345,9 @@ class _CollectionsScreenState extends ConsumerState<CollectionsScreen> with Sing
                                 } catch (e) {
                                   if (mounted) {
                                     ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(content: Text('Error loading collection: $e')),
+                                      SnackBar(
+                                          content: Text(
+                                              'Error loading collection: $e')),
                                     );
                                   }
                                 }
@@ -363,23 +361,28 @@ class _CollectionsScreenState extends ConsumerState<CollectionsScreen> with Sing
                         emptyMessage: 'No public collections available.',
                         itemBuilder: (Collection collection) => ListTile(
                           title: Text(collection.name),
-                          subtitle: Text('${collection.decks.length} decks - ${collection.subject}'),
+                          subtitle: Text(
+                              '${collection.decks.length} decks - ${collection.subject}'),
                           trailing: const Icon(Icons.add),
                           onTap: () async {
                             try {
-                              final service = ref.read(collectionServiceProvider);
-                              await service.addCollectionToUser(collection.id);
-                              ref.invalidate(userCollectionsProvider(0));
-                              
+                              await ref
+                                  .read(userStateProvider.notifier)
+                                  .addCollection(collection);
+
                               if (context.mounted) {
                                 ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(content: Text('Collection added to your collections')),
+                                  const SnackBar(
+                                      content: Text(
+                                          'Collection added to your collections')),
                                 );
                               }
                             } catch (e) {
                               if (context.mounted) {
                                 ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(content: Text('Error adding collection: $e')),
+                                  SnackBar(
+                                      content:
+                                          Text('Error adding collection: $e')),
                                 );
                               }
                             }
@@ -404,4 +407,4 @@ class _CollectionsScreenState extends ConsumerState<CollectionsScreen> with Sing
       ),
     );
   }
-} 
+}

@@ -17,7 +17,8 @@ class CollectionStudyScreen extends ConsumerStatefulWidget {
   }) : super(key: key);
 
   @override
-  ConsumerState<CollectionStudyScreen> createState() => _CollectionStudyScreenState();
+  ConsumerState<CollectionStudyScreen> createState() =>
+      _CollectionStudyScreenState();
 }
 
 class _CollectionStudyScreenState extends ConsumerState<CollectionStudyScreen> {
@@ -28,12 +29,14 @@ class _CollectionStudyScreenState extends ConsumerState<CollectionStudyScreen> {
   @override
   void initState() {
     super.initState();
-    _initializeDecks();
+    Future.microtask(() => _initializeDecks());
   }
 
   Future<void> _initializeDecks() async {
     try {
-      final decks = await ref.read(deckStateProvider.notifier).getDecksForCollection(widget.collection.id);
+      final decks = await ref
+          .read(deckStateProvider.notifier)
+          .getDecksForCollection(widget.collection.id);
       if (mounted) {
         setState(() {
           _decks = decks;
@@ -110,11 +113,13 @@ class _CollectionStudyScreenState extends ConsumerState<CollectionStudyScreen> {
                     margin: const EdgeInsets.only(bottom: 8),
                     child: ListTile(
                       title: Text(deck.title),
-                      subtitle: Text('Cards: ${deck.totalCards} • Difficulty: ${deck.difficultyLevel}'),
+                      subtitle: Text(
+                          'Cards: ${deck.totalCards} • Difficulty: ${deck.difficultyLevel}'),
                       trailing: FutureBuilder(
                         future: _preloadedDecks[deck.id],
                         builder: (context, snapshot) {
-                          if (snapshot.connectionState == ConnectionState.waiting) {
+                          if (snapshot.connectionState ==
+                              ConnectionState.waiting) {
                             return const SizedBox(
                               width: 20,
                               height: 20,
@@ -138,7 +143,9 @@ class _CollectionStudyScreenState extends ConsumerState<CollectionStudyScreen> {
                         } catch (e) {
                           if (mounted) {
                             ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text('Error loading flashcards: $e')),
+                              SnackBar(
+                                  content:
+                                      Text('Error loading flashcards: $e')),
                             );
                           }
                         }
@@ -152,4 +159,4 @@ class _CollectionStudyScreenState extends ConsumerState<CollectionStudyScreen> {
       ),
     );
   }
-} 
+}

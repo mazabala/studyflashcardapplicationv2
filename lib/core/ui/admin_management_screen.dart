@@ -19,10 +19,7 @@ class _AdminManagementScreenState extends ConsumerState<AdminManagementScreen> {
   @override
   Widget build(BuildContext context) {
     final String currentRoute = ModalRoute.of(context)?.settings.name ?? '/';
-
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      final userState = ref.watch(userStateProvider);
-    });
+    final userState = ref.watch(userStateProvider);
 
     return CustomScaffold(
       currentRoute: currentRoute,

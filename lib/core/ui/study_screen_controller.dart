@@ -37,14 +37,16 @@ class StudyScreenController {
   void handleConfidenceResponse(String confidence) {
     final state = ref.read(flashcardStateProvider);
     final flashcards = state.flashcardsByDeck[deckId] ?? [];
-    
+
     if (flashcards.isEmpty) return;
-    
+
     final currentCard = flashcards[state.currentCardIndex];
-    
+
     // Record the confidence level
-    ref.read(flashcardStateProvider.notifier).recordConfidence(currentCard.id, confidence);
-    
+    ref
+        .read(flashcardStateProvider.notifier)
+        .recordConfidence(currentCard.id, confidence);
+
     // Track analytics
     ref.read(analyticsProvider.notifier).trackEvent(
       'flashcard_confidence_recorded',
@@ -62,21 +64,25 @@ class StudyScreenController {
   void toggleMarkForLater() {
     final state = ref.read(flashcardStateProvider);
     final flashcards = state.flashcardsByDeck[deckId] ?? [];
-    
+
     if (flashcards.isEmpty) return;
-    
+
     final currentCard = flashcards[state.currentCardIndex];
-    ref.read(flashcardStateProvider.notifier).toggleMarkForLater(currentCard.id);
+    ref
+        .read(flashcardStateProvider.notifier)
+        .toggleMarkForLater(currentCard.id);
   }
 
   // Navigate to the next card
   void nextCard(BuildContext context) {
     final state = ref.read(flashcardStateProvider);
     final flashcards = state.flashcardsByDeck[deckId] ?? [];
-    
+
     if (state.currentCardIndex < flashcards.length - 1) {
-      ref.read(flashcardStateProvider.notifier).nextCard(deckId, state.currentCardIndex);
-      
+      ref
+          .read(flashcardStateProvider.notifier)
+          .nextCard(deckId, state.currentCardIndex);
+
       // Check if it's time for a break
       if (ref.read(flashcardStateProvider.notifier).shouldTakeBreak()) {
         _suggestBreak(context);
@@ -84,12 +90,14 @@ class StudyScreenController {
     } else {
       // Capture all necessary state before showing dialog
       final confidenceLevels = state.cardConfidence;
-      final highConfidenceCount = confidenceLevels.values.where((level) => level == 'high').length;
+      final highConfidenceCount =
+          confidenceLevels.values.where((level) => level == 'high').length;
       final totalCards = flashcards.length;
-      final progressPercentage = totalCards > 0 ? (highConfidenceCount / totalCards * 100).round() : 0;
+      final progressPercentage =
+          totalCards > 0 ? (highConfidenceCount / totalCards * 100).round() : 0;
       final isReviewingMarked = state.isReviewingMarked;
       final markedCount = state.markedForLater.length;
-      
+
       // Show completion dialog with captured state
       _showCompletionDialog(
         context: context,
@@ -105,23 +113,24 @@ class StudyScreenController {
   void previousCard() {
     final state = ref.read(flashcardStateProvider);
     final flashcards = state.flashcardsByDeck[deckId] ?? [];
-    
+
     if (state.currentCardIndex > 0) {
-      ref.read(flashcardStateProvider.notifier).previousCard(deckId, state.currentCardIndex);
+      ref
+          .read(flashcardStateProvider.notifier)
+          .previousCard(deckId, state.currentCardIndex);
     }
   }
 
   // Show break suggestion dialog
   void _suggestBreak(BuildContext context) {
     final notifier = ref.read(flashcardStateProvider.notifier);
-    
+
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Time for a Break! 🌟'),
         content: const Text(
-          'You\'ve been studying for a while. Taking regular breaks helps with retention and reduces stress. How about a 5-minute break?'
-        ),
+            'You\'ve been studying for a while. Taking regular breaks helps with retention and reduces stress. How about a 5-minute break?'),
         actions: [
           TextButton(
             onPressed: () {
@@ -158,23 +167,25 @@ class StudyScreenController {
     required bool hasMarkedCards,
   }) {
     final notifier = ref.read(flashcardStateProvider.notifier);
-    
+
     showDialog(
       context: context,
       barrierDismissible: false,
       builder: (context) => WillPopScope(
         onWillPop: () async => false,
         child: AlertDialog(
-          title: Text(isReviewingMarked ? 'Review Complete! 🎯' : 'Great Progress! 🎉'),
+          title: Text(
+              isReviewingMarked ? 'Review Complete! 🎯' : 'Great Progress! 🎉'),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text(isReviewingMarked 
-                ? 'You\'ve reviewed all your marked cards!'
-                : 'You\'ve completed this study session!'),
+              Text(isReviewingMarked
+                  ? 'You\'ve reviewed all your marked cards!'
+                  : 'You\'ve completed this study session!'),
               const SizedBox(height: 8),
               if (!isReviewingMarked) ...[
-                Text('You\'re feeling confident about $progressPercentage% of the cards.'),
+                Text(
+                    'You\'re feeling confident about $progressPercentage% of the cards.'),
                 if (hasMarkedCards)
                   Text('$markedCount cards marked for later review.'),
               ],

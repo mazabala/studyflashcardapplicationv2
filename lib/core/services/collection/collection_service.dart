@@ -104,14 +104,17 @@ class CollectionService implements ICollectionService {
           'p_query': query,
         },
       );
-      return (response as List).map((json) => Collection.fromJson(json)).toList();
+      return (response as List)
+          .map((json) => Collection.fromJson(json))
+          .toList();
     } catch (e) {
       throw ErrorHandler.handle(e);
     }
   }
 
   @override
-  Future<List<Collection>> getCollectionPool({int page = 0, int pageSize = 20}) async {
+  Future<List<Collection>> getCollectionPool(
+      {int page = 0, int pageSize = 20}) async {
     try {
       final start = page * pageSize;
       final response = await _supabaseClient
@@ -122,7 +125,9 @@ class CollectionService implements ICollectionService {
           .order('created_at', ascending: false);
 
       if (response == null) return [];
-      return (response as List).map((json) => Collection.fromJson(json)).toList();
+      return (response as List)
+          .map((json) => Collection.fromJson(json))
+          .toList();
     } catch (e) {
       throw ErrorHandler.handle(e);
     }
@@ -160,17 +165,39 @@ class CollectionService implements ICollectionService {
   }
 
   @override
-  Future<List<UserCollection>> getUserCollections({int page = 0, int pageSize = 20}) async {
+  Future<List<UserCollection>> getUserCollections(
+      {int page = 0, int pageSize = 20}) async {
     try {
       final start = page * pageSize;
-      final response = await _supabaseClient
-          .from('user_collections')
-          .select()
-          .range(start, start + pageSize - 1)
-          .order('created_at', ascending: false);
+      final response = await _supabaseClient.from('user_collections').select('''
+            *,
+            user_collection_decks (
+              deck_id,
+              added_at,
+              display_order
+            )
+          ''').order('added_at', ascending: false);
 
       if (response == null) return [];
-      return (response as List).map((json) => UserCollection.fromJson(json)).toList();
+
+      return (response as List).map((json) {
+        // Transform user_collection_decks to decks format
+        final decks = ((json['user_collection_decks'] as List?) ?? [])
+            .map((deck) => <String, dynamic>{
+                  'deck_id': deck['deck_id'] as String,
+                  'added_at': deck['added_at'] as String,
+                  'display_order': deck['display_order'] as int? ?? 0
+                })
+            .toList();
+
+        // Create modified json with decks field
+        final modifiedJson = <String, dynamic>{
+          ...Map<String, dynamic>.from(json),
+          'decks': decks,
+        }..remove('user_collection_decks');
+
+        return UserCollection.fromJson(modifiedJson);
+      }).toList();
     } catch (e) {
       throw ErrorHandler.handle(e);
     }
@@ -192,7 +219,8 @@ class CollectionService implements ICollectionService {
   }
 
   @override
-  Future<double> getUserCollectionCompletionRate(String userCollectionId) async {
+  Future<double> getUserCollectionCompletionRate(
+      String userCollectionId) async {
     try {
       final response = await _supabaseClient.rpc(
         'get_user_collection_completion_rate',
@@ -209,11 +237,13 @@ class CollectionService implements ICollectionService {
   @override
   Future<void> updateUserCollection(UserCollection userCollection) async {
     try {
-      final deckEntries = userCollection.decks.map((deck) => {
-        'deck_id': deck.deckId,
-        'added_at': deck.addedAt.toIso8601String(),
-        'display_order': deck.displayOrder,
-      }).toList();
+      final deckEntries = userCollection.decks
+          .map((deck) => {
+                'deck_id': deck.deckId,
+                'added_at': deck.addedAt.toIso8601String(),
+                'display_order': deck.displayOrder,
+              })
+          .toList();
 
       await _supabaseClient.rpc(
         'update_user_collection',
@@ -246,7 +276,8 @@ class CollectionService implements ICollectionService {
   }
 
   @override
-  Future<void> removeDeckFromCollection(String collectionId, String deckId) async {
+  Future<void> removeDeckFromCollection(
+      String collectionId, String deckId) async {
     try {
       await _supabaseClient.rpc(
         'remove_deck_from_collection',
@@ -261,7 +292,8 @@ class CollectionService implements ICollectionService {
   }
 
   @override
-  Future<void> addDeckToUserCollection(String userCollectionId, String deckId) async {
+  Future<void> addDeckToUserCollection(
+      String userCollectionId, String deckId) async {
     try {
       await _supabaseClient.rpc(
         'add_deck_to_user_collection',
@@ -276,7 +308,8 @@ class CollectionService implements ICollectionService {
   }
 
   @override
-  Future<void> removeDeckFromUserCollection(String userCollectionId, String deckId) async {
+  Future<void> removeDeckFromUserCollection(
+      String userCollectionId, String deckId) async {
     try {
       await _supabaseClient.rpc(
         'remove_deck_from_user_collection',
@@ -289,4 +322,4 @@ class CollectionService implements ICollectionService {
       throw ErrorHandler.handle(e);
     }
   }
-} 
+}

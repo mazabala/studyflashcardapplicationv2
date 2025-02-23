@@ -29,6 +29,7 @@ import '../interfaces/i_api_service.dart';
 import '../interfaces/i_api_manager.dart';
 import '../interfaces/i_billing_service.dart';
 import '../interfaces/i_posthog_service.dart';
+import '../interfaces/i_collection_service.dart';
 
 // Services
 import '../services/authentication/authentication_service.dart';
@@ -46,101 +47,135 @@ import '../services/spaced_repetition/spaced_repetition_service.dart';
 // Initialization Provider
 final initializationProvider = StateProvider<bool>((ref) => false);
 
-// Infrastructure Providers
+// Infrastructure Providers - These are singleton-like providers that should be kept alive
 final supabaseClientProvider = Provider<SupabaseClient>((ref) {
+  ref.keepAlive(); // Keep the client alive throughout the app lifecycle
   return Supabase.instance.client;
 });
 
 final supabaseServiceProvider = Provider<ISupabaseService>((ref) {
+  ref.keepAlive(); // Keep the service alive
   return SupabaseService();
 });
 
-// API Layer Providers
+// API Layer Providers - These should be kept alive as they're fundamental services
 final apiClientProvider = Provider<IApiService>((ref) {
+  ref.keepAlive();
   return ApiClient();
 });
 
 final apiManagerProvider = Provider<IApiManager>((ref) {
+  ref.keepAlive();
   return ApiManager.instance;
 });
 
-// Service Layer Providers
+// Service Layer Providers - Optimize dependencies and keep core services alive
 final authServiceProvider = Provider<IAuthService>((ref) {
-  return AuthService(ref.watch(supabaseClientProvider));
+  ref.keepAlive();
+  return AuthService(
+      ref.read(supabaseClientProvider)); // Use read instead of watch
 });
 
 final subscriptionServiceProvider = Provider<ISubscriptionService>((ref) {
+  // Only rebuild when user state changes
+  final userState =
+      ref.watch(userStateProvider.select((state) => state.userId));
   return SubscriptionService(
-    ref.watch(supabaseClientProvider),
+    ref.read(supabaseClientProvider),
     ref.watch(userStateProvider),
   );
 });
 
 final userServiceProvider = Provider<IUserService>((ref) {
+  ref.keepAlive();
   return UserService(
-    ref.watch(supabaseClientProvider),
-    ref.watch(apiClientProvider),
+    ref.read(supabaseClientProvider),
+    ref.read(apiClientProvider),
   );
 });
 
 final deckServiceProvider = Provider<IDeckService>((ref) {
+  ref.keepAlive();
   return DeckService(
-    ref.watch(supabaseClientProvider),
-    ref.watch(apiClientProvider),
+    ref.read(supabaseClientProvider),
+    ref.read(apiClientProvider),
   );
 });
 
 final adminServiceProvider = Provider<IAdminService>((ref) {
+  // Only rebuild when auth state changes
+  final isAdmin = ref.watch(userStateProvider.select((state) => state.isAdmin));
   return AdminService(
-    ref.watch(supabaseClientProvider),
-    ref.watch(authServiceProvider),
+    ref.read(supabaseClientProvider),
+    ref.read(authServiceProvider),
     ref.watch(userStateProvider),
   );
 });
 
 final analyticsProvider = StateNotifierProvider<AnalyticsNotifier, void>((ref) {
-  final posthogService = ref.watch(posthogServiceProvider);
+  ref.keepAlive(); // Analytics should stay alive
+  final posthogService = ref.read(posthogServiceProvider);
   return AnalyticsNotifier(posthogService, ref);
 });
 
 final posthogServiceProvider = Provider<IPostHogService>((ref) {
-  final supabase = Supabase.instance.client;
+  ref.keepAlive();
+  final supabase = ref.read(supabaseClientProvider);
   return PostHogService(supabase);
 });
 
-// State Management Layer
+// State Management Layer - Optimize with selective watching
 final authStateProvider =
     StateNotifierProvider<AuthNotifier, AuthenthicationState>((ref) {
-  return AuthNotifier(ref.watch(authServiceProvider), ref);
+  return AuthNotifier(ref.read(authServiceProvider), ref);
 });
 
 final subscriptionStateProvider =
     StateNotifierProvider<SubscriptionNotifier, SubscriptionState>((ref) {
-  return SubscriptionNotifier(ref.watch(subscriptionServiceProvider));
+  return SubscriptionNotifier(ref.read(subscriptionServiceProvider));
+});
+
+// Collection Service Provider
+final collectionServiceProvider = Provider<ICollectionService>((ref) {
+  ref.keepAlive();
+  return CollectionService(ref.read(supabaseClientProvider));
+});
+
+// Public collections provider
+final publicCollectionsProvider =
+    FutureProvider.family<List<Collection>, int>((ref, page) async {
+  final service = ref.read(collectionServiceProvider);
+  return service.getCollectionPool(page: page, pageSize: 20);
 });
 
 final userStateProvider = StateNotifierProvider<UserNotifier, UserState>((ref) {
-  return UserNotifier(ref.watch(userServiceProvider), ref);
+  return UserNotifier(
+    ref.read(userServiceProvider),
+    ref.read(collectionServiceProvider),
+    ref,
+  );
 });
 
 final deckStateProvider = StateNotifierProvider<DeckNotifier, DeckState>((ref) {
   return DeckNotifier(
-    ref.watch(deckServiceProvider),
-    ref.watch(userServiceProvider),
+    ref.read(deckServiceProvider),
+    ref.read(userServiceProvider),
     ref,
   );
 });
 
 final progressServiceProvider = Provider<ProgressService>((ref) {
-  return ProgressService(ref.watch(supabaseClientProvider));
+  ref.keepAlive();
+  return ProgressService(ref.read(supabaseClientProvider));
 });
 
 final flashcardStateProvider =
     StateNotifierProvider<FlashcardNotifier, FlashcardState>((ref) {
-  final deckService = ref.watch(deckServiceProvider);
-  final progressService = ref.watch(progressServiceProvider);
-  final userService = ref.watch(userServiceProvider);
-  final spacedRepetitionService = ref.watch(spacedRepetitionServiceProvider);
+  // Only get the services once since they don't need to be watched
+  final deckService = ref.read(deckServiceProvider);
+  final progressService = ref.read(progressServiceProvider);
+  final userService = ref.read(userServiceProvider);
+  final spacedRepetitionService = ref.read(spacedRepetitionServiceProvider);
 
   return FlashcardNotifier(
     deckService,
@@ -153,108 +188,46 @@ final flashcardStateProvider =
 
 final adminStateProvider =
     StateNotifierProvider<AdminNotifier, AdminState>((ref) {
-  return AdminNotifier(ref.watch(adminServiceProvider));
+  return AdminNotifier(ref.read(adminServiceProvider));
 });
 
-// Safe Providers (with null safety checks)
+// Safe Providers with optimized dependency tracking
 final safeSubscriptionProvider = Provider<SubscriptionState>((ref) {
-  final authState = ref.watch(authStateProvider);
-  if (!authState.isAuthenticated) {
+  final isAuthenticated =
+      ref.watch(authStateProvider.select((state) => state.isAuthenticated));
+  if (!isAuthenticated) {
     return SubscriptionState();
   }
   return ref.watch(subscriptionStateProvider);
 });
 
-// RevenueCat Integration
+// RevenueCat Integration with optimized initialization
 final revenueCatClientProvider =
     StateNotifierProvider<RevenueCatNotifier, RevenueCatService>((ref) {
+  ref.keepAlive(); // Keep RevenueCat client alive
   return RevenueCatNotifier(ref);
 });
 
-// Collection Service Provider
-final collectionServiceProvider = Provider<CollectionService>((ref) {
-  return CollectionService(ref.watch(supabaseClientProvider));
-});
-
-// Cached collection providers with pagination
-final userCollectionsCacheProvider =
-    StateProvider<Map<int, List<UserCollection>>>((ref) => {});
-final publicCollectionsCacheProvider =
-    StateProvider<Map<int, List<Collection>>>((ref) => {});
-
-final userCollectionsProvider =
-    FutureProvider.family<List<UserCollection>, int>((ref, page) async {
-  final cache = ref.watch(userCollectionsCacheProvider);
-  const pageSize = 20;
-
-  if (cache.containsKey(page)) {
-    return cache[page]!;
-  }
-
-  final service = ref.watch(collectionServiceProvider);
-  final collections =
-      await service.getUserCollections(page: page, pageSize: pageSize);
-
-  ref.read(userCollectionsCacheProvider.notifier).update((state) => {
-        ...state,
-        page: collections,
-      });
-
-  return collections;
-});
-
-final publicCollectionsProvider =
-    FutureProvider.family<List<Collection>, int>((ref, page) async {
-  final cache = ref.watch(publicCollectionsCacheProvider);
-  final pageSize = 20;
-
-  if (cache.containsKey(page)) {
-    return cache[page]!;
-  }
-
-  final service = ref.watch(collectionServiceProvider);
-  final collections =
-      await service.getCollectionPool(page: page, pageSize: pageSize);
-
-  ref.read(publicCollectionsCacheProvider.notifier).update((state) => {
-        ...state,
-        page: collections,
-      });
-
-  return collections;
-});
-
-// Cache invalidation provider
-final collectionCacheInvalidationProvider = Provider((ref) {
-  ref.listen(userStateProvider, (previous, next) {
-    if (previous?.userId != next.userId) {
-      ref.invalidate(userCollectionsCacheProvider);
-      ref.invalidate(publicCollectionsCacheProvider);
-    }
-  });
-});
-
-// Anki Service Provider
+// Service providers with optimized initialization
 final ankiServiceProvider = Provider<AnkiService>((ref) {
+  ref.keepAlive();
   return AnkiService();
 });
 
-// User Preferences Provider
 final userPreferencesProvider =
     StateNotifierProvider<UserPreferencesNotifier, UserPreferences>((ref) {
-  final userService = ref.watch(userServiceProvider);
-  return UserPreferencesNotifier(userService);
+  return UserPreferencesNotifier(ref.read(userServiceProvider));
 });
 
-// Spaced Repetition Service Provider
 final spacedRepetitionServiceProvider =
     Provider<SpacedRepetitionService>((ref) {
-  final userPrefs = ref.watch(userPreferencesProvider);
+  // Only rebuild when spaced repetition setting changes
+  final isEnabled = ref.watch(userPreferencesProvider
+      .select((prefs) => prefs.isSpacedRepetitionEnabled));
   final service = SpacedRepetitionService();
-  service.toggleSpacedRepetition(userPrefs.isSpacedRepetitionEnabled);
+  service.toggleSpacedRepetition(isEnabled);
   return service;
 });
-
 
 ///TODO IS THIS EFFICIENT?
 ///TODO, IS THIS CALLING TOO MANY TIMES?
