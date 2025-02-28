@@ -10,6 +10,7 @@ import 'package:flashcardstudyapplication/core/ui/widgets/flashcard_display.dart
 import 'package:flashcardstudyapplication/core/ui/widgets/progress_indicator.dart';
 import 'package:flashcardstudyapplication/core/ui/widgets/progress_button.dart';
 import 'package:flashcardstudyapplication/core/providers/flashcard_provider.dart';
+import 'dart:math';
 
 class StudyScreen extends ConsumerStatefulWidget {
   final Deck deck;
@@ -162,7 +163,7 @@ class _StudyScreenState extends ConsumerState<StudyScreen> {
                       constraints: BoxConstraints(
                         maxWidth: isSmallScreen ? constraints.maxWidth : 800,
                         minHeight: 200,
-                        maxHeight: constraints.maxHeight * 0.6,
+                        maxHeight: min(500, constraints.maxHeight * 0.6),
                       ),
                       child: FlashcardDisplay(
                         widget.deck.title,
@@ -198,7 +199,8 @@ class _StudyScreenState extends ConsumerState<StudyScreen> {
                             'study_session_ended',
                             properties: {
                               'deck_id': widget.deck.id,
-                              'cards_reviewed': flashcardState.currentCardIndex + 1,
+                              'cards_reviewed':
+                                  flashcardState.currentCardIndex + 1,
                             },
                           );
                           _flashcardNotifier.endSession();

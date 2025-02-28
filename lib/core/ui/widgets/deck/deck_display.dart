@@ -3,17 +3,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flashcardstudyapplication/core/models/deck.dart';
 
-
 class DeckDisplayWidget extends StatelessWidget {
   final List<Deck>? filteredDecks;
   final TextEditingController searchController;
   final bool isSearchingNewDecks;
-  final VoidCallback onDeckAdded; 
+  final VoidCallback onDeckAdded;
 
   const DeckDisplayWidget({
     Key? key,
     required this.filteredDecks,
-    required this.searchController, 
+    required this.searchController,
     required this.isSearchingNewDecks,
     required this.onDeckAdded,
   }) : super(key: key);
@@ -26,7 +25,6 @@ class DeckDisplayWidget extends StatelessWidget {
         final flashcardState = ref.watch(flashcardStateProvider);
         final ThemeData theme = Theme.of(context);
 
-
         if (deckState.isLoading) {
           return const Center(child: CircularProgressIndicator());
         } else if (deckState.error.isNotEmpty) {
@@ -38,7 +36,9 @@ class DeckDisplayWidget extends StatelessWidget {
         var filteredDecks = deckState.decks;
         if (searchController.text.isNotEmpty) {
           filteredDecks = deckState.decks.where((deck) {
-            return deck.title.toLowerCase().contains(searchController.text.toLowerCase());
+            return deck.title
+                .toLowerCase()
+                .contains(searchController.text.toLowerCase());
           }).toList();
         }
 
@@ -59,47 +59,53 @@ class DeckDisplayWidget extends StatelessWidget {
               title: Text(
                 deck.title,
                 style: Theme.of(context).textTheme.bodyLarge,
-                ),
+                overflow: TextOverflow.ellipsis,
+                maxLines: 1,
+              ),
               subtitle: Text(
                 'Difficulty: ${deck.difficultyLevel}',
-                style:  theme.textTheme.bodyMedium,
-                ),
-              
+                style: theme.textTheme.bodyMedium,
+                overflow: TextOverflow.ellipsis,
+                maxLines: 1,
+              ),
               onTap: () async {
                 if (!isSearchingNewDecks) {
                   // Proceed with studying if not in search mode
                   try {
-                    await ref.read(flashcardStateProvider.notifier).getFlashcardsForDeck(deck.id);
+                    await ref
+                        .read(flashcardStateProvider.notifier)
+                        .getFlashcardsForDeck(deck.id);
                     if (context.mounted) {
                       Navigator.pushNamed(context, '/study', arguments: deck);
                     }
-
                   } catch (e) {
                     if (context.mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error loading flashcards: $e')));
+                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                          content: Text('Error loading flashcards: $e')));
                     }
                   }
                 }
               },
-              trailing: 
-               isSearchingNewDecks
+              trailing: isSearchingNewDecks
                   ? IconButton(
                       icon: const Icon(Icons.add),
                       onPressed: () {
                         // Add deck to library logic here
-                         ref.read(deckStateProvider.notifier).addDecktoUser(deck.id);
-                          onDeckAdded();
-                          Navigator.pushNamed(context, '/myDecks');
-
+                        ref
+                            .read(deckStateProvider.notifier)
+                            .addDecktoUser(deck.id);
+                        onDeckAdded();
+                        Navigator.pushNamed(context, '/myDecks');
                       },
-                    ):
-                IconButton(
-                  icon: const Icon(Icons.delete),
-                  onPressed: () => ref.read(deckStateProvider.notifier).deleteDeck(deck.id),
-                ),
+                    )
+                  : IconButton(
+                      icon: const Icon(Icons.delete),
+                      onPressed: () => ref
+                          .read(deckStateProvider.notifier)
+                          .deleteDeck(deck.id),
+                    ),
             );
           },
-
         );
       },
     );

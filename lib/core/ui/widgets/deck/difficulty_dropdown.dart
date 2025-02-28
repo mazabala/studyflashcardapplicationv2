@@ -21,12 +21,13 @@ class FetchAndDisplayDifficultyLevelWidget extends StatelessWidget {
           future: fetchDifficulty(),
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
-              return CircularProgressIndicator();
+              return const Center(child: CircularProgressIndicator());
             } else if (snapshot.hasError) {
               return Text('Error: ${snapshot.error}');
             } else if (snapshot.hasData) {
               final difficultyLevels = snapshot.data!;
               return DropdownButton<String>(
+                borderRadius: BorderRadius.circular(10),
                 value: selectedDifficulty,
                 onChanged: onChanged,
                 items: difficultyLevels
@@ -38,7 +39,7 @@ class FetchAndDisplayDifficultyLevelWidget extends StatelessWidget {
                 }).toList(),
               );
             } else {
-              return Text('No difficulty levels available');
+              return const Text('No difficulty levels available');
             }
           },
         );

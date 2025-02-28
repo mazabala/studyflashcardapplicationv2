@@ -55,14 +55,15 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             builder: (context, constraints) {
               final maxWidth = constraints.maxWidth;
               final maxHeight = constraints.maxHeight;
-              
+
               // Calculate responsive dimensions
               final titleSize = maxHeight * (isSmallScreen ? 0.08 : 0.1);
-              final illustrationHeight = maxHeight * (isSmallScreen ? 0.3 : 0.35);
+              final illustrationHeight =
+                  maxHeight * (isSmallScreen ? 0.3 : 0.35);
               final buttonHeight = maxHeight * (isSmallScreen ? 0.07 : 0.08);
               final featureIconSize = maxHeight * 0.025;
               final horizontalPadding = maxWidth * 0.06;
-              
+
               return Padding(
                 padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
                 child: Column(
@@ -94,29 +95,32 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                               height: maxHeight * 0.2,
                               decoration: BoxDecoration(
                                 color: theme.colorScheme.tertiary,
-                                borderRadius: BorderRadius.circular(maxWidth * 0.04),
+                                borderRadius:
+                                    BorderRadius.circular(maxWidth * 0.04),
                               ),
                               child: Icon(Icons.person, size: maxWidth * 0.15),
                             ),
                           ),
                           // Floating cards
                           ...List.generate(5, (index) {
-                            final top = illustrationHeight * (0.1 + (index * 0.15));
+                            final top =
+                                illustrationHeight * (0.1 + (index * 0.15));
                             final right = maxWidth * (0.05 + (index * 0.08));
                             return Positioned(
                               top: top,
                               right: right,
                               child: Transform.rotate(
-                                angle: (index * 0.2) - 0.4,
+                                angle: (index * 0.4) - 0.4,
                                 child: Container(
                                   width: maxWidth * 0.2,
                                   height: maxHeight * 0.15,
                                   decoration: BoxDecoration(
                                     color: Colors.white,
-                                    borderRadius: BorderRadius.circular(maxWidth * 0.02),
+                                    borderRadius:
+                                        BorderRadius.circular(maxWidth * 0.02),
                                     boxShadow: [
                                       BoxShadow(
-                                        color: Colors.black.withOpacity(0.1),
+                                        color: Colors.black.withOpacity(0.4),
                                         blurRadius: maxWidth * 0.02,
                                         offset: Offset(0, maxWidth * 0.01),
                                       ),
@@ -129,7 +133,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         ],
                       ),
                     ),
-            
+
                     SizedBox(height: maxHeight * 0.03),
                     // Continue Button
                     SizedBox(
@@ -143,7 +147,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                           backgroundColor: Colors.white,
                           foregroundColor: theme.colorScheme.primary,
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(maxWidth * 0.03),
+                            borderRadius:
+                                BorderRadius.circular(maxWidth * 0.03),
                           ),
                         ),
                         child: Text(

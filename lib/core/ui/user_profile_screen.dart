@@ -10,17 +10,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class UserProfileScreen extends ConsumerWidget {
   const UserProfileScreen({super.key});
- 
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final userState = ref.watch(userStateProvider);
     final userPreferences = ref.read(userServiceProvider);
-    
 
     final userNotifier = ref.read(userStateProvider.notifier);
-     
-
 
     return CustomScaffold(
       currentRoute: '/userProfile',
@@ -109,6 +105,7 @@ class UserProfileScreen extends ConsumerWidget {
                                       'Expiration Date: ${userState.subscriptionExpiryDate}',
                                       style:
                                           Theme.of(context).textTheme.bodyLarge,
+                                      overflow: TextOverflow.ellipsis,
                                     ),
                                   ],
                                 ),
@@ -128,8 +125,8 @@ class UserProfileScreen extends ConsumerWidget {
                       child: Padding(
                         padding: const EdgeInsets.all(16.0),
                         child: FutureBuilder<UserPreferences>(
-                          future: 
-                             userPreferences.getUserPreferences(userState.userId ?? ''),
+                          future: userPreferences
+                              .getUserPreferences(userState.userId ?? ''),
                           builder: (context, snapshot) {
                             if (snapshot.connectionState ==
                                 ConnectionState.waiting) {
@@ -189,11 +186,12 @@ class UserProfileScreen extends ConsumerWidget {
                                         }).toList(),
                                         onChanged: (ThemeMode? newMode) {
                                           if (newMode != null) {
-                                              userPreferences.updateUserPreferences(
-                                                  userState.userId!,
-                                                  preferences.copyWith(
-                                                      themeMode: newMode),
-                                                );
+                                            userPreferences
+                                                .updateUserPreferences(
+                                              userState.userId!,
+                                              preferences.copyWith(
+                                                  themeMode: newMode),
+                                            );
                                           }
                                         },
                                       ),
@@ -217,7 +215,7 @@ class UserProfileScreen extends ConsumerWidget {
                                                 .bodyLarge),
                                       ),
                                       SizedBox(
-                                        width: 50,
+                                        width: 70,
                                         child: TextFormField(
                                           initialValue: preferences
                                               .dailyGoalCards
@@ -237,12 +235,12 @@ class UserProfileScreen extends ConsumerWidget {
                                             final newValue =
                                                 int.tryParse(value);
                                             if (newValue != null) {
-                                              userPreferences.updateUserPreferences(
-                                                    userState.userId!,
-                                                    preferences.copyWith(
-                                                        dailyGoalCards:
-                                                            newValue),
-                                                  );
+                                              userPreferences
+                                                  .updateUserPreferences(
+                                                userState.userId!,
+                                                preferences.copyWith(
+                                                    dailyGoalCards: newValue),
+                                              );
                                             }
                                           },
                                         ),
@@ -267,7 +265,7 @@ class UserProfileScreen extends ConsumerWidget {
                                                 .bodyLarge),
                                       ),
                                       SizedBox(
-                                        width: 50,
+                                        width: 70,
                                         child: TextFormField(
                                           initialValue: preferences
                                               .studySessionDuration
@@ -287,12 +285,13 @@ class UserProfileScreen extends ConsumerWidget {
                                             final newValue =
                                                 int.tryParse(value);
                                             if (newValue != null) {
-                                              userPreferences.updateUserPreferences(
-                                                    userState.userId!,
-                                                    preferences.copyWith(
-                                                        studySessionDuration:
-                                                            newValue),
-                                                  );
+                                              userPreferences
+                                                  .updateUserPreferences(
+                                                userState.userId!,
+                                                preferences.copyWith(
+                                                    studySessionDuration:
+                                                        newValue),
+                                              );
                                             }
                                           },
                                         ),
@@ -320,10 +319,10 @@ class UserProfileScreen extends ConsumerWidget {
                                         value: preferences.soundEnabled,
                                         onChanged: (value) {
                                           userPreferences.updateUserPreferences(
-                                                userState.userId!,
-                                                preferences.copyWith(
-                                                    soundEnabled: value),
-                                              );
+                                            userState.userId!,
+                                            preferences.copyWith(
+                                                soundEnabled: value),
+                                          );
                                         },
                                       ),
                                     ],
@@ -345,10 +344,10 @@ class UserProfileScreen extends ConsumerWidget {
                                         value: preferences.hapticFeedback,
                                         onChanged: (value) {
                                           userPreferences.updateUserPreferences(
-                                                userState.userId!,
-                                                preferences.copyWith(
-                                                    hapticFeedback: value),
-                                              );
+                                            userState.userId!,
+                                            preferences.copyWith(
+                                                hapticFeedback: value),
+                                          );
                                         },
                                       ),
                                     ],
@@ -408,11 +407,8 @@ class UserProfileScreen extends ConsumerWidget {
     );
   }
 
-
   Future<void> deleteAccountDialog(BuildContext context, WidgetRef ref) async {
-
     final userNotifier = ref.read(userStateProvider.notifier);
- 
 
     showDialog(
       context: context,
@@ -420,7 +416,8 @@ class UserProfileScreen extends ConsumerWidget {
         icon: const Icon(Icons.warning),
         iconColor: AppColors.errorColor,
         title: const Text('Delete Account'),
-        content: const Text('This action is inmmidiate and irreversible and will remove all your data from the system. \n\nAre you sure you want to delete your account? '),
+        content: const Text(
+            'This action is inmmidiate and irreversible and will remove all your data from the system. \n\nAre you sure you want to delete your account? '),
         actions: [
           CustomButton(
             text: 'Delete',
@@ -439,17 +436,12 @@ class UserProfileScreen extends ConsumerWidget {
   }
 
   Future<void> editProfileDialog(BuildContext context, WidgetRef ref) async {
-
     TextEditingController firstNameController = TextEditingController();
     TextEditingController lastNameController = TextEditingController();
     final userNotifier = ref.read(userStateProvider.notifier);
     final userState = ref.watch(userStateProvider);
-    
-
-
 
     showDialog(
-      
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Edit Profile'),
@@ -457,12 +449,12 @@ class UserProfileScreen extends ConsumerWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             TextField(
-              controller: firstNameController ,
+              controller: firstNameController,
               decoration: const InputDecoration(labelText: 'First Name'),
             ),
             const SizedBox(height: 8),
             TextField(
-              controller: lastNameController ,
+              controller: lastNameController,
               decoration: const InputDecoration(labelText: 'Last Name'),
             ),
             const SizedBox(height: 8),
@@ -471,13 +463,11 @@ class UserProfileScreen extends ConsumerWidget {
               icon: Icons.save,
               onPressed: () {
                 userNotifier.userService.updateUserProfile(
-                   firstNameController.text,
-                   lastNameController.text,
-                   userState.userId??''
-                );
+                    firstNameController.text,
+                    lastNameController.text,
+                    userState.userId ?? '');
 
-                  Navigator.pop(context);
-                
+                Navigator.pop(context);
               },
               isLoading: false,
             ),

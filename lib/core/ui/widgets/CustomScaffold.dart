@@ -1,11 +1,9 @@
 import 'dart:math';
 
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flashcardstudyapplication/core/providers/provider_config.dart';
 import 'dart:io' show Platform;
-
 
 class CustomScaffold extends ConsumerStatefulWidget {
   final String currentRoute;
@@ -48,7 +46,7 @@ class _CustomScaffoldState extends ConsumerState<CustomScaffold> {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
-    
+
     final authNotifier = ref.watch(authStateProvider.notifier);
     final bool isLoggedIn = ref.watch(authStateProvider).isAuthenticated;
     final bool isSmallScreen = MediaQuery.of(context).size.width < 600;
@@ -74,19 +72,19 @@ class _CustomScaffoldState extends ConsumerState<CustomScaffold> {
                   ),
                 ],
               ),
-              child: isSmallScreen 
-                ? _buildMobileHeader()
-                : _buildWebHeader(isLoggedIn, ref),
+              child: isSmallScreen
+                  ? _buildMobileHeader()
+                  : _buildWebHeader(isLoggedIn, ref),
             ),
             Expanded(
               child: widget.useScroll
-                ? SingleChildScrollView(
-                    child: Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: widget.body,
-                    ),
-                  )
-                : widget.body,
+                  ? SingleChildScrollView(
+                      child: Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: widget.body,
+                      ),
+                    )
+                  : widget.body,
             ),
           ],
         ),
@@ -111,7 +109,7 @@ class _CustomScaffoldState extends ConsumerState<CustomScaffold> {
       //   notchMargin: 8,
       //   height: 60,
       //   child: SizedBox(
-          
+
       //     child: Row(
       //       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       //       children: [
@@ -137,7 +135,7 @@ class _CustomScaffoldState extends ConsumerState<CustomScaffold> {
       //             mainAxisAlignment: MainAxisAlignment.center,
       //             children: [
       //               _buildNavItem(
-                      
+
       //                 context: context,
       //                 icon: Icons.person,
       //                 route: '/userProfile',
@@ -157,9 +155,12 @@ class _CustomScaffoldState extends ConsumerState<CustomScaffold> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Image.asset(
-          'assets/images/logo.png',
-          height: 24,
+        Flexible(
+          child: Image.asset(
+            'assets/images/logo.png',
+            height: 24,
+            fit: BoxFit.contain,
+          ),
         ),
         IconButton(
           icon: const Icon(Icons.menu),
@@ -183,7 +184,7 @@ class _CustomScaffoldState extends ConsumerState<CustomScaffold> {
           'assets/images/logo.png',
           height: 32,
         ),
-        const SizedBox(width: 48),
+        const SizedBox(width: 16), // Smaller fixed width that adapts better
         Expanded(
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -298,7 +299,7 @@ class _CustomScaffoldState extends ConsumerState<CustomScaffold> {
   Widget _buildNavItem({
     required BuildContext context,
     required IconData icon,
-     String? label,
+    String? label,
     required String route,
     required bool isSelected,
   }) {
@@ -306,7 +307,6 @@ class _CustomScaffoldState extends ConsumerState<CustomScaffold> {
     final color = isSelected ? theme.colorScheme.primary : Colors.grey;
 
     return InkWell(
-      
       onTap: () {
         if (route != widget.currentRoute) {
           _navigateWithoutAnimation(context, route);
@@ -315,7 +315,7 @@ class _CustomScaffoldState extends ConsumerState<CustomScaffold> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, color: color,size: 32),
+          Icon(icon, color: color, size: 32),
           if (label != null)
             Text(
               label,
@@ -325,7 +325,6 @@ class _CustomScaffoldState extends ConsumerState<CustomScaffold> {
               ),
             ),
         ],
-        
       ),
     );
   }

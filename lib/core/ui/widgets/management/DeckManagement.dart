@@ -1,5 +1,5 @@
 import 'package:flashcardstudyapplication/core/providers/provider_config.dart';
-import 'package:flashcardstudyapplication/core/ui/widgets/deck/deck_form.dart';
+import 'package:flashcardstudyapplication/core/ui/widgets/management/deck_form.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flashcardstudyapplication/core/themes/app_theme.dart';
@@ -256,24 +256,82 @@ class _CreateDeckPageState extends ConsumerState<CreateDeckPage> {
   final List<DeckFormData> _deckForms = [];
   bool _isCreating = false;
 
+  // Add cached data
+  List<String>? _categories;
+  List<String>? _difficulties;
+  bool _isLoadingInitialData = true;
+
   @override
   void initState() {
     super.initState();
-    // Start with one deck form
+    // Start with one empty deck form
     _deckForms.add(DeckFormData());
+
+    // Load categories and difficulties once
+    _loadInitialData();
   }
 
-  @override
-  void dispose() {
-    for (var form in _deckForms) {
-      form.dispose();
+  Future<void> _loadInitialData() async {
+    try {
+      // Fetch the data in parallel
+      final results = await Future.wait([
+        ref.read(deckStateProvider.notifier).getDeckCategory(),
+        ref.read(deckStateProvider.notifier).getDeckDifficulty(
+            ref.read(userStateProvider).subscriptionPlanID ?? ''),
+      ]);
+
+      if (mounted) {
+        setState(() {
+          _categories = results[0];
+          _difficulties = results[1];
+          _isLoadingInitialData = false;
+
+          // Initialize the first form with default values
+          if (_categories != null &&
+              _categories!.isNotEmpty &&
+              _difficulties != null &&
+              _difficulties!.isNotEmpty) {
+            _deckForms[0].selectedCategory = _categories!.first;
+            _deckForms[0].selectedDifficulty = _difficulties!.first;
+          }
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _isLoadingInitialData = false;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error loading form data: $e')),
+        );
+      }
     }
-    super.dispose();
   }
 
   void _addNewDeckForm() {
     setState(() {
-      _deckForms.add(DeckFormData());
+      final newForm = DeckFormData();
+      // Pre-select first values to prevent flicker
+      if (_categories != null && _categories!.isNotEmpty) {
+        newForm.selectedCategory = _categories!.first;
+      }
+      if (_difficulties != null && _difficulties!.isNotEmpty) {
+        newForm.selectedDifficulty = _difficulties!.first;
+      }
+      _deckForms.add(newForm);
+    });
+
+    // Scroll to the bottom after adding a new deck form
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_deckForms.length > 2) {
+        // Only scroll if we have more than 2 forms to avoid unnecessary scrolling
+        final scrollController = PrimaryScrollController.of(context);
+        scrollController.animateTo(
+          scrollController.position.maxScrollExtent,
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeOut,
+        );
+      }
     });
   }
 
@@ -342,53 +400,120 @@ class _CreateDeckPageState extends ConsumerState<CreateDeckPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Theme.of(context).colorScheme.surface,
       appBar: AppBar(
         title:
             Text('Create Decks', style: Theme.of(context).textTheme.labelLarge),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            Expanded(
-              child: ListView.builder(
-                itemCount: _deckForms.length,
-                itemBuilder: (context, index) {
-                  return DeckFormCard(
-                    formData: _deckForms[index],
-                    index: index,
-                    canDelete: _deckForms.length > 1,
-                    onDelete: () => _removeDeckForm(index),
+      body: _isLoadingInitialData
+          ? const Center(child: CircularProgressIndicator())
+          : Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  // Calculate number of columns based on available width
+                  final double availableWidth = constraints.maxWidth;
+                  final int crossAxisCount =
+                      (availableWidth / 400).floor().clamp(1, 3);
+                  // Increase childAspectRatio to make cards shorter (less tall)
+                  final childAspectRatio = crossAxisCount == 1 ? 1.3 : 1.2;
+
+                  return Column(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 16.0),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              'Creating ${_deckForms.length} deck${_deckForms.length > 1 ? 's' : ''}',
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .headlineSmall
+                                  ?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                            ),
+                            ElevatedButton.icon(
+                              onPressed: _addNewDeckForm,
+                              icon: const Icon(Icons.add),
+                              label: const Text('Add Deck',
+                                  style: TextStyle(fontSize: 16)),
+                              style: ElevatedButton.styleFrom(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 16, vertical: 12),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Expanded(
+                        child: AnimatedSwitcher(
+                          duration: const Duration(milliseconds: 300),
+                          child: GridView.builder(
+                            key: ValueKey<int>(_deckForms.length),
+                            padding: const EdgeInsets.only(bottom: 16),
+                            gridDelegate:
+                                SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: crossAxisCount,
+                              crossAxisSpacing: 20.0,
+                              mainAxisSpacing:
+                                  20.0, // Increase spacing for better readability
+                              childAspectRatio: childAspectRatio,
+                            ),
+                            itemCount: _deckForms.length,
+                            itemBuilder: (context, index) {
+                              return AnimatedScale(
+                                scale: 1.0,
+                                duration: const Duration(milliseconds: 300),
+                                curve: Curves.easeInOut,
+                                child: DeckFormCard(
+                                  formData: _deckForms[index],
+                                  index: index,
+                                  canDelete: _deckForms.length > 1,
+                                  onDelete: () => _removeDeckForm(index),
+                                  categories: _categories,
+                                  difficulties: _difficulties,
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      ElevatedButton.icon(
+                        onPressed: _isCreating ? null : _createDecks,
+                        icon: _isCreating
+                            ? const SizedBox(
+                                width: 20,
+                                height: 20,
+                                child:
+                                    CircularProgressIndicator(strokeWidth: 2),
+                              )
+                            : const Icon(Icons.save),
+                        label: Text(
+                            _isCreating ? 'Creating...' : 'Create All Decks',
+                            style: const TextStyle(fontSize: 16)),
+                        style: ElevatedButton.styleFrom(
+                          minimumSize: const Size(200, 50),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 24, vertical: 16),
+                        ),
+                      ),
+                    ],
                   );
                 },
               ),
             ),
-            const SizedBox(height: 16),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                ElevatedButton.icon(
-                  onPressed: _addNewDeckForm,
-                  icon: const Icon(Icons.add),
-                  label: const Text('Add Another Deck'),
-                ),
-                ElevatedButton.icon(
-                  onPressed: _isCreating ? null : _createDecks,
-                  icon: _isCreating
-                      ? const SizedBox(
-                          width: 20,
-                          height: 20,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                      : const Icon(Icons.save),
-                  label: Text(_isCreating ? 'Creating...' : 'Create All Decks'),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
     );
+  }
+
+  @override
+  void dispose() {
+    for (var form in _deckForms) {
+      form.dispose();
+    }
+    super.dispose();
   }
 }
 

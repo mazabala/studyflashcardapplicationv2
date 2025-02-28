@@ -3,10 +3,11 @@ import 'package:flashcardstudyapplication/core/providers/provider_config.dart';
 import 'package:flashcardstudyapplication/core/providers/user_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flashcardstudyapplication/core/ui/widgets/CardCountSlider.dart';  // Make sure to import the slider widget
+import 'package:flashcardstudyapplication/core/ui/widgets/CardCountSlider.dart'; // Make sure to import the slider widget
 
 class CreateDeckDialog extends ConsumerStatefulWidget {
-  final Function(String topic, String focus , String category, String difficultyLevel, int cardcount) onSubmit;
+  final Function(String topic, String focus, String category,
+      String difficultyLevel, int cardcount) onSubmit;
 
   const CreateDeckDialog({super.key, required this.onSubmit});
 
@@ -28,14 +29,14 @@ class _CreateDeckDialogState extends ConsumerState<CreateDeckDialog> {
   final TextEditingController _topicController = TextEditingController();
   final TextEditingController _focusController = TextEditingController();
 
-  
-  double _cardCount = 10.0;  // Initial slider value
+  double _cardCount = 10.0; // Initial slider value
 
   // Function to fetch categories (replace with your actual fetching logic)
   Future<void> _fetchCategories() async {
     try {
       final deckReader = ref.read(deckServiceProvider);
-      final categoriesFromDb = await deckReader.getDeckCategory(); // Assuming `getDeckCategories` exists in your service
+      final categoriesFromDb = await deckReader
+          .getDeckCategory(); // Assuming `getDeckCategories` exists in your service
 
       if (mounted) {
         setState(() {
@@ -85,7 +86,9 @@ class _CreateDeckDialogState extends ConsumerState<CreateDeckDialog> {
     return AlertDialog(
       title: const Text('Create New Deck'),
       content: categories.isEmpty || difficultyLevels.isEmpty
-          ? const Center(child: CircularProgressIndicator())  // Show loading spinner while fetching data
+          ? const Center(
+              child:
+                  CircularProgressIndicator()) // Show loading spinner while fetching data
           : Column(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -101,20 +104,21 @@ class _CreateDeckDialogState extends ConsumerState<CreateDeckDialog> {
                   decoration: const InputDecoration(labelText: 'Key Focus'),
                 ),
 
-
-
                 // Replace the TextField with the CardCountSlider widget
                 CardCountSlider(
-                  initialValue: _cardCount,  // Set the initial value for the slider
+                  initialValue:
+                      _cardCount, // Set the initial value for the slider
                   onChanged: (value) {
                     setState(() {
-                      _cardCount = value;  // Update the card count based on slider value
+                      _cardCount =
+                          value; // Update the card count based on slider value
                     });
                   },
                 ),
 
                 // Category Dropdown
                 DropdownButton<String>(
+                  borderRadius: BorderRadius.circular(10),
                   value: _selectedCategory,
                   hint: const Text('Select Category'),
                   onChanged: (newValue) {
@@ -124,7 +128,8 @@ class _CreateDeckDialogState extends ConsumerState<CreateDeckDialog> {
                       });
                     }
                   },
-                  items: categories.map<DropdownMenuItem<String>>((String category) {
+                  items: categories
+                      .map<DropdownMenuItem<String>>((String category) {
                     return DropdownMenuItem<String>(
                       value: category,
                       child: Text(category),
@@ -134,6 +139,7 @@ class _CreateDeckDialogState extends ConsumerState<CreateDeckDialog> {
 
                 // Difficulty Level Dropdown
                 DropdownButton<String>(
+                  borderRadius: BorderRadius.circular(10),
                   value: _selectedDifficulty,
                   hint: const Text('Select Difficulty Level'),
                   onChanged: (newValue) {
@@ -143,7 +149,8 @@ class _CreateDeckDialogState extends ConsumerState<CreateDeckDialog> {
                       });
                     }
                   },
-                  items: difficultyLevels.map<DropdownMenuItem<String>>((String level) {
+                  items: difficultyLevels
+                      .map<DropdownMenuItem<String>>((String level) {
                     return DropdownMenuItem<String>(
                       value: level,
                       child: Text(level),
@@ -166,10 +173,13 @@ class _CreateDeckDialogState extends ConsumerState<CreateDeckDialog> {
           onPressed: () {
             final topic = _topicController.text;
             final focus = _focusController.text;
-            final category = _selectedCategory ?? '';  // Default to empty string if no category selected
-            final difficultyLevel = _selectedDifficulty ?? ''; // Default to empty string if no difficulty selected
-    
-            final cardcount = _cardCount.toInt();  // Convert the slider value to an integer
+            final category = _selectedCategory ??
+                ''; // Default to empty string if no category selected
+            final difficultyLevel = _selectedDifficulty ??
+                ''; // Default to empty string if no difficulty selected
+
+            final cardcount =
+                _cardCount.toInt(); // Convert the slider value to an integer
 
             if (category.isEmpty || difficultyLevel.isEmpty) {
               // You can show a warning or error here if category or difficulty is not selected
@@ -178,7 +188,7 @@ class _CreateDeckDialogState extends ConsumerState<CreateDeckDialog> {
             }
 
             // Call the onSubmit callback with the values entered
-            widget.onSubmit(topic, focus,  category, difficultyLevel, cardcount);
+            widget.onSubmit(topic, focus, category, difficultyLevel, cardcount);
 
             // Close the dialog after submitting
             if (mounted) {

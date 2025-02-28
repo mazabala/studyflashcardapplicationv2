@@ -21,16 +21,16 @@ class FetchAndDisplayCategorySelectionWidget extends StatelessWidget {
           future: fetchCategory(),
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
-              return const CircularProgressIndicator();
+              return const Center(child: CircularProgressIndicator());
             } else if (snapshot.hasError) {
               return Text('Error: ${snapshot.error}');
             } else if (snapshot.hasData) {
               final categories = snapshot.data!;
               return DropdownButton<String>(
+                borderRadius: BorderRadius.circular(10),
                 value: selectedCategory,
                 onChanged: onChanged,
-                items: categories
-                    .map<DropdownMenuItem<String>>((String value) {
+                items: categories.map<DropdownMenuItem<String>>((String value) {
                   return DropdownMenuItem<String>(
                     value: value,
                     child: Text(value),

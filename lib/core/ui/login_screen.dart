@@ -9,7 +9,6 @@ import 'package:flashcardstudyapplication/core/ui/widgets/CustomScaffold.dart';
 import 'package:flashcardstudyapplication/core/ui/widgets/CustomTextField.dart';
 import 'package:flashcardstudyapplication/core/ui/widgets/CustomButton.dart';
 
-
 class LoginScreen extends ConsumerStatefulWidget {
   @override
   _LoginScreenState createState() => _LoginScreenState();
@@ -18,8 +17,8 @@ class LoginScreen extends ConsumerStatefulWidget {
 class _LoginScreenState extends ConsumerState<LoginScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
- 
-  static final   _formKey = GlobalKey<FormState>();
+
+  static final _formKey = GlobalKey<FormState>();
   bool _obscurePassword = true;
 
   @override
@@ -50,13 +49,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     return null;
   }
 
-Future<void> _signWithGoogle() async {
+  Future<void> _signWithGoogle() async {
     final authNotifier = ref.read(authStateProvider.notifier);
     await authNotifier.googleSignin();
 
-
     final isAuthed = ref.read(authStateProvider).isAuthenticated;
-
 
     if (isAuthed) {
       if (mounted) {
@@ -69,19 +66,12 @@ Future<void> _signWithGoogle() async {
     final authNotifier = ref.read(authStateProvider.notifier);
     await authNotifier.signInWithApple();
 
-
     final isAuthed = ref.read(authStateProvider).isAuthenticated;
-
 
     if (isAuthed) {
       Navigator.pushReplacementNamed(context, '/myDecks');
     }
   }
-
-
-
-
-
 
   Future<void> _handleSubmit(bool isSignUp) async {
     if (!_formKey.currentState!.validate()) return;
@@ -165,16 +155,16 @@ Future<void> _signWithGoogle() async {
         log(e.toString());
         ScaffoldMessenger.of(context)
             .showSnackBar(SnackBar(content: Text(e.toString())));
-      } else
-        {dispose();}
+      } else {
+        dispose();
+      }
     }
   }
 
-void _onForgotPasswordTapped() {
+  void _onForgotPasswordTapped() {
     final authWatcher = ref.watch(authStateProvider.notifier);
     final authState = ref.watch(authStateProvider);
     final resetEmailController = TextEditingController();
-
 
     showDialog(
       context: context,
@@ -193,8 +183,8 @@ void _onForgotPasswordTapped() {
             onPressed: () {
               authWatcher.resetPassword(resetEmailController.text);
               if (mounted) {
-                 Navigator.of(context).pop(); 
-                  }
+                Navigator.of(context).pop();
+              }
 // Close the dialog after reset
             },
           ),
@@ -202,14 +192,12 @@ void _onForgotPasswordTapped() {
       ),
     );
   }
- 
+
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
     final isWeb = size.width > 800;
     final authState = ref.watch(authStateProvider);
- 
-
 
     Widget loginForm = Form(
       key: _formKey,
@@ -218,26 +206,31 @@ void _onForgotPasswordTapped() {
         mainAxisSize: MainAxisSize.min,
         children: [
           if (!isWeb) const SizedBox(height: 40),
-          if (!isWeb) const Center(
-            child: Text(
-              'Log in',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w500,
+          if (!isWeb)
+            const Center(
+              child: Text(
+                'Log in',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w500,
+                ),
               ),
             ),
-          ),
           if (!isWeb) const SizedBox(height: 20),
           CustomButton(
             text: 'Continue with Apple',
             isLoading: false,
-            onPressed: () {_signInWithApple();},
+            onPressed: () {
+              _signInWithApple();
+            },
           ),
           const SizedBox(height: 12),
           CustomButton(
             text: 'Continue with Google',
             isLoading: false,
-            onPressed: () {_signWithGoogle();},
+            onPressed: () {
+              _signWithGoogle();
+            },
           ),
           const SizedBox(height: 24),
           const Center(child: Text('OR')),
@@ -269,8 +262,10 @@ void _onForgotPasswordTapped() {
                 borderSide: const BorderSide(width: 1),
               ),
               suffixIcon: IconButton(
-                icon: Icon(_obscurePassword ? Icons.visibility : Icons.visibility_off),
-                onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
+                icon: Icon(
+                    _obscurePassword ? Icons.visibility : Icons.visibility_off),
+                onPressed: () =>
+                    setState(() => _obscurePassword = !_obscurePassword),
               ),
             ),
           ),
@@ -278,42 +273,52 @@ void _onForgotPasswordTapped() {
           CustomButton(
             text: 'Log In',
             isLoading: authState.isLoading,
-            onPressed: () {_handleSubmit(false);},
+            onPressed: () {
+              _handleSubmit(false);
+            },
           ),
           const SizedBox(height: 16),
           Center(
             child: TextButton(
-              onPressed: () {_handleSubmit(true);},
+              onPressed: () {
+                _handleSubmit(true);
+              },
               child: const Text('Dont have an account? Register Here!'),
             ),
           ),
           const SizedBox(height: 2),
           Center(
             child: TextButton(
-              onPressed: () {_onForgotPasswordTapped();},
+              onPressed: () {
+                _onForgotPasswordTapped();
+              },
               child: const Text('Forgot your password?'),
             ),
           ),
           if (!isWeb) const SizedBox(height: 16),
-          if (!isWeb) Center(
-            child: RichText(
-              text: TextSpan(
-                style: const TextStyle(color: Colors.black87),
-                children: [
-                  const TextSpan(text: 'By continuing, you agree to Haniel '),
-                  TextSpan(
-                    text: 'Terms of Service',
-                    style: TextStyle(color: Theme.of(context).primaryColor),
-                  ),
-                  const TextSpan(text: ' and '),
-                  TextSpan(
-                    text: 'Privacy Policy',
-                    style: TextStyle(color: Theme.of(context).primaryColor),
-                  ),
-                ],
+          if (!isWeb)
+            Center(
+              child: RichText(
+                textAlign: TextAlign.center,
+                overflow: TextOverflow.ellipsis,
+                maxLines: 3,
+                text: TextSpan(
+                  style: const TextStyle(color: Colors.black87),
+                  children: [
+                    const TextSpan(text: 'By continuing, you agree to Haniel '),
+                    TextSpan(
+                      text: 'Terms of Service',
+                      style: TextStyle(color: Theme.of(context).primaryColor),
+                    ),
+                    const TextSpan(text: ' and '),
+                    TextSpan(
+                      text: 'Privacy Policy',
+                      style: TextStyle(color: Theme.of(context).primaryColor),
+                    ),
+                  ],
+                ),
               ),
             ),
-          ),
         ],
       ),
     );

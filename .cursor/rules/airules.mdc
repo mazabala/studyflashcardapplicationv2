@@ -2,183 +2,108 @@
 description: mainrule
 globs: *.dart
 ---
-// 1. Key Principles
-const keyPrinciples = `
-- Write concise, technical Dart code with clear, accurate examples.
-- Use functional and declarative programming patterns where possible.
-- Prefer composition over inheritance.
-- Use descriptive variable names with auxiliary verbs (e.g., isLoading, hasError).
-`;
+# Instructions
 
-// 2. Dart/Flutter Guidelines
+During your interaction with the user, if you find anything reusable in this project (e.g. version of a library, model name), especially about a fix to a mistake you made or a correction you received, you should take note in the `Lessons` section in the `.cursorrules` file so you will not make the same mistake again. 
 
-// 2.1 Code Structure
-const dartFlutterCodeStructure = `
-- Use const constructors for immutable widgets.
-- Prefer expression bodies for one-line getters and setters.
-- Use trailing commas for better formatting and diffing.
-`;
+You should also use the `.cursorrules` file as a Scratchpad to organize your thoughts. Especially when you receive a new task, you should first review the content of the Scratchpad, clear old different task if necessary, first explain the task, and plan the steps you need to take to complete the task. You can use todo markers to indicate the progress, e.g.
+[X] Task 1
+[ ] Task 2
 
-// 2.2 Error Handling and Validation
-const dartFlutterErrorHandling = `
-- Implement error handling in views using SelectableText.rich instead of SnackBars.
-- Display errors in SelectableText.rich with red color for visibility.
-- Handle empty states within the screen display.
-- Use AsyncValue for error handling and loading states.
-`;
+Also update the progress of the task in the Scratchpad when you finish a subtask.
+Especially when you finished a milestone, it will help to improve your depth of task accomplishment to use the Scratchpad to reflect and plan.
+The goal is to help you maintain a big picture as well as the progress of the task. Always refer to the Scratchpad when you plan the next step.
 
-// 2.3 Performance Optimization
-const dartFlutterPerformance = `
-- Use const widgets for optimization (minimizing rebuilds).
-- Use ListView.builder for efficient list rendering.
-- Use AssetImage for static images and cached_network_image for remote images.
-- Handle Supabase operations with appropriate error handling, especially for network errors.
-`;
+# Tools
 
+Note all the tools are in python3. So in the case you need to do batch processing, you can always consult the python files and write your own script.
 
-// 3. Riverpod-Specific Guidelines
+## Screenshot Verification
 
-// 3.1 Provider Management
-const riverpodProviderManagement = `
-- Use @riverpod annotation for generating providers.
-- Prefer AsyncNotifierProvider and NotifierProvider over StateProvider.
-- Avoid StateProvider, StateNotifierProvider, and ChangeNotifierProvider.
-- Use ref.invalidate() to trigger provider updates manually.
-- Implement proper cancellation of asynchronous operations when widgets are disposed.
-`;
+The screenshot verification workflow allows you to capture screenshots of web pages and verify their appearance using LLMs. The following tools are available:
 
-// 3.2 State Management
-const riverpodStateManagement = `
-- Use ConsumerWidget for state-dependent widgets.
-- Use HookConsumerWidget for combining Riverpod and Flutter Hooks.
-`;
+1. Screenshot Capture:
+```bash
+venv/bin/python3 tools/screenshot_utils.py URL [--output OUTPUT] [--width WIDTH] [--height HEIGHT]
+```
 
+2. LLM Verification with Images:
+```bash
+venv/bin/python3 tools/llm_api.py --prompt "Your verification question" --provider {openai|anthropic} --image path/to/screenshot.png
+```
 
-// 4. UI and Styling
+Example workflow:
+```python
+from screenshot_utils import take_screenshot_sync
+from llm_api import query_llm
 
-// 4.1 Widget Usage
-const uiWidgetUsage = `
-- Use Flutter's built-in widgets; create custom widgets when necessary.
-- Ensure responsiveness with proper logic for different screen sizes.
-- Themes should be used for consistent styling across the app.
-- Prefer textTheme.titleLarge instead of headline6, and headlineSmall instead of headline5 for consistent text styling.
-`;
+# Take a screenshot
 
-// 4.2 Widgets and UI Components
-const uiWidgetsAndComponents = `
-- Create small, private widget classes instead of methods like Widget _build....
-- Use RefreshIndicator for pull-to-refresh functionality.
-- Set appropriate properties for TextFields (textCapitalization, keyboardType, textInputAction).
-- Always include an errorBuilder when using Image.network.
-`;
+screenshot_path = take_screenshot_sync('https://example.com', 'screenshot.png')
 
-// 4.3 Miscellaneous UI Guidelines
-const uiMiscellaneous = `
-- Use log instead of print for debugging.
-- Flutter Hooks / Riverpod Hooks can be used where appropriate.
-- Keep lines under 80 characters; add commas before closing brackets for multi-parameter functions.
-`;
+# Verify with LLM
 
+response = query_llm(
+    "What is the background color and title of this webpage?",
+    provider="openai",  # or "anthropic"
+    image_path=screenshot_path
+)
+print(response)
+```
 
-// 5. Code Generation
-const codeGeneration = `
-- Use build_runner for code generation (e.g., Freezed, Riverpod, JSON serialization).
-- Run flutter pub run build_runner build --delete-conflicting-outputs after modifying annotated classes.
-`;
+## LLM
 
+You always have an LLM at your side to help you with the task. For simple tasks, you could invoke the LLM by running the following command:
+```
+venv/bin/python3 ./tools/llm_api.py --prompt "What is the capital of France?" --provider "anthropic"
+```
 
-// 6. Functions
+The LLM API supports multiple providers:
+- OpenAI (default, model: gpt-4o)
+- Azure OpenAI (model: configured via AZURE_OPENAI_MODEL_DEPLOYMENT in .env file, defaults to gpt-4o-ms)
+- DeepSeek (model: deepseek-chat)
+- Anthropic (model: claude-3-sonnet-20240229)
+- Gemini (model: gemini-pro)
+- Local LLM (model: Qwen/Qwen2.5-32B-Instruct-AWQ)
 
-// 6.1 Function Structure
-const functionStructure = `
-- Write short functions (less than 20 instructions) with a single purpose.
-- Name functions with a verb and meaningful description.
-- Avoid nesting by:
-    - Using early checks and returns.
-    - Extracting logic into utility functions.
-- Use higher-order functions (e.g., map, filter, reduce) to reduce nesting.
-- Use arrow functions for simple functions (less than 3 instructions).
-- Use named functions for more complex functions.
-- Use default parameter values instead of checking for null or undefined.
-- Reduce function parameters by applying the RO-RO pattern (using objects for multiple parameters).
-- Declare input arguments and output types clearly.
-`;
+But usually it's a better idea to check the content of the file and use the APIs in the `tools/llm_api.py` file to invoke the LLM if needed.
 
-// 6.2 Abstraction
-const functionAbstraction = `
-- Maintain a single level of abstraction in functions.
-`;
+## Web browser
 
+You could use the `tools/web_scraper.py` file to scrape the web.
+```bash
+venv/bin/python3 ./tools/web_scraper.py --max-concurrent 3 URL1 URL2 URL3
+```
+This will output the content of the web pages.
 
-// 7. Exceptions
+## Search engine
 
-const exceptionsHandling = `
-- Use exceptions for unexpected errors.
-- If catching an exception:
-    - Add context.
-    - Fix the problem if expected.
-    - Otherwise, rely on global handlers.
-`;
+You could use the `tools/search_engine.py` file to search the web.
+```bash
+venv/bin/python3 ./tools/search_engine.py "your search keywords"
+```
+This will output the search results in the following format:
+```
+URL: https://example.com
+Title: This is the title of the search result
+Snippet: This is a snippet of the search result
+```
+If needed, you can further use the `web_scraper.py` file to scrape the web page content.
 
+# Lessons
 
-// 8. Performance Guidelines
+## User Specified Lessons
 
-// 8.1 General Performance
-const performanceGeneral = `
-- Implement image caching techniques.
-- Optimize list views with efficient rendering strategies.
-- Follow state management patterns that optimize performance.
-- Use proper memory management strategies.
-- Use platform channels when necessary for performance.
-`;
+- You have a python3 venv in ./venv. Use it.
+- Include info useful for debugging in the program output.
+- Read the file before you try to edit it.
+- Due to Cursor's limit, when you use `git` and `gh` and need to submit a multiline commit message, first write the message in a file, and then use `git commit -F <filename>` or similar command to commit. And then remove the file. Include "[Cursor] " in the commit message and PR title.
 
-// 8.2 Compilation Optimization
-const performanceCompilation = `
-- Follow best practices for compilation optimization.
-`;
+## Cursor learned
 
+- For search results, ensure proper handling of different character encodings (UTF-8) for international queries
+- Add debug information to stderr while keeping the main output clean in stdout for better pipeline integration
+- When using seaborn styles in matplotlib, use 'seaborn-v0_8' instead of 'seaborn' as the style name due to recent seaborn version changes
+- Use 'gpt-4o' as the model name for OpenAI's GPT-4 with vision capabilities
 
-// 9. Widget Guidelines
-
-const widgetGuidelines = `
-- Keep widgets small and focused.
-- Use const constructors when possible to improve performance.
-- Implement widget keys for better state management.
-- Follow proper layout principles for consistency.
-- Use appropriate widget lifecycle methods.
-- Implement error boundaries for better error management.
-- Optimize widget performance with the best techniques available.
-- Adhere to accessibility guidelines to ensure inclusivity.
-`;
-
-// 10. Documentation
-
-const documentationBestPractices = `
-- Document complex logic and non-obvious decisions in the code.
-- Always refer to official documentation for Flutter, Riverpod, and Supabase for best practices.
-`;
-
-
-// 11. Performance Guidelines (Detailed)
-
-const performanceGuidelines = `
-1. Use proper image caching
-2. Implement proper list view optimization
-3. Use proper build methods optimization
-4. Follow proper state management patterns
-5. Implement proper memory management
-6. Use proper platform channels when needed
-7. Follow proper compilation optimization techniques
-`;
-
-const widgetGuidelinesDetailed = `
-1. Keep widgets small and focused
-2. Use const constructors when possible
-3. Implement proper widget keys
-4. Follow proper layout principles
-5. Use proper widget lifecycle methods
-6. Implement proper error boundaries
-7. Use proper performance optimization techniques
-8. Follow proper accessibility guidelines
-`;
-
+# Scratchpad

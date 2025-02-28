@@ -302,31 +302,48 @@ class _CollectionsScreenState extends ConsumerState<CollectionsScreen>
                                 future: collectionFuture,
                                 builder: (context, snapshot) {
                                   if (snapshot.hasData) {
-                                    return Text(snapshot.data!.name);
+                                    return Text(
+                                      snapshot.data!.name,
+                                      overflow: TextOverflow.ellipsis,
+                                      maxLines: 1,
+                                    );
                                   } else if (snapshot.hasError) {
                                     return Text(
-                                        'Error loading collection: ${snapshot.error}');
+                                      'Error loading collection: ${snapshot.error}',
+                                      overflow: TextOverflow.ellipsis,
+                                      maxLines: 2,
+                                    );
                                   }
-                                  return const Text('Loading...');
+                                  return const Text(
+                                    'Loading...',
+                                    overflow: TextOverflow.ellipsis,
+                                  );
                                 },
                               ),
                               subtitle: Text(
-                                  '${userCollection.decks.length} decks - ${(userCollection.completionRate * 100).toStringAsFixed(1)}% complete'),
-                              trailing: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  IconButton(
-                                    icon: const Icon(Icons.add),
-                                    onPressed: () async {
-                                      final collection = await collectionFuture;
-                                      if (mounted) {
-                                        _showAddDecksDialog(collection);
-                                      }
-                                    },
-                                    tooltip: 'Add decks',
-                                  ),
-                                  const Icon(Icons.chevron_right),
-                                ],
+                                '${userCollection.decks.length} decks - ${(userCollection.completionRate * 100).toStringAsFixed(1)}% complete',
+                                overflow: TextOverflow.ellipsis,
+                                maxLines: 1,
+                              ),
+                              trailing: SizedBox(
+                                width: 80,
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    IconButton(
+                                      icon: const Icon(Icons.add),
+                                      onPressed: () async {
+                                        final collection =
+                                            await collectionFuture;
+                                        if (mounted) {
+                                          _showAddDecksDialog(collection);
+                                        }
+                                      },
+                                      tooltip: 'Add decks',
+                                    ),
+                                    const Icon(Icons.chevron_right),
+                                  ],
+                                ),
                               ),
                               onTap: () async {
                                 try {
@@ -360,9 +377,16 @@ class _CollectionsScreenState extends ConsumerState<CollectionsScreen>
                         publicCollections,
                         emptyMessage: 'No public collections available.',
                         itemBuilder: (Collection collection) => ListTile(
-                          title: Text(collection.name),
+                          title: Text(
+                            collection.name,
+                            overflow: TextOverflow.ellipsis,
+                            maxLines: 1,
+                          ),
                           subtitle: Text(
-                              '${collection.decks.length} decks - ${collection.subject}'),
+                            '${collection.decks.length} decks - ${collection.subject}',
+                            overflow: TextOverflow.ellipsis,
+                            maxLines: 1,
+                          ),
                           trailing: const Icon(Icons.add),
                           onTap: () async {
                             try {

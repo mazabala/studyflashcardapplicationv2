@@ -616,8 +616,10 @@ class DeckService implements IDeckService {
   @override
   Future<List<String>> getDeckCategory() async {
     try {
-      final PostgrestList deckCategory =
-          await _supabaseClient.from('categories').select();
+      final PostgrestList deckCategory = await _supabaseClient
+          .from('categories')
+          .select()
+          .eq('is_active', true);
 
       return (deckCategory as List)
           .map((deckCat) => deckCat['name'].toString())
@@ -652,6 +654,7 @@ class DeckService implements IDeckService {
           .from('categories')
           .select('id')
           .eq('name', categoryName)
+          .eq('is_active', true)
           .single();
 
       if (deckCategory.isEmpty) {
