@@ -24,6 +24,7 @@ class DeckDisplayWidget extends StatelessWidget {
         final deckState = ref.watch(deckStateProvider);
         final flashcardState = ref.watch(flashcardStateProvider);
         final ThemeData theme = Theme.of(context);
+        final bool isDarkMode = theme.brightness == Brightness.dark;
 
         if (deckState.isLoading) {
           return const Center(child: CircularProgressIndicator());
@@ -50,21 +51,34 @@ class DeckDisplayWidget extends StatelessWidget {
           separatorBuilder: (context, index) => const SizedBox(height: 8),
           itemBuilder: (context, index) {
             final deck = filteredDecks[index];
+            // Use a card color that adapts to the theme
+            final cardColor = isDarkMode ? theme.cardColor : Colors.white;
+            // Use text colors that contrast with the card color
+            final textColor = isDarkMode ? Colors.white : Colors.black87;
+            final subtitleColor = isDarkMode ? Colors.white70 : Colors.black54;
+
             return ListTile(
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
               ),
-              tileColor: Colors.white,
+              tileColor: cardColor,
               focusColor: theme.secondaryHeaderColor,
               title: Text(
                 deck.title,
-                style: Theme.of(context).textTheme.bodyLarge,
+                style: TextStyle(
+                  fontSize: theme.textTheme.bodyLarge?.fontSize,
+                  fontWeight: FontWeight.bold,
+                  color: textColor,
+                ),
                 overflow: TextOverflow.ellipsis,
                 maxLines: 1,
               ),
               subtitle: Text(
                 'Difficulty: ${deck.difficultyLevel}',
-                style: theme.textTheme.bodyMedium,
+                style: TextStyle(
+                  fontSize: theme.textTheme.bodyMedium?.fontSize,
+                  color: subtitleColor,
+                ),
                 overflow: TextOverflow.ellipsis,
                 maxLines: 1,
               ),
@@ -88,7 +102,7 @@ class DeckDisplayWidget extends StatelessWidget {
               },
               trailing: isSearchingNewDecks
                   ? IconButton(
-                      icon: const Icon(Icons.add),
+                      icon: Icon(Icons.add, color: textColor),
                       onPressed: () {
                         // Add deck to library logic here
                         ref
@@ -99,7 +113,7 @@ class DeckDisplayWidget extends StatelessWidget {
                       },
                     )
                   : IconButton(
-                      icon: const Icon(Icons.delete),
+                      icon: Icon(Icons.delete, color: textColor),
                       onPressed: () => ref
                           .read(deckStateProvider.notifier)
                           .deleteDeck(deck.id),

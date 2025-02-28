@@ -6,49 +6,47 @@ class AppTypography {
   // ---- Light Theme Typography ----
 
   // Body Text
-   static TextStyle bodySmall = GoogleFonts.openSans(
-    color: AppColors.textSecondaryColor, // Dark text for light backgrounds
-    fontSize: 16,
+  static TextStyle bodySmall = GoogleFonts.openSans(
+    color: AppColors.textSecondaryColor,
+    fontSize: 14,
     fontWeight: FontWeight.normal,
   );
 
   static TextStyle bodyText1 = GoogleFonts.openSans(
-    color: AppColors.textPrimaryColor, // Dark text for light backgrounds
-    fontSize: 18,
+    color: AppColors.textPrimaryColor,
+    fontSize: 16,
     fontWeight: FontWeight.normal,
   );
 
   static TextStyle bodyText2 = GoogleFonts.openSans(
-    color: AppColors.textPrimaryColor, // Softer text for secondary content
-    fontSize: 16,
+    color: AppColors.textSecondaryColor,
+    fontSize: 14,
     fontWeight: FontWeight.normal,
   );
 
   // Headings
   static TextStyle headline1 = GoogleFonts.openSans(
-    color: AppColors.textPrimaryColor, // Dark text for headings
-    fontSize: 70,
+    color: AppColors.primaryColor,
+    fontSize: 32,
     fontWeight: FontWeight.bold,
   );
 
   static TextStyle headline2 = GoogleFonts.openSans(
-    color: AppColors.textPrimaryColor, // Dark text for headings
+    color: AppColors.primaryColor,
     fontSize: 24,
     fontWeight: FontWeight.bold,
   );
 
-
-
   // headlineSmall (for use in small headings like flashcards)
   static TextStyle headlineSmall = GoogleFonts.openSans(
-    color: AppColors.textSecondaryColor, // Dark text for small headings
-    fontSize: 20, // Adjust size as needed
-    fontWeight: FontWeight.w600, // Medium weight for emphasis
+    color: AppColors.primaryColor,
+    fontSize: 20,
+    fontWeight: FontWeight.w600,
   );
 
   // Buttons
   static TextStyle button = GoogleFonts.openSans(
-    color: Colors.white, // White text for buttons on dark backgrounds
+    color: Colors.white,
     fontSize: 16,
     fontWeight: FontWeight.w600,
   );
@@ -56,51 +54,91 @@ class AppTypography {
   // ---- Dark Theme Typography ----
 
   // Body Text
-
-   static TextStyle bodysmallDark = GoogleFonts.openSans(
-    color: AppColors.textSecondaryColor, // Light text for dark backgrounds
-    fontSize: 16,
+  static TextStyle bodysmallDark = GoogleFonts.openSans(
+    color: Colors.white70,
+    fontSize: 14,
     fontWeight: FontWeight.normal,
   );
 
   static TextStyle bodyText1Dark = GoogleFonts.openSans(
-    color: AppColors.textPrimaryColor, // Light text for dark backgrounds
+    color: Colors.white,
     fontSize: 16,
     fontWeight: FontWeight.normal,
   );
 
   static TextStyle bodyText2Dark = GoogleFonts.openSans(
-    color: AppColors.textSecondaryColor, // Slightly muted white for secondary content
+    color: Colors.white70,
     fontSize: 14,
     fontWeight: FontWeight.normal,
   );
 
   // Headings
   static TextStyle headline1Dark = GoogleFonts.openSans(
-    color: AppColors.textPrimaryColor, // White text for strong contrast on dark backgrounds
+    color: Colors.white,
     fontSize: 32,
     fontWeight: FontWeight.bold,
   );
 
   static TextStyle headline2Dark = GoogleFonts.openSans(
-    color: AppColors.textPrimaryColor, // White text for headings
+    color: Colors.white,
     fontSize: 24,
     fontWeight: FontWeight.bold,
   );
 
   // headlineSmall (for use in small headings like flashcards)
   static TextStyle headlineSmallDark = GoogleFonts.openSans(
-    color: AppColors.textPrimaryColor, // Light text for small headings on dark backgrounds
-    fontSize: 20, // Adjust size as needed
-    fontWeight: FontWeight.w600, // Medium weight for emphasis
+    color: Colors.white,
+    fontSize: 20,
+    fontWeight: FontWeight.w600,
   );
 
   // Buttons
   static TextStyle buttonDark = GoogleFonts.openSans(
-    color: Colors.white, // White text for buttons on dark backgrounds
+    color: Colors.white,
     fontSize: 16,
     fontWeight: FontWeight.w600,
   );
+
+  // Additional styles for consistent UI
+
+  // Card Title
+  static TextStyle cardTitle = GoogleFonts.openSans(
+    color: AppColors.primaryColor,
+    fontSize: 18,
+    fontWeight: FontWeight.w600,
+  );
+
+  static TextStyle cardTitleDark = GoogleFonts.openSans(
+    color: Colors.white,
+    fontSize: 18,
+    fontWeight: FontWeight.w600,
+  );
+
+  // Subtitle
+  static TextStyle subtitle = GoogleFonts.openSans(
+    color: AppColors.textSecondaryColor,
+    fontSize: 14,
+    fontWeight: FontWeight.w500,
+    letterSpacing: 0.1,
+  );
+
+  static TextStyle subtitleDark = GoogleFonts.openSans(
+    color: Colors.white70,
+    fontSize: 14,
+    fontWeight: FontWeight.w500,
+    letterSpacing: 0.1,
+  );
+
+  // Caption
+  static TextStyle caption = GoogleFonts.openSans(
+    color: AppColors.textSecondaryColor,
+    fontSize: 12,
+    fontWeight: FontWeight.normal,
+  );
+
+  static TextStyle captionDark = GoogleFonts.openSans(
+    color: Colors.white70,
+    fontSize: 12,
+    fontWeight: FontWeight.normal,
+  );
 }
-
-

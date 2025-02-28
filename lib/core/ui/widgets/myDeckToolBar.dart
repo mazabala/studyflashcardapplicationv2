@@ -18,8 +18,11 @@ class MyDeckToolBar extends StatelessWidget {
   Widget build(BuildContext context) {
     final double height = 50;
     final double width = 100;
+    final ThemeData theme = Theme.of(context);
+    final bool isDarkMode = theme.brightness == Brightness.dark;
 
-    final textColor = Theme.of(context).colorScheme.primary;
+    final textColor =
+        isDarkMode ? Colors.white : Theme.of(context).colorScheme.primary;
 
     var children = [
       Expanded(

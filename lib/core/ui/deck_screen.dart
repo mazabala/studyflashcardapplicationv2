@@ -1,3 +1,4 @@
+import 'package:flashcardstudyapplication/core/themes/colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flashcardstudyapplication/core/ui/widgets/CustomScaffold.dart';
 
@@ -19,23 +20,21 @@ class _FlashcardPreviewState extends State<FlashcardPreviewScreen> {
       'cardCount': 60,
       'category': 'Medical Board Exam',
       'previewCard': {
-        'front': '''A 58-year-old man presents to the emergency department with a 2-hour history of crushing chest pain radiating to his left arm.
+        'front':
+            '''A 58-year-old man presents to the emergency department with a 2-hour history of crushing chest pain radiating to his left arm.
         He has a history of hypertension and hyperlipidemia. On examination, he is diaphoretic and in moderate distress.
-        His blood pressure is 160/100 mmHg, and heart rate is 100 bpm. An ECG shows ST-segment elevations in leads II, III, and aVFs.\n\n''' 
-        
-        'Which of the following is the most likely diagnosis?\n \n'
-
-           ' A) Acute pericarditis\n'
-           ' B) Non-ST elevation myocardial infarction (NSTEMI)\n'
-           ' C) Acute inferior wall myocardial infarction\n'
-           ' D) Stable angina\n'
-           ' E) Aortic dissection\n',
+        His blood pressure is 160/100 mmHg, and heart rate is 100 bpm. An ECG shows ST-segment elevations in leads II, III, and aVFs.\n\n'''
+                'Which of the following is the most likely diagnosis?\n \n'
+                ' A) Acute pericarditis\n'
+                ' B) Non-ST elevation myocardial infarction (NSTEMI)\n'
+                ' C) Acute inferior wall myocardial infarction\n'
+                ' D) Stable angina\n'
+                ' E) Aortic dissection\n',
         'back': 'Correct Answer: \n C) Acute inferior wall myocardial infarction\n \n'
-
-                  'Explanation:\n'
-                  'ST-segment elevations in leads II, III, and aVF suggest an inferior wall myocardial infarction (MI), typically involving the right coronary artery.)\n'
-                  'The patient’s symptoms, along with risk factors like hypertension and hyperlipidemia, support this diagnosis. NSTEMI would present without ST elevations. )\n'
-                  'Acute pericarditis would show diffuse ST elevations, and aortic dissection typically presents with tearing chest pain radiating to the back.)\n'
+            'Explanation:\n'
+            'ST-segment elevations in leads II, III, and aVF suggest an inferior wall myocardial infarction (MI), typically involving the right coronary artery.)\n'
+            'The patient’s symptoms, along with risk factors like hypertension and hyperlipidemia, support this diagnosis. NSTEMI would present without ST elevations. )\n'
+            'Acute pericarditis would show diffuse ST elevations, and aortic dissection typically presents with tearing chest pain radiating to the back.)\n'
       }
     },
     {
@@ -45,23 +44,22 @@ class _FlashcardPreviewState extends State<FlashcardPreviewScreen> {
       'category': 'Medical Board Exam',
       'previewCard': {
         'front': 'A 35-year-old woman presents with fatigue, weight gain, and constipation. '
-        'She also reports feeling cold all the time. On examination, her skin is dry, and her reflexes are delayed.\n\n'
-        ' Laboratory tests reveal: \n'
-        '- TSH: 15 mIU/L (normal 0.4-4.0 mIU/L\n'
-        '- Free T4: 0.6 ng/dL (normal 0.8-1.8 ng/dL\n\n'
-        
-        'Which of the following is the most likely cause of her symptoms? \n\n'
-              'A) Graves’ disease\n'
-              'B) Hashimoto’s thyroiditis\n'
-              'C) Pituitary adenoma\n'
-              'D) Iodine toxicity\n'
-              'E) Subclinical hypothyroidism\n',
+            'She also reports feeling cold all the time. On examination, her skin is dry, and her reflexes are delayed.\n\n'
+            ' Laboratory tests reveal: \n'
+            '- TSH: 15 mIU/L (normal 0.4-4.0 mIU/L\n'
+            '- Free T4: 0.6 ng/dL (normal 0.8-1.8 ng/dL\n\n'
+            'Which of the following is the most likely cause of her symptoms? \n\n'
+            'A) Graves’ disease\n'
+            'B) Hashimoto’s thyroiditis\n'
+            'C) Pituitary adenoma\n'
+            'D) Iodine toxicity\n'
+            'E) Subclinical hypothyroidism\n',
         'back': 'Correct Answer:\n B) Hashimoto’s thyroiditis \n \n'
-
             'Explanation:\n'
             'The patient presents with classic symptoms of hypothyroidism (fatigue, weight gain, cold intolerance, dry skin). \n'
             'The elevated TSH and low free T4 indicate primary hypothyroidism. Hashimoto’s thyroiditis, an autoimmune condition, is the most common cause of primary hypothyroidism. \n'
-            'Graves'' disease causes hyperthyroidism. \n'
+            'Graves'
+            ' disease causes hyperthyroidism. \n'
             'Subclinical hypothyroidism would have normal free T4 levels.',
       },
     },
@@ -72,11 +70,13 @@ class _FlashcardPreviewState extends State<FlashcardPreviewScreen> {
     final currentDeck = previewDecks[currentDeckIndex];
     final theme = Theme.of(context);
     final screenSize = MediaQuery.of(context).size;
-    
+
+    final bool isDarkMode = theme.brightness == Brightness.dark;
+
     // Breakpoints
     const tabletBreakpoint = 768.0;
     const desktopBreakpoint = 1024.0;
-    
+
     return CustomScaffold(
       currentRoute: '/preview',
       useScroll: false, // We'll handle scrolling within our layout
@@ -95,7 +95,8 @@ class _FlashcardPreviewState extends State<FlashcardPreviewScreen> {
     );
   }
 
-  Widget _buildDesktopLayout(ThemeData theme, Map<String, dynamic> currentDeck, BoxConstraints constraints) {
+  Widget _buildDesktopLayout(ThemeData theme, Map<String, dynamic> currentDeck,
+      BoxConstraints constraints) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -109,23 +110,22 @@ class _FlashcardPreviewState extends State<FlashcardPreviewScreen> {
             ),
           ),
         ),
-        
+
         // Right Side Flashcard
         Expanded(
           flex: 3,
           child: SingleChildScrollView(
-            child: Padding(
-            
+              child: Padding(
             padding: const EdgeInsets.all(24.0),
-            child: Flashcard_Display_new(theme, currentDeck),
-          )
-          ),
+            child: flashcardDisplayNew(theme, currentDeck),
+          )),
         ),
       ],
     );
   }
 
-  Widget _buildTabletLayout(ThemeData theme, Map<String, dynamic> currentDeck, BoxConstraints constraints) {
+  Widget _buildTabletLayout(ThemeData theme, Map<String, dynamic> currentDeck,
+      BoxConstraints constraints) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -138,31 +138,32 @@ class _FlashcardPreviewState extends State<FlashcardPreviewScreen> {
             ),
           ),
         ),
-        
+
         // Right Side Flashcard
         Expanded(
           child: Container(
             height: constraints.maxHeight,
             padding: const EdgeInsets.all(16.0),
-            child: Flashcard_Display_new(theme, currentDeck),
+            child: flashcardDisplayNew(theme, currentDeck),
           ),
         ),
       ],
     );
   }
 
-  Widget _buildMobileLayout(ThemeData theme, Map<String, dynamic> currentDeck, BoxConstraints constraints) {
+  Widget _buildMobileLayout(ThemeData theme, Map<String, dynamic> currentDeck,
+      BoxConstraints constraints) {
     return SingleChildScrollView(
       child: Column(
         children: [
           // Flashcard Section
           SingleChildScrollView(
             child: Padding(
-           
-            padding: const EdgeInsets.all(16.0),
-            child: Flashcard_Display_new(theme, currentDeck),
-          ),),
-          
+              padding: const EdgeInsets.all(16.0),
+              child: flashcardDisplayNew(theme, currentDeck),
+            ),
+          ),
+
           // Features Section
           Padding(
             padding: const EdgeInsets.all(16.0),
@@ -226,7 +227,8 @@ class _FlashcardPreviewState extends State<FlashcardPreviewScreen> {
     );
   }
 
-  Widget _buildFeatureSection(String title, String description, IconData icon, ThemeData theme) {
+  Widget _buildFeatureSection(
+      String title, String description, IconData icon, ThemeData theme) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 24.0),
       child: Row(
@@ -275,129 +277,148 @@ class _FlashcardPreviewState extends State<FlashcardPreviewScreen> {
     );
   }
 
-Widget Flashcard_Display_new(ThemeData theme, Map<String, dynamic> currentDeck) {
-  return Card(
-    elevation: 4,
-    shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(12),
-    ),
-    child: Column(
-      mainAxisSize: MainAxisSize.min, // This ensures the card takes minimum required height
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        // Deck Header
-        Container(
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: theme.colorScheme.primary,
-            borderRadius: const BorderRadius.only(
-              topLeft: Radius.circular(12),
-              topRight: Radius.circular(12),
+  Widget flashcardDisplayNew(
+      ThemeData theme, Map<String, dynamic> currentDeck) {
+    return Card(
+      color: theme.brightness == Brightness.dark
+          ? AppColors.darkCardBackgroundColor
+          : Colors.white,
+      elevation: 4,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize
+            .min, // This ensures the card takes minimum required height
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          // Deck Header
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: theme.colorScheme.primary,
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(12),
+                topRight: Radius.circular(12),
+              ),
             ),
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        currentDeck['title'],
+                        style: theme.textTheme.titleLarge
+                            ?.copyWith(color: Colors.white),
+                      ),
+                      Text(
+                        currentDeck['category'],
+                        style: theme.textTheme.bodyMedium
+                            ?.copyWith(color: Colors.white70),
+                      ),
+                    ],
+                  ),
+                ),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
-                    Text(
-                      currentDeck['title'],
-                      style: theme.textTheme.titleLarge?.copyWith(color: Colors.white),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: theme.colorScheme.secondary,
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Text(
+                        currentDeck['difficulty'],
+                        style: theme.textTheme.bodySmall
+                            ?.copyWith(color: Colors.white),
+                      ),
                     ),
+                    const SizedBox(height: 4),
                     Text(
-                      currentDeck['category'],
-                      style: theme.textTheme.bodyMedium?.copyWith(color: Colors.white70),
+                      '${currentDeck['cardCount']} cards',
+                      style: theme.textTheme.bodySmall
+                          ?.copyWith(color: Colors.white70),
                     ),
                   ],
                 ),
-              ),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: theme.colorScheme.secondary,
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Text(
-                      currentDeck['difficulty'],
-                      style: theme.textTheme.bodySmall?.copyWith(color: Colors.white),
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    '${currentDeck['cardCount']} cards',
-                    style: theme.textTheme.bodySmall?.copyWith(color: Colors.white70),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-
-        // Flashcard Content
-        GestureDetector(
-          onTap: () {
-            setState(() {
-              isFlipped = !isFlipped;
-            });
-          },
-          child: Container(
-            margin: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: isFlipped
-                  ? theme.colorScheme.secondary.withOpacity(0.1)
-                  : Colors.white,
-              border: Border.all(
-                color: theme.colorScheme.primary.withOpacity(0.2),
-              ),
-              borderRadius: BorderRadius.circular(12),
+              ],
             ),
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Text(
-                isFlipped
-                    ? currentDeck['previewCard']['back']
-                    : currentDeck['previewCard']['front'],
-                style: theme.textTheme.bodyLarge,
-                textAlign: TextAlign.justify,
+          ),
+
+          // Flashcard Content
+          GestureDetector(
+            onTap: () {
+              setState(() {
+                isFlipped = !isFlipped;
+              });
+            },
+            child: Container(
+              margin: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: isFlipped
+                    ? theme.colorScheme.secondary.withOpacity(0.1)
+                    : theme.brightness == Brightness.dark
+                        ? AppColors.darkCardBackgroundColor.withOpacity(0.1)
+                        : Colors.white,
+                border: Border.all(
+                  color: theme.colorScheme.primary.withOpacity(0.2),
+                ),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Text(
+                  isFlipped
+                      ? currentDeck['previewCard']['back']
+                      : currentDeck['previewCard']['front'],
+                  style: theme.textTheme.bodyLarge?.copyWith(
+                    color: theme.brightness == Brightness.dark
+                        ? Colors.white
+                        : Colors.black87,
+                  ),
+                  textAlign: TextAlign.justify,
+                ),
               ),
             ),
           ),
-        ),
 
-        // Navigation Buttons
-        Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              ElevatedButton(
-                onPressed: () {
-                  setState(() {
-                    currentDeckIndex = (currentDeckIndex - 1 + previewDecks.length) % previewDecks.length;
-                    isFlipped = false;
-                  });
-                },
-                child: const Text('Previous Deck'),
-              ),
-              ElevatedButton(
-                onPressed: () {
-                  setState(() {
-                    currentDeckIndex = (currentDeckIndex + 1) % previewDecks.length;
-                    isFlipped = false;
-                  });
-                },
-                child: const Text('Next Deck'),
-              ),
-            ],
+          // Navigation Buttons
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                ElevatedButton(
+                  onPressed: () {
+                    setState(() {
+                      currentDeckIndex =
+                          (currentDeckIndex - 1 + previewDecks.length) %
+                              previewDecks.length;
+                      isFlipped = false;
+                    });
+                  },
+                  child: const Text('Previous Deck'),
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    setState(() {
+                      currentDeckIndex =
+                          (currentDeckIndex + 1) % previewDecks.length;
+                      isFlipped = false;
+                    });
+                  },
+                  child: const Text('Next Deck'),
+                ),
+              ],
+            ),
           ),
-        ),
-      ],
-    ),
-  );
-}
+        ],
+      ),
+    );
+  }
 }

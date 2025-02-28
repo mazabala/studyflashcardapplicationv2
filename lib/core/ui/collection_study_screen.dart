@@ -109,12 +109,32 @@ class _CollectionStudyScreenState extends ConsumerState<CollectionStudyScreen> {
                 itemBuilder: (context, index) {
                   _onDeckVisible(index);
                   final deck = _decks[index];
+                  final ThemeData theme = Theme.of(context);
+                  final bool isDarkMode = theme.brightness == Brightness.dark;
+                  final cardColor = isDarkMode ? theme.cardColor : Colors.white;
+                  final textColor = isDarkMode ? Colors.white : Colors.black87;
+                  final subtitleColor =
+                      isDarkMode ? Colors.white70 : Colors.black54;
+
                   return Card(
                     margin: const EdgeInsets.only(bottom: 8),
+                    color: cardColor,
                     child: ListTile(
-                      title: Text(deck.title),
+                      title: Text(
+                        deck.title,
+                        style: TextStyle(
+                          fontSize: theme.textTheme.titleMedium?.fontSize,
+                          fontWeight: FontWeight.bold,
+                          color: textColor,
+                        ),
+                      ),
                       subtitle: Text(
-                          'Cards: ${deck.totalCards} • Difficulty: ${deck.difficultyLevel}'),
+                        'Cards: ${deck.totalCards} • Difficulty: ${deck.difficultyLevel}',
+                        style: TextStyle(
+                          fontSize: theme.textTheme.bodyMedium?.fontSize,
+                          color: subtitleColor,
+                        ),
+                      ),
                       trailing: FutureBuilder(
                         future: _preloadedDecks[deck.id],
                         builder: (context, snapshot) {
@@ -126,7 +146,7 @@ class _CollectionStudyScreenState extends ConsumerState<CollectionStudyScreen> {
                               child: CircularProgressIndicator(strokeWidth: 2),
                             );
                           }
-                          return const Icon(Icons.chevron_right);
+                          return Icon(Icons.chevron_right, color: textColor);
                         },
                       ),
                       onTap: () async {

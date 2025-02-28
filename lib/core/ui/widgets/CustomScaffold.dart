@@ -3,6 +3,8 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flashcardstudyapplication/core/providers/provider_config.dart';
+import 'package:flashcardstudyapplication/core/themes/colors.dart';
+import 'package:flashcardstudyapplication/core/ui/widgets/theme_toggle.dart';
 import 'dart:io' show Platform;
 
 class CustomScaffold extends ConsumerStatefulWidget {
@@ -46,10 +48,21 @@ class _CustomScaffoldState extends ConsumerState<CustomScaffold> {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
+    final brightness = theme.brightness;
+    final bool isDarkMode = brightness == Brightness.dark;
 
     final authNotifier = ref.watch(authStateProvider.notifier);
     final bool isLoggedIn = ref.watch(authStateProvider).isAuthenticated;
-    final bool isSmallScreen = MediaQuery.of(context).size.width < 600;
+
+    // Responsive breakpoints
+    final size = MediaQuery.of(context).size;
+    final bool isSmallScreen = size.width < 600;
+    final bool isMediumScreen = size.width >= 600 && size.width < 900;
+    final bool isLargeScreen = size.width >= 900;
+
+    // Padding based on screen size
+    final EdgeInsets contentPadding =
+        isSmallScreen ? const EdgeInsets.all(16) : const EdgeInsets.all(24);
 
     return Scaffold(
       key: _scaffoldKey,
@@ -63,7 +76,7 @@ class _CustomScaffoldState extends ConsumerState<CustomScaffold> {
                 vertical: 12,
               ),
               decoration: BoxDecoration(
-                color: Theme.of(context).primaryColor,
+                color: theme.colorScheme.primary,
                 boxShadow: [
                   BoxShadow(
                     color: Colors.black.withOpacity(0.05),
@@ -73,14 +86,14 @@ class _CustomScaffoldState extends ConsumerState<CustomScaffold> {
                 ],
               ),
               child: isSmallScreen
-                  ? _buildMobileHeader()
-                  : _buildWebHeader(isLoggedIn, ref),
+                  ? _buildMobileHeader(isDarkMode)
+                  : _buildWebHeader(isLoggedIn, ref, isDarkMode),
             ),
             Expanded(
               child: widget.useScroll
                   ? SingleChildScrollView(
                       child: Padding(
-                        padding: const EdgeInsets.all(16),
+                        padding: contentPadding,
                         child: widget.body,
                       ),
                     )
@@ -89,102 +102,81 @@ class _CustomScaffoldState extends ConsumerState<CustomScaffold> {
           ],
         ),
       ),
-      endDrawer: isSmallScreen ? _buildDrawer(isLoggedIn, ref) : null,
-      // floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-      // floatingActionButton: widget.showBottomNav ? Container(
-      //   height: 60,
-      //   width: 60,
-      //   margin: const EdgeInsets.only(top: 10),
-      //   child: FloatingActionButton(
-      //     shape: const CircleBorder(),
-      //     onPressed: () {},
-      //     backgroundColor: theme.colorScheme.primary,
-      //     elevation: 0,
-      //     child: const Icon(Icons.add, size: 32),
-      //   ),
-      // ) : null,
-      // bottomNavigationBar: widget.showBottomNav ? BottomAppBar(
-      //   color: theme.colorScheme.primary,
-      //   shape: const CircularNotchedRectangle(),
-      //   notchMargin: 8,
-      //   height: 60,
-      //   child: SizedBox(
-
-      //     child: Row(
-      //       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-      //       children: [
-      //         // Left side of FAB
-      //         Expanded(
-      //           child: Row(
-      //             mainAxisAlignment: MainAxisAlignment.center,
-      //             children: [
-      //               _buildNavItem(
-      //                 context: context,
-      //                 icon: Icons.style,
-      //                 route: '/myDecks',
-      //                 isSelected: widget.currentRoute == '/myDecks',
-      //               ),
-      //             ],
-      //           ),
-      //         ),
-      //         // Space for FAB
-      //         const SizedBox(width: 80),
-      //         // Right side of FAB
-      //         Expanded(
-      //           child: Row(
-      //             mainAxisAlignment: MainAxisAlignment.center,
-      //             children: [
-      //               _buildNavItem(
-
-      //                 context: context,
-      //                 icon: Icons.person,
-      //                 route: '/userProfile',
-      //                 isSelected: widget.currentRoute == '/userProfile',
-      //               ),
-      //             ],
-      //           ),
-      //         ),
-      //       ],
-      //     ),
-      //   ),
-      // ) : null,
+      endDrawer:
+          isSmallScreen ? _buildDrawer(isLoggedIn, ref, isDarkMode) : null,
+      bottomNavigationBar: widget.showBottomNav && isSmallScreen
+          ? _buildBottomNavBar(context, theme)
+          : null,
     );
   }
 
-  Widget _buildMobileHeader() {
+  Widget _buildMobileHeader(bool isDarkMode) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Flexible(
           child: Image.asset(
-            'assets/images/logo.png',
+            isDarkMode
+                ? 'assets/images/logo_dark.png'
+                : 'assets/images/logo.png',
             height: 24,
             fit: BoxFit.contain,
+            errorBuilder: (context, error, stackTrace) {
+              // Fallback when image fails to load
+              return Text(
+                'Deck Focus',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 18,
+                ),
+              );
+            },
           ),
         ),
-        IconButton(
-          icon: const Icon(Icons.menu),
-          color: Colors.white,
-          onPressed: () {
-            if (_scaffoldKey.currentState?.isEndDrawerOpen ?? false) {
-              Navigator.of(context).pop();
-            } else {
-              _scaffoldKey.currentState?.openEndDrawer();
-            }
-          },
+        Row(
+          children: [
+            const ThemeToggle(
+              isSmall: true,
+              iconColor: Colors.white,
+            ),
+            const SizedBox(width: 8),
+            IconButton(
+              icon: const Icon(Icons.menu),
+              color: Colors.white,
+              onPressed: () {
+                if (_scaffoldKey.currentState?.isEndDrawerOpen ?? false) {
+                  Navigator.of(context).pop();
+                } else {
+                  _scaffoldKey.currentState?.openEndDrawer();
+                }
+              },
+            ),
+          ],
         ),
       ],
     );
   }
 
-  Widget _buildWebHeader(bool isLoggedIn, WidgetRef ref) {
+  Widget _buildWebHeader(bool isLoggedIn, WidgetRef ref, bool isDarkMode) {
     return Row(
       children: [
         Image.asset(
-          'assets/images/logo.png',
+          isDarkMode ? 'assets/images/logo_dark.png' : 'assets/images/logo.png',
           height: 32,
+          errorBuilder: (context, error, stackTrace) {
+            // Fallback when image fails to load
+            return Text(
+              'Deck Focus',
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+                fontSize: 22,
+              ),
+            );
+          },
         ),
-        const SizedBox(width: 16), // Smaller fixed width that adapts better
+        const SizedBox(width: 16),
         Expanded(
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -200,6 +192,10 @@ class _CustomScaffoldState extends ConsumerState<CustomScaffold> {
               ]
             ],
           ),
+        ),
+        const ThemeToggle(
+          showLabel: true,
+          iconColor: Colors.white,
         ),
       ],
     );
@@ -237,93 +233,233 @@ class _CustomScaffoldState extends ConsumerState<CustomScaffold> {
     );
   }
 
-  Widget _buildDrawer(bool isLoggedIn, WidgetRef ref) {
+  Widget _buildDrawer(bool isLoggedIn, WidgetRef ref, bool isDarkMode) {
+    final theme = Theme.of(context);
+
     return Drawer(
-      child: ListView(
-        padding: EdgeInsets.zero,
-        children: [
-          DrawerHeader(
-            decoration: BoxDecoration(
-              color: Theme.of(context).primaryColor,
-            ),
-            child: const Text(
-              'Deck Focus',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 24,
+      child: Container(
+        color: theme.scaffoldBackgroundColor,
+        child: ListView(
+          padding: EdgeInsets.zero,
+          children: [
+            DrawerHeader(
+              decoration: BoxDecoration(
+                color: theme.colorScheme.primary,
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Image.asset(
+                    'assets/images/logo_dark.png',
+                    height: 40,
+                    errorBuilder: (context, error, stackTrace) {
+                      // Fallback when image fails to load
+                      return Text(
+                        'Deck Focus',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 24,
+                        ),
+                      );
+                    },
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    'Deck Focus',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  Text(
+                    'Study on the Go',
+                    style: TextStyle(
+                      color: Colors.white70,
+                      fontSize: 14,
+                    ),
+                  ),
+                ],
               ),
             ),
-          ),
-          _buildDrawerItem('Home', '/', Icons.home),
-          _buildDrawerItem('Decks & Flashcards', '/deck', Icons.library_books),
-          _buildDrawerItem('Pricing', '/prices', Icons.monetization_on),
-          _buildDrawerItem('Contact Us', '/contactUs', Icons.phone),
-          _buildDrawerItem('About Us', '/aboutUs', Icons.info),
-          if (isLoggedIn) ...[
-            _buildDrawerItem('My Decks', '/myDecks', Icons.folder),
-            ListTile(
-              leading: const Icon(Icons.logout),
-              title: const Text('Logout'),
-              onTap: () async {
-                Navigator.pop(context);
-                await ref.read(authStateProvider.notifier).signOut();
-                if (mounted) {
-                  _navigateWithoutAnimation(context, '/');
-                }
-              },
+            _buildDrawerItem(
+              icon: Icons.home,
+              title: 'Home',
+              route: '/',
+              isSelected: widget.currentRoute == '/',
             ),
-          ] else ...[
-            _buildDrawerItem('Login', '/login', Icons.login),
+            _buildDrawerItem(
+              icon: Icons.style,
+              title: 'Decks & Flashcards',
+              route: '/deck',
+              isSelected: widget.currentRoute == '/deck',
+            ),
+            _buildDrawerItem(
+              icon: Icons.attach_money,
+              title: 'Pricing',
+              route: '/prices',
+              isSelected: widget.currentRoute == '/prices',
+            ),
+            if (isLoggedIn) ...[
+              _buildDrawerItem(
+                icon: Icons.library_books,
+                title: 'My Decks',
+                route: '/myDecks',
+                isSelected: widget.currentRoute == '/myDecks',
+              ),
+              _buildDrawerItem(
+                icon: Icons.person,
+                title: 'Profile',
+                route: '/userProfile',
+                isSelected: widget.currentRoute == '/userProfile',
+              ),
+              ListTile(
+                leading: Icon(
+                  Icons.logout,
+                  color: theme.colorScheme.primary,
+                ),
+                title: Text(
+                  'Logout',
+                  style: TextStyle(
+                    color: theme.colorScheme.onBackground,
+                  ),
+                ),
+                onTap: () async {
+                  await ref.read(authStateProvider.notifier).signOut();
+                  if (mounted) {
+                    Navigator.pop(context); // Close drawer
+                    _navigateWithoutAnimation(context, '/');
+                  }
+                },
+              ),
+            ] else ...[
+              _buildDrawerItem(
+                icon: Icons.login,
+                title: 'Login',
+                route: '/login',
+                isSelected: widget.currentRoute == '/login',
+              ),
+            ],
+            const Divider(),
+            _buildDrawerItem(
+              icon: Icons.info,
+              title: 'About Us',
+              route: '/aboutUs',
+              isSelected: widget.currentRoute == '/aboutUs',
+            ),
+            const Divider(),
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              child: ThemeToggleSwitch(),
+            ),
           ],
-        ],
+        ),
       ),
     );
   }
 
-  Widget _buildDrawerItem(String label, String route, IconData icon) {
-    return ListTile(
-      leading: Icon(icon),
-      title: Text(label),
-      selected: widget.currentRoute == route,
-      onTap: () {
-        Navigator.pop(context); // Close drawer
-        Future.delayed(Duration.zero, () {
-          if (mounted) {
-            _navigateWithoutAnimation(context, route);
-          }
-        });
-      },
-    );
-  }
-
-  Widget _buildNavItem({
-    required BuildContext context,
+  Widget _buildDrawerItem({
     required IconData icon,
-    String? label,
+    required String title,
     required String route,
     required bool isSelected,
   }) {
     final theme = Theme.of(context);
-    final color = isSelected ? theme.colorScheme.primary : Colors.grey;
 
-    return InkWell(
+    return ListTile(
+      leading: Icon(
+        icon,
+        color: isSelected
+            ? theme.colorScheme.secondary
+            : theme.colorScheme.primary,
+      ),
+      title: Text(
+        title,
+        style: TextStyle(
+          color: theme.colorScheme.onBackground,
+          fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+        ),
+      ),
+      selected: isSelected,
+      selectedTileColor: theme.colorScheme.secondary.withOpacity(0.1),
       onTap: () {
-        if (route != widget.currentRoute) {
-          _navigateWithoutAnimation(context, route);
-        }
+        Navigator.pop(context); // Close drawer
+        _navigateWithoutAnimation(context, route);
       },
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, color: color, size: 32),
-          if (label != null)
-            Text(
-              label,
-              style: theme.textTheme.labelSmall?.copyWith(
-                color: color,
-                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-              ),
+    );
+  }
+
+  Widget _buildBottomNavBar(BuildContext context, ThemeData theme) {
+    return BottomAppBar(
+      color: theme.colorScheme.primary,
+      elevation: 8,
+      child: SizedBox(
+        height: 60,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: [
+            _buildBottomNavItem(
+              icon: Icons.home,
+              label: 'Home',
+              route: '/',
+              isSelected: widget.currentRoute == '/',
             ),
+            _buildBottomNavItem(
+              icon: Icons.style,
+              label: 'Decks',
+              route: '/deck',
+              isSelected: widget.currentRoute == '/deck',
+            ),
+            if (ref.watch(authStateProvider).isAuthenticated) ...[
+              _buildBottomNavItem(
+                icon: Icons.library_books,
+                label: 'My Decks',
+                route: '/myDecks',
+                isSelected: widget.currentRoute == '/myDecks',
+              ),
+              _buildBottomNavItem(
+                icon: Icons.person,
+                label: 'Profile',
+                route: '/userProfile',
+                isSelected: widget.currentRoute == '/userProfile',
+              ),
+            ] else ...[
+              _buildBottomNavItem(
+                icon: Icons.login,
+                label: 'Login',
+                route: '/login',
+                isSelected: widget.currentRoute == '/login',
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildBottomNavItem({
+    required IconData icon,
+    required String label,
+    required String route,
+    required bool isSelected,
+  }) {
+    return InkWell(
+      onTap: () => _navigateWithoutAnimation(context, route),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            icon,
+            color: isSelected ? Colors.white : Colors.white70,
+          ),
+          Text(
+            label,
+            style: TextStyle(
+              color: isSelected ? Colors.white : Colors.white70,
+              fontSize: 12,
+            ),
+          ),
         ],
       ),
     );

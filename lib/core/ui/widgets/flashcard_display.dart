@@ -142,7 +142,9 @@ class FlashcardDisplay extends ConsumerWidget {
                   decoration: BoxDecoration(
                     color: flashcardState.isFlipped
                         ? theme.colorScheme.secondary.withOpacity(0.1)
-                        : Colors.white,
+                        : theme.brightness == Brightness.dark
+                            ? theme.cardColor
+                            : Colors.white,
                     border: Border.all(
                       color: theme.colorScheme.primary.withOpacity(0.2),
                     ),
@@ -159,6 +161,9 @@ class FlashcardDisplay extends ConsumerWidget {
                                 : currentFlashcard.front,
                             style: theme.textTheme.headlineSmall?.copyWith(
                               fontWeight: FontWeight.bold,
+                              color: theme.brightness == Brightness.dark
+                                  ? Colors.white
+                                  : Colors.black87,
                             ),
                             textAlign: TextAlign.center,
                             overflow: TextOverflow.ellipsis,

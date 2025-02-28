@@ -198,6 +198,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     final size = MediaQuery.of(context).size;
     final isWeb = size.width > 800;
     final authState = ref.watch(authStateProvider);
+    final ThemeData theme = Theme.of(context);
+    final bool isDarkMode = theme.brightness == Brightness.dark;
 
     Widget loginForm = Form(
       key: _formKey,
@@ -241,7 +243,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             hint: 'Enter your email',
             decoration: InputDecoration(
               filled: true,
-              fillColor: Colors.grey[100],
+              fillColor: isDarkMode
+                  ? Theme.of(context).colorScheme.surface
+                  : Colors.grey[100],
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
                 borderSide: const BorderSide(width: 1),
@@ -256,7 +260,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             obscureText: _obscurePassword,
             decoration: InputDecoration(
               filled: true,
-              fillColor: Colors.grey[100],
+              fillColor: isDarkMode
+                  ? Theme.of(context).colorScheme.surface
+                  : Colors.grey[100],
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
                 borderSide: const BorderSide(width: 1),
