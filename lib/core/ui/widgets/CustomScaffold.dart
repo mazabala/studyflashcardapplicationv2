@@ -66,7 +66,7 @@ class _CustomScaffoldState extends ConsumerState<CustomScaffold> {
 
     return Scaffold(
       key: _scaffoldKey,
-      backgroundColor: theme.scaffoldBackgroundColor,
+      backgroundColor: theme.colorScheme.surface,
       body: SafeArea(
         child: Column(
           children: [
@@ -76,7 +76,9 @@ class _CustomScaffoldState extends ConsumerState<CustomScaffold> {
                 vertical: 12,
               ),
               decoration: BoxDecoration(
-                color: theme.colorScheme.primary,
+                color: isDarkMode
+                    ? AppColors.darkCardBackgroundColor.withOpacity(0.3)
+                    : theme.colorScheme.primary,
                 boxShadow: [
                   BoxShadow(
                     color: Colors.black.withOpacity(0.05),
@@ -117,13 +119,13 @@ class _CustomScaffoldState extends ConsumerState<CustomScaffold> {
         Flexible(
           child: Image.asset(
             isDarkMode
-                ? 'assets/images/logo_dark.png'
-                : 'assets/images/logo.png',
+                ? 'assets/logos/dark mode/logo-darkmode.png'
+                : 'assets/logos/light mode/logo-lightmode.png',
             height: 24,
             fit: BoxFit.contain,
             errorBuilder: (context, error, stackTrace) {
               // Fallback when image fails to load
-              return Text(
+              return const Text(
                 'Deck Focus',
                 style: TextStyle(
                   color: Colors.white,
@@ -162,11 +164,13 @@ class _CustomScaffoldState extends ConsumerState<CustomScaffold> {
     return Row(
       children: [
         Image.asset(
-          isDarkMode ? 'assets/images/logo_dark.png' : 'assets/images/logo.png',
+          isDarkMode
+              ? 'assets/logos/dark mode/logo-darkmode.png'
+              : 'assets/logos/light mode/logo-lightmode.png',
           height: 32,
           errorBuilder: (context, error, stackTrace) {
             // Fallback when image fails to load
-            return Text(
+            return const Text(
               'Deck Focus',
               style: TextStyle(
                 color: Colors.white,
@@ -250,11 +254,11 @@ class _CustomScaffoldState extends ConsumerState<CustomScaffold> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Image.asset(
-                    'assets/images/logo_dark.png',
+                    'assets/logos/dark mode/logo-darkmode.png',
                     height: 40,
                     errorBuilder: (context, error, stackTrace) {
                       // Fallback when image fails to load
-                      return Text(
+                      return const Text(
                         'Deck Focus',
                         style: TextStyle(
                           color: Colors.white,
@@ -265,7 +269,7 @@ class _CustomScaffoldState extends ConsumerState<CustomScaffold> {
                     },
                   ),
                   const SizedBox(height: 16),
-                  Text(
+                  const Text(
                     'Deck Focus',
                     style: TextStyle(
                       color: Colors.white,
@@ -273,7 +277,7 @@ class _CustomScaffoldState extends ConsumerState<CustomScaffold> {
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  Text(
+                  const Text(
                     'Study on the Go',
                     style: TextStyle(
                       color: Colors.white70,
@@ -391,8 +395,10 @@ class _CustomScaffoldState extends ConsumerState<CustomScaffold> {
   }
 
   Widget _buildBottomNavBar(BuildContext context, ThemeData theme) {
+    final bool isDarkMode = theme.brightness == Brightness.dark;
+
     return BottomAppBar(
-      color: theme.colorScheme.primary,
+      color: isDarkMode ? Colors.black : theme.colorScheme.primary,
       elevation: 8,
       child: SizedBox(
         height: 60,

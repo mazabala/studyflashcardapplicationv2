@@ -1,5 +1,5 @@
 name: flashcardstudyapplication
-description: A medical flashcard application for students
+description: A flashcard Study application for students
 
 publish_to: 'none'
 
@@ -46,9 +46,6 @@ dependencies:
   flutter_launcher_icons: ^0.13.1
   archive: ^3.4.10
   path: ^1.8.3
-  sqlite3: ^2.3.0
-  sqflite: ^2.3.2
-  file_picker: ^6.1.1
   flutter_cache_manager: ^3.3.1
   hive: ^2.2.3
   hive_flutter: ^1.1.0
@@ -71,9 +68,12 @@ flutter:
     - assets/images/medical_bg.jpg
     - lib/core/config/api.config.yaml
     - 'assets/images/logo.png'
+    - 'assets/logos/light mode/logo-lightmode.png'
+    - 'assets/logos/dark mode/logo-darkmode.png'
     
   # Add custom fonts if needed
-  # fonts:
-  #   - family: CustomFont
-  #     fonts:
-  #       - asset: assets/fonts/CustomFont-Regular.ttf
+  fonts:
+    - family: BankGothic
+      fonts:
+        - asset: assets/fonts/BankGothic-Bold.ttf
+          weight: 700

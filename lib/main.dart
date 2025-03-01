@@ -179,7 +179,9 @@ class _LoadingScreen extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Image.asset(
-                'assets/images/logo_dark.png',
+                Theme.of(context).brightness == Brightness.dark
+                    ? 'assets/logos/dark mode/logo-darkmode.png'
+                    : 'assets/logos/light mode/logo-lightmode.png',
                 height: 120,
                 errorBuilder: (context, error, stackTrace) {
                   // Fallback when image fails to load

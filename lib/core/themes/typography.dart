@@ -3,49 +3,68 @@ import 'package:flashcardstudyapplication/core/themes/colors.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class AppTypography {
+  // Font family to use throughout the app
+  static const String primaryFontFamily = 'OpenSans';
+
+  // Helper method to create TextStyle with the primary font
+  static TextStyle _createTextStyle({
+    required Color color,
+    required double fontSize,
+    required FontWeight fontWeight,
+    double? letterSpacing,
+  }) {
+    return TextStyle(
+      fontFamily: primaryFontFamily,
+      color: color,
+      fontSize: fontSize,
+      fontWeight: fontWeight,
+      letterSpacing: letterSpacing,
+    );
+  }
+
   // ---- Light Theme Typography ----
 
   // Body Text
-  static TextStyle bodySmall = GoogleFonts.openSans(
+  static TextStyle bodySmall = _createTextStyle(
     color: AppColors.textSecondaryColor,
     fontSize: 14,
     fontWeight: FontWeight.normal,
   );
 
-  static TextStyle bodyText1 = GoogleFonts.openSans(
+  static TextStyle bodyText1 = _createTextStyle(
     color: AppColors.textPrimaryColor,
     fontSize: 16,
     fontWeight: FontWeight.normal,
   );
 
-  static TextStyle bodyText2 = GoogleFonts.openSans(
+  static TextStyle bodyText2 = _createTextStyle(
     color: AppColors.textSecondaryColor,
     fontSize: 14,
     fontWeight: FontWeight.normal,
   );
 
   // Headings
-  static TextStyle headline1 = GoogleFonts.openSans(
+  static TextStyle headline1 = _createTextStyle(
     color: AppColors.primaryColor,
     fontSize: 32,
     fontWeight: FontWeight.bold,
   );
 
-  static TextStyle headline2 = GoogleFonts.openSans(
+  static TextStyle headline2 = _createTextStyle(
     color: AppColors.primaryColor,
     fontSize: 24,
     fontWeight: FontWeight.bold,
   );
 
   // headlineSmall (for use in small headings like flashcards)
-  static TextStyle headlineSmall = GoogleFonts.openSans(
+  static TextStyle headlineSmall = _createTextStyle(
     color: AppColors.primaryColor,
     fontSize: 20,
     fontWeight: FontWeight.w600,
   );
 
   // Buttons
-  static TextStyle button = GoogleFonts.openSans(
+  static TextStyle button = _createTextStyle(
     color: Colors.white,
     fontSize: 16,
     fontWeight: FontWeight.w600,
@@ -54,46 +73,46 @@ class AppTypography {
   // ---- Dark Theme Typography ----
 
   // Body Text
-  static TextStyle bodysmallDark = GoogleFonts.openSans(
+  static TextStyle bodysmallDark = _createTextStyle(
     color: Colors.white70,
     fontSize: 14,
     fontWeight: FontWeight.normal,
   );
 
-  static TextStyle bodyText1Dark = GoogleFonts.openSans(
+  static TextStyle bodyText1Dark = _createTextStyle(
     color: Colors.white,
     fontSize: 16,
     fontWeight: FontWeight.normal,
   );
 
-  static TextStyle bodyText2Dark = GoogleFonts.openSans(
+  static TextStyle bodyText2Dark = _createTextStyle(
     color: Colors.white70,
     fontSize: 14,
     fontWeight: FontWeight.normal,
   );
 
   // Headings
-  static TextStyle headline1Dark = GoogleFonts.openSans(
+  static TextStyle headline1Dark = _createTextStyle(
     color: Colors.white,
     fontSize: 32,
     fontWeight: FontWeight.bold,
   );
 
-  static TextStyle headline2Dark = GoogleFonts.openSans(
+  static TextStyle headline2Dark = _createTextStyle(
     color: Colors.white,
     fontSize: 24,
     fontWeight: FontWeight.bold,
   );
 
   // headlineSmall (for use in small headings like flashcards)
-  static TextStyle headlineSmallDark = GoogleFonts.openSans(
+  static TextStyle headlineSmallDark = _createTextStyle(
     color: Colors.white,
     fontSize: 20,
     fontWeight: FontWeight.w600,
   );
 
   // Buttons
-  static TextStyle buttonDark = GoogleFonts.openSans(
+  static TextStyle buttonDark = _createTextStyle(
     color: Colors.white,
     fontSize: 16,
     fontWeight: FontWeight.w600,
@@ -102,27 +121,27 @@ class AppTypography {
   // Additional styles for consistent UI
 
   // Card Title
-  static TextStyle cardTitle = GoogleFonts.openSans(
+  static TextStyle cardTitle = _createTextStyle(
     color: AppColors.primaryColor,
     fontSize: 18,
     fontWeight: FontWeight.w600,
   );
 
-  static TextStyle cardTitleDark = GoogleFonts.openSans(
+  static TextStyle cardTitleDark = _createTextStyle(
     color: Colors.white,
     fontSize: 18,
     fontWeight: FontWeight.w600,
   );
 
   // Subtitle
-  static TextStyle subtitle = GoogleFonts.openSans(
+  static TextStyle subtitle = _createTextStyle(
     color: AppColors.textSecondaryColor,
     fontSize: 14,
     fontWeight: FontWeight.w500,
     letterSpacing: 0.1,
   );
 
-  static TextStyle subtitleDark = GoogleFonts.openSans(
+  static TextStyle subtitleDark = _createTextStyle(
     color: Colors.white70,
     fontSize: 14,
     fontWeight: FontWeight.w500,
@@ -130,13 +149,13 @@ class AppTypography {
   );
 
   // Caption
-  static TextStyle caption = GoogleFonts.openSans(
+  static TextStyle caption = _createTextStyle(
     color: AppColors.textSecondaryColor,
     fontSize: 12,
     fontWeight: FontWeight.normal,
   );
 
-  static TextStyle captionDark = GoogleFonts.openSans(
+  static TextStyle captionDark = _createTextStyle(
     color: Colors.white70,
     fontSize: 12,
     fontWeight: FontWeight.normal,
