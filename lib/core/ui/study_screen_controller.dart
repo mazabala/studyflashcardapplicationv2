@@ -8,11 +8,13 @@ class StudyScreenController {
   final WidgetRef ref;
   final String deckId;
   final VoidCallback onFinish;
+  final bool isCollectionStudy;
 
   StudyScreenController({
     required this.ref,
     required this.deckId,
     required this.onFinish,
+    this.isCollectionStudy = false,
   });
 
   // Get the current state of flashcards for the deck
@@ -189,16 +191,31 @@ class StudyScreenController {
                 if (hasMarkedCards)
                   Text('$markedCount cards marked for later review.'),
               ],
+              if (isCollectionStudy) ...[
+                const SizedBox(height: 8),
+                const Text(
+                    'Ready to continue with the next deck in the collection?'),
+              ],
             ],
           ),
           actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-                onFinish();
-              },
-              child: const Text('Finish'),
-            ),
+            if (isCollectionStudy)
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                  // Automatically continue to the next deck
+                  onFinish();
+                },
+                child: const Text('Continue to Next Deck'),
+              )
+            else
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                  onFinish();
+                },
+                child: const Text('Finish'),
+              ),
             if (!isReviewingMarked && hasMarkedCards)
               TextButton(
                 onPressed: () {
@@ -226,5 +243,16 @@ class StudyScreenController {
         ),
       ),
     );
+
+    // If this is a collection study, automatically continue to the next deck after a short delay
+    if (isCollectionStudy && !isReviewingMarked) {
+      Future.delayed(const Duration(seconds: 3), () {
+        // Check if the dialog is still showing
+        if (Navigator.of(context).canPop()) {
+          Navigator.of(context).pop();
+          onFinish();
+        }
+      });
+    }
   }
 }

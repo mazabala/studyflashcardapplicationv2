@@ -14,7 +14,6 @@ import 'package:flashcardstudyapplication/core/ui/login_screen.dart';
 import 'package:flashcardstudyapplication/core/ui/home_screen.dart';
 import 'package:flashcardstudyapplication/core/ui/my_deck_screen.dart';
 
-
 class RouteManager {
   static Route<dynamic> generateRoute(RouteSettings settings) {
     // Handle routes that need arguments
@@ -26,19 +25,51 @@ class RouteManager {
           settings: settings,
         );
       } else if (args is Map<String, dynamic>) {
-        final collection = args['collection'] as Collection;
-        final userCollection = args['userCollection'] as UserCollection;
-        return MaterialPageRoute(
-          builder: (context) => CollectionStudyScreen(
-            collection: collection,
-            userCollection: userCollection,
-          ),
-          settings: settings,
-        );
+        // Check if this is a collection study
+        if (args.containsKey('deck') && args.containsKey('isCollectionStudy')) {
+          final deck = args['deck'] as Deck;
+          final collection = args['collection'] as Collection?;
+          final isCollectionStudy = args['isCollectionStudy'] as bool;
+          final remainingDecks = args['remainingDecks'] as List<Deck>?;
+
+          return MaterialPageRoute(
+            builder: (context) => StudyScreen(
+              deck: deck,
+              collection: collection,
+              isCollectionStudy: isCollectionStudy,
+              remainingDecks: remainingDecks,
+            ),
+            settings: settings,
+          );
+        } else if (args.containsKey('collection') &&
+            args.containsKey('userCollection')) {
+          final collection = args['collection'] as Collection;
+          final userCollection = args['userCollection'] as UserCollection;
+          return MaterialPageRoute(
+            builder: (context) => CollectionStudyScreen(
+              collection: collection,
+              userCollection: userCollection,
+            ),
+            settings: settings,
+          );
+        }
       }
       throw ArgumentError('Invalid arguments for study screen');
     }
-    
+
+    if (settings.name == '/collection_study') {
+      final args = settings.arguments as Map<String, dynamic>;
+      final collection = args['collection'] as Collection;
+      final userCollection = args['userCollection'] as UserCollection;
+      return MaterialPageRoute(
+        builder: (context) => CollectionStudyScreen(
+          collection: collection,
+          userCollection: userCollection,
+        ),
+        settings: settings,
+      );
+    }
+
     switch (settings.name) {
       case '/':
         return _noAnimationRoute(const HomeScreen());
@@ -59,7 +90,7 @@ class RouteManager {
       case '/collections':
         return _noAnimationRoute(const CollectionsScreen());
       default:
-        return _noAnimationRoute(const HomeScreen());  // Default route
+        return _noAnimationRoute(const HomeScreen()); // Default route
     }
   }
 
@@ -86,7 +117,6 @@ class RouteManager {
       '/aboutUs': (_) => const AboutUsScreen(),
       '/admin': (_) => AdminManagementScreen(),
       '/collections': (_) => CollectionsScreen(),
-
     };
   }
 }

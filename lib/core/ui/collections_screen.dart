@@ -352,7 +352,7 @@ class _CollectionsScreenState extends ConsumerState<CollectionsScreen>
                                   if (mounted) {
                                     Navigator.pushNamed(
                                       context,
-                                      '/study',
+                                      '/collection_study',
                                       arguments: {
                                         'collection': collection,
                                         'userCollection': userCollection,
