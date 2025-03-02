@@ -339,6 +339,7 @@ class DeckService implements IDeckService {
       List<dynamic> cards;
 
       try {
+        // Parse the JSON content
         cards = jsonDecode(cleanContent) as List;
       } catch (e) {
         // Fix the json format if needed
@@ -399,7 +400,8 @@ class DeckService implements IDeckService {
         'messages': [
           {
             'role': 'system',
-            'content': '''You are the last resource for verifying flashcards.'''
+            'content':
+                '''You are the last resource for verifying flashcards. Your task is to fix JSON arrays containing flashcards. Always return a valid JSON array, never a JSON object.'''
           },
           {
             'role': 'user',
@@ -414,6 +416,7 @@ Rules for JSON Fixing:
 5. Ensure strings are properly formatted – Remove unintended line breaks within values.
 6. Check for missing or extra brackets – Close any unclosed arrays or objects.
 7. Output a corrected JSON file – Return the fixed JSON in a properly formatted structure.
+8. IMPORTANT: Always return a JSON ARRAY, not a JSON object. The output should be a direct array of flashcard objects, not wrapped in any outer object.
 
 Example Input (Incorrect JSON):
 [
@@ -440,11 +443,20 @@ Expected Fixed JSON Output:
     }
 ]
 
+INCORRECT Output Format (DO NOT USE):
+{
+    "cards": [
+        {"front": "Question", "back": "Answer"},
+        {"front": "Question", "back": "Answer"}
+    ]
+}
+
 Instructions for AI:
 - Identify and correct all syntax errors.
 - Ensure all objects are properly enclosed and formatted.
 - Remove unnecessary line breaks within strings.
-- Return both the fixed JSON and a list of corrections made.
+- Return ONLY the fixed JSON array directly, not wrapped in any object.
+- Do not include any explanations or text outside the JSON array.
 
 Now, fix the following JSON content:
 ${content}
@@ -465,7 +477,8 @@ ${content}
         'messages': [
           {
             'role': 'system',
-            'content': '''You are the last resource for verifying flashcards.'''
+            'content':
+                '''You are the last resource for verifying flashcards. Your task is to fix JSON arrays containing flashcards. Always return a valid JSON array, never a JSON object.'''
           },
           {
             'role': 'user',
@@ -480,6 +493,7 @@ Rules for JSON Fixing:
 5. Ensure strings are properly formatted – Remove unintended line breaks within values.
 6. Check for missing or extra brackets – Close any unclosed arrays or objects.
 7. Output a corrected JSON file – Return the fixed JSON in a properly formatted structure.
+8. IMPORTANT: Always return a JSON ARRAY, not a JSON object. The output should be a direct array of flashcard objects, not wrapped in any outer object.
 
 Example Input (Incorrect JSON):
 [
@@ -506,11 +520,20 @@ Expected Fixed JSON Output:
     }
 ]
 
+INCORRECT Output Format (DO NOT USE):
+{
+    "cards": [
+        {"front": "Question", "back": "Answer"},
+        {"front": "Question", "back": "Answer"}
+    ]
+}
+
 Instructions for AI:
 - Identify and correct all syntax errors.
 - Ensure all objects are properly enclosed and formatted.
 - Remove unnecessary line breaks within strings.
-- Return both the fixed JSON and a list of corrections made.
+- Return ONLY the fixed JSON array directly, not wrapped in any object.
+- Do not include any explanations or text outside the JSON array.
 
 Now, fix the following JSON content:
 ${content}
