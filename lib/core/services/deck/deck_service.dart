@@ -12,6 +12,8 @@ import 'package:flashcardstudyapplication/core/interfaces/i_api_service.dart';
 import 'package:flashcardstudyapplication/core/services/api/api_client.dart';
 import 'package:uuid/uuid.dart';
 import 'package:posthog_flutter/posthog_flutter.dart';
+import 'package:flashcardstudyapplication/core/models/deck_import.dart';
+import 'package:flashcardstudyapplication/core/interfaces/i_collection_service.dart';
 
 class SystemDeckConfig {
   final String category;
@@ -30,9 +32,10 @@ class SystemDeckConfig {
 class DeckService implements IDeckService {
   final SupabaseClient _supabaseClient;
   final IApiService _apiService;
+  final ICollectionService _collectionService;
   final _uuid = const Uuid();
 
-  DeckService(this._supabaseClient, this._apiService);
+  DeckService(this._supabaseClient, this._apiService, this._collectionService);
 
   @override
   Future<List<Flashcard>> getFlashcards(String deckid) async {
@@ -221,7 +224,8 @@ class DeckService implements IDeckService {
             The flashcards should include clinical applications, disease mechanisms, pathophysiology, and differential diagnoses based on reliable, evidence-based medical knowledge from trusted sources such as textbooks, clinical guidelines, and peer-reviewed literature. 
             Ensure the content is challenging yet relevant to a clinical student at this level. 
             Category: $category
-            Return ONLY a JSON array in this exact format: [{\"front\":\"question text\", \"back\":\"answer text\"}]
+            Return ONLY a JSON array in this exact format: [{"front":"question text", "back":"answer text"}]
+            Rule: Do not break the strings into multiple lines. If needed, use the \n character to break the string into multiple lines.
             Note: If a concept cannot be verified through academic sources, exclude it.'''
         }
       ],
@@ -308,8 +312,13 @@ class DeckService implements IDeckService {
       }
 
       // Ensure we don't return more cards than requested
+      allFlashcards = allFlashcards.take(cardCount).toList();
 
-      return allFlashcards.take(cardCount).toList();
+      // // 3. Verify and improve flashcards with AI
+      // allFlashcards = await _verifyFlashcardsWithAI(
+      //     allFlashcards, topic, focus, category, difficultyLevel);
+
+      return allFlashcards;
     } catch (e) {
       print('Error generating flashcards: $e');
 
@@ -320,8 +329,6 @@ class DeckService implements IDeckService {
   Future<List<Flashcard>> _processApiResponse(Map<String, dynamic> response,
       String deckid, String difficultyLevel) async {
     final content = response['choices'][0]['message']['content'].trim();
-
-    // Clean the content by removing markdown code block indicators
 
     final cleanContent =
         content.replaceAll('```json', '').replaceAll('```', '').trim();
@@ -334,16 +341,33 @@ class DeckService implements IDeckService {
       try {
         cards = jsonDecode(cleanContent) as List;
       } catch (e) {
+        // Fix the json format if needed
         log('JSON parsing error: $e');
-
         log('Problematic content: $cleanContent');
 
-        throw Exception(
-            'Failed to parse API response as JSON. Response was not a valid JSON array.');
+        try {
+          // Request AI to fix the JSON format
+          final request = await _verifyFlashcardsWithAI(content);
+          final verifiedContent = await _apiPost(request);
+          final newContent =
+              verifiedContent['choices'][0]['message']['content'].trim();
+
+          // Clean the fixed content
+          final cleanNewContent =
+              newContent.replaceAll('```json', '').replaceAll('```', '').trim();
+          log('AI fixed content: $cleanNewContent');
+
+          // Try to parse the fixed JSON
+          cards = jsonDecode(cleanNewContent) as List;
+          log('Successfully parsed fixed JSON');
+        } catch (fixError) {
+          log('Failed to fix JSON: $fixError');
+          throw Exception(
+              'Failed to parse API response as JSON, even after attempting to fix it: ${fixError.toString()}');
+        }
       }
 
       // Validate and convert cards
-
       return cards.map((card) {
         if (!card.containsKey('front') || !card.containsKey('back')) {
           throw Exception('Invalid card format: Missing front or back field');
@@ -360,6 +384,140 @@ class DeckService implements IDeckService {
       }).toList();
     } else {
       throw Exception('Failed to generate flashcards');
+    }
+  }
+
+  // New method to verify flashcards with AI
+  Future<Map<String, dynamic>> _verifyFlashcardsWithAI(String content) async {
+    try {
+      // Create verification prompt
+      final verificationBody = {
+        'model': await _getModel().then((models) => models.first),
+        'temperature': 0.7,
+        'top_p': 0.95,
+        'max_tokens': 4000,
+        'messages': [
+          {
+            'role': 'system',
+            'content': '''You are the last resource for verifying flashcards.'''
+          },
+          {
+            'role': 'user',
+            'content':
+                '''You are an AI designed to analyze and correct JSON files. Your goal is to ensure the JSON is valid, properly structured, and formatted correctly. Follow these rules when processing JSON:
+
+Rules for JSON Fixing:
+1. Validate the JSON syntax – Ensure it is correctly formatted and parsable.
+2. Fix structural errors – Repair missing commas, brackets, or incorrect data types.
+3. Ensure uniform formatting – Maintain consistent spacing and indentation.
+4. Preserve all data accurately – Do not alter any information or meaning.
+5. Ensure strings are properly formatted – Remove unintended line breaks within values.
+6. Check for missing or extra brackets – Close any unclosed arrays or objects.
+7. Output a corrected JSON file – Return the fixed JSON in a properly formatted structure.
+
+Example Input (Incorrect JSON):
+[
+    {"front":"What is the most common cause of tricuspid regurgitation?","back":"Secondary to left-sided heart disease, such as
+    mitral valve disease or left ventricular failure."},
+    {"front":"What is the classic physical exam finding in severe tricuspid regurgitation?","back":"Giant 'v' waves in the jugular 
+    venous pulse."},
+    {"front":"What is the most common cause of pulmonic stenosis in adults?","back":"Rheumatic heart disease."},
+]
+
+Expected Fixed JSON Output:
+[
+    {
+        "front": "What is the most common cause of tricuspid regurgitation?",
+        "back": "Secondary to left-sided heart disease, such as mitral valve disease or left ventricular failure."
+    },
+    {
+        "front": "What is the classic physical exam finding in severe tricuspid regurgitation?",
+        "back": "Giant 'v' waves in the jugular venous pulse."
+    },
+    {
+        "front": "What is the most common cause of pulmonic stenosis in adults?",
+        "back": "Rheumatic heart disease."
+    }
+]
+
+Instructions for AI:
+- Identify and correct all syntax errors.
+- Ensure all objects are properly enclosed and formatted.
+- Remove unnecessary line breaks within strings.
+- Return both the fixed JSON and a list of corrections made.
+
+Now, fix the following JSON content:
+${content}
+'''
+          }
+        ]
+      };
+
+      return verificationBody;
+    } catch (e) {
+      log('Error verifying flashcards: $e');
+      // Return a fallback verification body with the original content
+      return {
+        'model': 'gpt-3.5-turbo', // Fallback model
+        'temperature': 0.5,
+        'top_p': 0.9,
+        'max_tokens': 2000,
+        'messages': [
+          {
+            'role': 'system',
+            'content': '''You are the last resource for verifying flashcards.'''
+          },
+          {
+            'role': 'user',
+            'content':
+                '''You are an AI designed to analyze and correct JSON files. Your goal is to ensure the JSON is valid, properly structured, and formatted correctly. Follow these rules when processing JSON:
+
+Rules for JSON Fixing:
+1. Validate the JSON syntax – Ensure it is correctly formatted and parsable.
+2. Fix structural errors – Repair missing commas, brackets, or incorrect data types.
+3. Ensure uniform formatting – Maintain consistent spacing and indentation.
+4. Preserve all data accurately – Do not alter any information or meaning.
+5. Ensure strings are properly formatted – Remove unintended line breaks within values.
+6. Check for missing or extra brackets – Close any unclosed arrays or objects.
+7. Output a corrected JSON file – Return the fixed JSON in a properly formatted structure.
+
+Example Input (Incorrect JSON):
+[
+    {"front":"What is the most common cause of tricuspid regurgitation?","back":"Secondary to left-sided heart disease, such as
+    mitral valve disease or left ventricular failure."},
+    {"front":"What is the classic physical exam finding in severe tricuspid regurgitation?","back":"Giant 'v' waves in the jugular 
+    venous pulse."},
+    {"front":"What is the most common cause of pulmonic stenosis in adults?","back":"Rheumatic heart disease."},
+]
+
+Expected Fixed JSON Output:
+[
+    {
+        "front": "What is the most common cause of tricuspid regurgitation?",
+        "back": "Secondary to left-sided heart disease, such as mitral valve disease or left ventricular failure."
+    },
+    {
+        "front": "What is the classic physical exam finding in severe tricuspid regurgitation?",
+        "back": "Giant 'v' waves in the jugular venous pulse."
+    },
+    {
+        "front": "What is the most common cause of pulmonic stenosis in adults?",
+        "back": "Rheumatic heart disease."
+    }
+]
+
+Instructions for AI:
+- Identify and correct all syntax errors.
+- Ensure all objects are properly enclosed and formatted.
+- Remove unnecessary line breaks within strings.
+- Return both the fixed JSON and a list of corrections made.
+
+Now, fix the following JSON content:
+${content}
+'''
+          }
+        ],
+      };
     }
   }
 
@@ -632,10 +790,12 @@ class DeckService implements IDeckService {
 
   Future<String> _getDeckDifficultyID(String deckDifficultyName) async {
     try {
+      print('fetching deckDifficultyName: $deckDifficultyName.toLowerCase()');
+
       final deckDifficulty = await _supabaseClient
           .from('deck_difficulties')
           .select('id')
-          .eq('name', deckDifficultyName)
+          .eq('name', deckDifficultyName.toLowerCase())
           .single();
 
       if (deckDifficulty.isEmpty) {
@@ -678,5 +838,426 @@ class DeckService implements IDeckService {
     } catch (e) {
       throw ErrorHandler.handle(e);
     }
+  }
+
+  // Import decks from JSON file (admin only)
+  @override
+  Future<DeckImportResult> importDecksFromJson(
+      String jsonContent, String userId) async {
+    try {
+      // Parse and validate the JSON content
+      Map<String, dynamic> jsonMap;
+      try {
+        jsonMap = jsonDecode(jsonContent) as Map<String, dynamic>;
+        print(jsonMap);
+      } catch (e) {
+        print(e);
+        return DeckImportResult(
+          success: false,
+          message: 'Invalid JSON format',
+          totalDecks: 0,
+          successfulDecks: 0,
+          errors: ['Failed to parse JSON: ${e.toString()}'],
+        );
+      }
+
+      // Check if the JSON has the new 'collections' format
+      if (jsonMap.containsKey('collections') &&
+          jsonMap['collections'] is List) {
+        // Handle the new collections format
+        return await _importCollectionsFromJson(jsonMap, userId);
+      }
+
+      // Handle the old format with 'decks' and 'collection'
+      // Validate the JSON structure
+      if (!jsonMap.containsKey('decks') || jsonMap['decks'] is! List) {
+        return DeckImportResult(
+          success: false,
+          message: 'Invalid JSON structure',
+          totalDecks: 0,
+          successfulDecks: 0,
+          errors: [
+            'JSON must contain a "decks" array or a "collections" array'
+          ],
+        );
+      }
+
+      // Create DeckImport object
+      DeckImport deckImport;
+      try {
+        // For backward compatibility, create a collection with the decks
+        final List<dynamic> decksList = jsonMap['decks'] as List;
+        final CollectionInfo collection = jsonMap.containsKey('collection')
+            ? CollectionInfo.fromJson(
+                jsonMap['collection'] as Map<String, dynamic>)
+            : CollectionInfo(
+                name: 'Imported Collection',
+                subject: 'Imported',
+                description: 'Imported from JSON',
+                isPublic: false,
+                decks: [],
+              );
+
+        // Convert old format to new format
+        final List<DeckImportItem> decks = decksList
+            .map((deckJson) =>
+                DeckImportItem.fromJson(deckJson as Map<String, dynamic>))
+            .toList();
+
+        // Create a collection with the decks
+        final CollectionInfo collectionWithDecks = CollectionInfo(
+          name: collection.name,
+          subject: collection.subject,
+          description: collection.description,
+          isPublic: collection.isPublic,
+          decks: decks,
+        );
+
+        deckImport = DeckImport(collections: [collectionWithDecks]);
+      } catch (e) {
+        return DeckImportResult(
+          success: false,
+          message: 'Invalid deck data format',
+          totalDecks: 0,
+          successfulDecks: 0,
+          errors: ['Failed to parse deck data: ${e.toString()}'],
+        );
+      }
+
+      // Process the collection
+      if (deckImport.collections.isEmpty ||
+          deckImport.collections[0].decks.isEmpty) {
+        return DeckImportResult(
+          success: false,
+          message: 'No decks found in import data',
+          totalDecks: 0,
+          successfulDecks: 0,
+          errors: ['No decks found in import data'],
+        );
+      }
+
+      final CollectionInfo collection = deckImport.collections[0];
+      final List<DeckImportItem> decks = collection.decks;
+
+      // Validate each deck's data
+      final List<String> validationErrors =
+          await _validateDeckImport(deckImport);
+      if (validationErrors.isNotEmpty) {
+        return DeckImportResult(
+          success: false,
+          message: 'Validation failed',
+          totalDecks: decks.length,
+          successfulDecks: 0,
+          errors: validationErrors,
+        );
+      }
+
+      // Process each deck
+      final List<String> errors = [];
+      int successCount = 0;
+      final List<String> createdDeckIds = [];
+
+      for (final deck in decks) {
+        try {
+          final deckId = _uuid.v4();
+          await createDeck(
+            deck.topic,
+            deck.focus,
+            deck.category,
+            deck.difficultyLevel,
+            userId,
+            deck.cardCount,
+          );
+
+          // Get the deck ID from the created deck
+          final deckDetails = await _supabaseClient
+              .from('decks')
+              .select('id')
+              .eq('title', '${deck.topic} - ${deck.focus}')
+              .eq('creator_id', userId)
+              .order('created_at', ascending: false)
+              .limit(1)
+              .single();
+
+          final createdDeckId = deckDetails['id'] as String;
+          createdDeckIds.add(createdDeckId);
+
+          successCount++;
+          log('Successfully created deck: ${deck.topic} - ${deck.focus}');
+        } catch (e) {
+          final errorMsg =
+              'Failed to create deck "${deck.topic} - ${deck.focus}": ${e.toString()}';
+          log(errorMsg);
+          errors.add(errorMsg);
+        }
+      }
+
+      // Create collection if specified
+      String? collectionId;
+      if (createdDeckIds.isNotEmpty) {
+        print('Creating collections now.');
+        try {
+          final createdCollection = await _collectionService.createCollection(
+            name: collection.name,
+            subject: collection.subject,
+            description: collection.description,
+            deckIds: createdDeckIds,
+            isPublic: collection.isPublic,
+          );
+          collectionId = createdCollection.id;
+          log('Successfully created collection: ${collection.name}');
+          print('Successfully created collection: ${collection.name}');
+        } catch (e) {
+          final errorMsg = 'Failed to create collection: ${e.toString()}';
+          log(errorMsg);
+          errors.add(errorMsg);
+        }
+      }
+
+      // Return result
+      final collectionCreated = collectionId != null;
+
+      return DeckImportResult(
+        success: errors.isEmpty,
+        message: errors.isEmpty
+            ? collectionCreated
+                ? 'Successfully imported all decks and created collection'
+                : 'Imported decks but failed to create collection'
+            : 'Imported $successCount out of ${decks.length} decks',
+        totalDecks: decks.length,
+        successfulDecks: successCount,
+        errors: errors,
+        collectionIds: collectionId != null ? [collectionId] : null,
+      );
+    } catch (e) {
+      log('Error importing decks: $e');
+      return DeckImportResult(
+        success: false,
+        message: 'Import failed',
+        totalDecks: 0,
+        successfulDecks: 0,
+        errors: ['Unexpected error: ${e.toString()}'],
+      );
+    }
+  }
+
+  // Import collections from the new JSON format
+  Future<DeckImportResult> _importCollectionsFromJson(
+      Map<String, dynamic> jsonMap, String userId) async {
+    try {
+      print(jsonMap);
+      final List<dynamic> collectionsList = jsonMap['collections'] as List;
+
+      int totalDecks = 0;
+      int successfulDecks = 0;
+      final List<String> errors = [];
+      final List<String> createdCollectionIds = [];
+
+      // Process each collection
+      for (final collectionData in collectionsList) {
+        if (collectionData is! Map<String, dynamic>) {
+          errors.add('Invalid collection format: Collection must be an object');
+          continue;
+        }
+
+        if (!collectionData.containsKey('decks') ||
+            collectionData['decks'] is! List) {
+          errors.add(
+              'Invalid collection format: Collection must contain a "decks" array');
+          continue;
+        }
+
+        final String collectionName =
+            collectionData['name'] as String? ?? 'Unnamed Collection';
+        final String subject = collectionData['subject'] as String? ?? '';
+        final String description =
+            collectionData['description'] as String? ?? '';
+        final bool isPublic = collectionData['isPublic'] as bool? ?? false;
+
+        final List<dynamic> decksList = collectionData['decks'] as List;
+        totalDecks += decksList.length;
+
+        // Create decks for this collection
+        final List<String> createdDeckIds = [];
+
+        for (final deckData in decksList) {
+          if (deckData is! Map<String, dynamic>) {
+            errors.add('Invalid deck format in collection "$collectionName"');
+            continue;
+          }
+
+          try {
+            final deckImportItem = DeckImportItem(
+              topic: deckData['topic'] as String? ?? '',
+              focus: deckData['focus'] as String? ?? '',
+              category: deckData['category'] as String? ?? '',
+              difficultyLevel: deckData['difficultyLevel'] as String? ?? '',
+              cardCount: deckData['cardCount'] as int? ?? 0,
+            );
+
+            // Validate deck data
+            final List<String> deckErrors =
+                await _validateDeckImportItem(deckImportItem);
+            if (deckErrors.isNotEmpty) {
+              errors.addAll(
+                  deckErrors.map((e) => 'In collection "$collectionName": $e'));
+              continue;
+            }
+
+            // Create the deck
+            await createDeck(
+              deckImportItem.topic,
+              deckImportItem.focus,
+              deckImportItem.category,
+              deckImportItem.difficultyLevel,
+              userId,
+              deckImportItem.cardCount,
+            );
+
+            // Get the deck ID
+            final deckDetails = await _supabaseClient
+                .from('decks')
+                .select('id')
+                .eq('title',
+                    '${deckImportItem.topic} - ${deckImportItem.focus}')
+                .eq('creator_id', userId)
+                .order('created_at', ascending: false)
+                .limit(1)
+                .single();
+
+            final createdDeckId = deckDetails['id'] as String;
+            createdDeckIds.add(createdDeckId);
+            successfulDecks++;
+
+            log('Successfully created deck: ${deckImportItem.topic} - ${deckImportItem.focus}');
+          } catch (e) {
+            final errorMsg =
+                'Failed to create deck in collection "$collectionName": ${e.toString()}';
+            log(errorMsg);
+            errors.add(errorMsg);
+          }
+        }
+
+        // Create the collection if we have decks
+        if (createdDeckIds.isNotEmpty) {
+          try {
+            final collection = await _collectionService.createCollection(
+              name: collectionName,
+              subject: subject,
+              description: description,
+              deckIds: createdDeckIds,
+              isPublic: isPublic,
+            );
+            createdCollectionIds.add(collection.id);
+            log('Successfully created collection: $collectionName');
+          } catch (e) {
+            final errorMsg =
+                'Failed to create collection "$collectionName": ${e.toString()}';
+            log(errorMsg);
+            errors.add(errorMsg);
+          }
+        }
+      }
+
+      // Return result
+      return DeckImportResult(
+        success: errors.isEmpty && successfulDecks > 0,
+        message: errors.isEmpty
+            ? 'Successfully imported $successfulDecks decks across ${createdCollectionIds.length} collections'
+            : 'Imported $successfulDecks out of $totalDecks decks with errors',
+        totalDecks: totalDecks,
+        successfulDecks: successfulDecks,
+        errors: errors,
+        collectionIds:
+            createdCollectionIds.isNotEmpty ? createdCollectionIds : null,
+      );
+    } catch (e) {
+      log('Error importing collections: $e');
+      return DeckImportResult(
+        success: false,
+        message: 'Import failed',
+        totalDecks: 0,
+        successfulDecks: 0,
+        errors: ['Unexpected error: ${e.toString()}'],
+      );
+    }
+  }
+
+  // Validate a single deck import item
+  Future<List<String>> _validateDeckImportItem(DeckImportItem deck) async {
+    final List<String> errors = [];
+
+    // Get available categories and difficulty levels for validation
+    final List<String> availableCategories = await getDeckCategory();
+    final List<String> availableDifficulties =
+        await getDeckDifficulty('default');
+
+    // Validate topic and focus
+    if (deck.topic.isEmpty) {
+      errors.add('Topic cannot be empty');
+    }
+    if (deck.focus.isEmpty) {
+      errors.add('Focus cannot be empty');
+    }
+
+    // Validate category
+    if (deck.category.isEmpty) {
+      errors.add('Category cannot be empty');
+    } else if (!availableCategories.contains(deck.category)) {
+      errors.add(
+          'Invalid category "${deck.category}". Available categories: ${availableCategories.join(", ")}');
+    }
+
+    // Validate difficulty level
+    if (deck.difficultyLevel.isEmpty) {
+      errors.add('Difficulty level cannot be empty');
+    } else if (!availableDifficulties.contains(deck.difficultyLevel)) {
+      errors.add(
+          'Invalid difficulty level "${deck.difficultyLevel}". Available difficulty levels: ${availableDifficulties.join(", ")}');
+    }
+
+    // Validate card count
+    if (deck.cardCount <= 0) {
+      errors.add('Card count must be greater than 0');
+    } else if (deck.cardCount > 100) {
+      errors.add('Card count cannot exceed 100');
+    }
+
+    return errors;
+  }
+
+  // Validate deck import data
+  Future<List<String>> _validateDeckImport(DeckImport deckImport) async {
+    final List<String> errors = [];
+    final Set<String> deckTitles = {};
+
+    // Get available categories and difficulty levels for validation
+    final List<String> availableCategories = await getDeckCategory();
+    final List<String> availableDifficulties =
+        await getDeckDifficulty('default');
+
+    // Validate each collection and its decks
+    for (final collection in deckImport.collections) {
+      for (int i = 0; i < collection.decks.length; i++) {
+        final deck = collection.decks[i];
+        final deckIndex = i + 1;
+        final deckTitle = '${deck.topic} - ${deck.focus}';
+
+        // Check for duplicate deck titles
+        if (deckTitles.contains(deckTitle)) {
+          errors.add('Deck $deckIndex: Duplicate deck title "$deckTitle"');
+        } else {
+          deckTitles.add(deckTitle);
+        }
+
+        // Validate the deck using the common validation method
+        final deckErrors = await _validateDeckImportItem(deck);
+        if (deckErrors.isNotEmpty) {
+          errors.addAll(deckErrors.map((e) => 'Deck $deckIndex: $e'));
+        }
+      }
+    }
+
+    return errors;
   }
 }

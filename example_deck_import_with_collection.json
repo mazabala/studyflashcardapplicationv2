@@ -1,0 +1,31 @@
+{
+  "decks": [
+    {
+      "topic": "Cardiology",
+      "focus": "Heart Failure",
+      "category": "Medicine",
+      "difficultyLevel": "Advanced",
+      "cardCount": 20
+    },
+    {
+      "topic": "Neurology",
+      "focus": "Stroke Management",
+      "category": "Medicine",
+      "difficultyLevel": "Intermediate",
+      "cardCount": 15
+    },
+    {
+      "topic": "Pharmacology",
+      "focus": "Antibiotics",
+      "category": "Medicine",
+      "difficultyLevel": "Beginner",
+      "cardCount": 10
+    }
+  ],
+  "collection": {
+    "name": "Medical Sciences",
+    "subject": "Medicine",
+    "description": "A collection of medical science flashcards covering various specialties",
+    "isPublic": true
+  }
+} 

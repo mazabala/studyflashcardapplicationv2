@@ -1,0 +1,872 @@
+{
+  "collections": [
+    {
+      "name": "Cardiac Anatomy and Physiology",
+      "subject": "Cardiology",
+      "description": "Fundamental concepts of cardiac structure, function, and electrophysiology",
+      "isPublic": true,
+      "decks": [
+        {
+          "topic": "Cardiac Anatomy",
+          "focus": "Chambers and Valves",
+          "category": "Medicine",
+          "difficultyLevel": "Beginner",
+          "cardCount": 10
+        },
+        {
+          "topic": "Cardiac Anatomy",
+          "focus": "Coronary Circulation",
+          "category": "Medicine",
+          "difficultyLevel": "Intermediate",
+          "cardCount": 25
+        },
+        {
+          "topic": "Cardiac Physiology",
+          "focus": "Cardiac Cycle",
+          "category": "Medicine",
+          "difficultyLevel": "Intermediate",
+          "cardCount": 25
+        },
+        {
+          "topic": "Cardiac Physiology",
+          "focus": "Cardiac Output",
+          "category": "Medicine",
+          "difficultyLevel": "Intermediate",
+          "cardCount": 25
+        },
+        {
+          "topic": "Electrophysiology",
+          "focus": "Action Potentials",
+          "category": "Medicine",
+          "difficultyLevel": "Advanced",
+          "cardCount": 40
+        },
+        {
+          "topic": "Electrophysiology",
+          "focus": "Conduction System",
+          "category": "Medicine",
+          "difficultyLevel": "Intermediate",
+          "cardCount": 25
+        },
+        {
+          "topic": "Electrophysiology",
+          "focus": "ECG Interpretation",
+          "category": "Medicine",
+          "difficultyLevel": "Advanced",
+          "cardCount": 40
+        }
+      ]
+    },
+    {
+      "name": "Coronary Artery Disease",
+      "subject": "Cardiology",
+      "description": "Pathophysiology, diagnosis, and management of coronary artery disease, including stable angina and acute coronary syndromes",
+      "isPublic": true,
+      "decks": [
+        {
+          "topic": "Pathophysiology",
+          "focus": "Atherosclerosis",
+          "category": "Medicine",
+          "difficultyLevel": "Intermediate",
+          "cardCount": 25
+        },
+        {
+          "topic": "Pathophysiology",
+          "focus": "Risk Factors",
+          "category": "Medicine",
+          "difficultyLevel": "Beginner",
+          "cardCount": 10
+        },
+        {
+          "topic": "Stable Angina",
+          "focus": "Clinical Presentation",
+          "category": "Medicine",
+          "difficultyLevel": "Intermediate",
+          "cardCount": 25
+        },
+        {
+          "topic": "Stable Angina",
+          "focus": "Diagnostic Testing",
+          "category": "Medicine",
+          "difficultyLevel": "Intermediate",
+          "cardCount": 25
+        },
+        {
+          "topic": "Acute Coronary Syndromes",
+          "focus": "NSTEMI",
+          "category": "Medicine",
+          "difficultyLevel": "Advanced",
+          "cardCount": 40
+        },
+        {
+          "topic": "Acute Coronary Syndromes",
+          "focus": "STEMI",
+          "category": "Medicine",
+          "difficultyLevel": "Advanced",
+          "cardCount": 40
+        },
+        {
+          "topic": "Management",
+          "focus": "Medical Therapy",
+          "category": "Medicine",
+          "difficultyLevel": "Advanced",
+          "cardCount": 40
+        },
+        {
+          "topic": "Management",
+          "focus": "Revascularization",
+          "category": "Medicine",
+          "difficultyLevel": "Advanced",
+          "cardCount": 40
+        }
+      ]
+    },
+    {
+      "name": "Heart Failure",
+      "subject": "Cardiology",
+      "description": "Classification, pathophysiology, diagnosis, and management of heart failure with reduced and preserved ejection fraction",
+      "isPublic": true,
+      "decks": [
+        {
+          "topic": "Classification",
+          "focus": "HFrEF vs HFpEF",
+          "category": "Medicine",
+          "difficultyLevel": "Intermediate",
+          "cardCount": 25
+        },
+        {
+          "topic": "Classification",
+          "focus": "NYHA and ACC/AHA Staging",
+          "category": "Medicine",
+          "difficultyLevel": "Intermediate",
+          "cardCount": 25
+        },
+        {
+          "topic": "Pathophysiology",
+          "focus": "Systolic Dysfunction",
+          "category": "Medicine",
+          "difficultyLevel": "Advanced",
+          "cardCount": 40
+        },
+        {
+          "topic": "Pathophysiology",
+          "focus": "Diastolic Dysfunction",
+          "category": "Medicine",
+          "difficultyLevel": "Advanced",
+          "cardCount": 40
+        },
+        {
+          "topic": "Diagnosis",
+          "focus": "Clinical Evaluation",
+          "category": "Medicine",
+          "difficultyLevel": "Intermediate",
+          "cardCount": 25
+        },
+        {
+          "topic": "Diagnosis",
+          "focus": "Diagnostic Testing",
+          "category": "Medicine",
+          "difficultyLevel": "Intermediate",
+          "cardCount": 25
+        },
+        {
+          "topic": "Management",
+          "focus": "HFrEF Treatment",
+          "category": "Medicine",
+          "difficultyLevel": "Advanced",
+          "cardCount": 40
+        },
+        {
+          "topic": "Management",
+          "focus": "HFpEF Treatment",
+          "category": "Medicine",
+          "difficultyLevel": "Advanced",
+          "cardCount": 40
+        },
+        {
+          "topic": "Management",
+          "focus": "Acute Decompensated HF",
+          "category": "Medicine",
+          "difficultyLevel": "Advanced",
+          "cardCount": 40
+        }
+      ]
+    },
+    {
+      "name": "Arrhythmias",
+      "subject": "Cardiology",
+      "description": "Classification, diagnosis, and management of cardiac arrhythmias, including bradyarrhythmias and tachyarrhythmias",
+      "isPublic": true,
+      "decks": [
+        {
+          "topic": "Bradyarrhythmias",
+          "focus": "Sinus Node Dysfunction",
+          "category": "Medicine",
+          "difficultyLevel": "Intermediate",
+          "cardCount": 25
+        },
+        {
+          "topic": "Bradyarrhythmias",
+          "focus": "AV Blocks",
+          "category": "Medicine",
+          "difficultyLevel": "Intermediate",
+          "cardCount": 25
+        },
+        {
+          "topic": "Supraventricular Tachycardias",
+          "focus": "Atrial Fibrillation",
+          "category": "Medicine",
+          "difficultyLevel": "Advanced",
+          "cardCount": 40
+        },
+        {
+          "topic": "Supraventricular Tachycardias",
+          "focus": "Atrial Flutter",
+          "category": "Medicine",
+          "difficultyLevel": "Intermediate",
+          "cardCount": 25
+        },
+        {
+          "topic": "Supraventricular Tachycardias",
+          "focus": "AVNRT and AVRT",
+          "category": "Medicine",
+          "difficultyLevel": "Advanced",
+          "cardCount": 40
+        },
+        {
+          "topic": "Ventricular Arrhythmias",
+          "focus": "PVCs",
+          "category": "Medicine",
+          "difficultyLevel": "Intermediate",
+          "cardCount": 25
+        },
+        {
+          "topic": "Ventricular Arrhythmias",
+          "focus": "VT and VF",
+          "category": "Medicine",
+          "difficultyLevel": "Advanced",
+          "cardCount": 40
+        },
+        {
+          "topic": "Management",
+          "focus": "Antiarrhythmic Drugs",
+          "category": "Medicine",
+          "difficultyLevel": "Advanced",
+          "cardCount": 40
+        },
+        {
+          "topic": "Management",
+          "focus": "Devices and Ablation",
+          "category": "Medicine",
+          "difficultyLevel": "Advanced",
+          "cardCount": 40
+        }
+      ]
+    },
+    {
+      "name": "Valvular Heart Disease",
+      "subject": "Cardiology",
+      "description": "Pathophysiology, diagnosis, and management of diseases affecting cardiac valves",
+      "isPublic": true,
+      "decks": [
+        {
+          "topic": "Aortic Valve",
+          "focus": "Aortic Stenosis",
+          "category": "Medicine",
+          "difficultyLevel": "Advanced",
+          "cardCount": 40
+        },
+        {
+          "topic": "Aortic Valve",
+          "focus": "Aortic Regurgitation",
+          "category": "Medicine",
+          "difficultyLevel": "Advanced",
+          "cardCount": 40
+        },
+        {
+          "topic": "Mitral Valve",
+          "focus": "Mitral Stenosis",
+          "category": "Medicine",
+          "difficultyLevel": "Advanced",
+          "cardCount": 40
+        },
+        {
+          "topic": "Mitral Valve",
+          "focus": "Mitral Regurgitation",
+          "category": "Medicine",
+          "difficultyLevel": "Advanced",
+          "cardCount": 40
+        },
+        {
+          "topic": "Right-Sided Valves",
+          "focus": "Tricuspid and Pulmonic Disease",
+          "category": "Medicine",
+          "difficultyLevel": "Intermediate",
+          "cardCount": 25
+        },
+        {
+          "topic": "Diagnosis",
+          "focus": "Echocardiography",
+          "category": "Medicine",
+          "difficultyLevel": "Advanced",
+          "cardCount": 40
+        },
+        {
+          "topic": "Management",
+          "focus": "Medical Therapy",
+          "category": "Medicine",
+          "difficultyLevel": "Intermediate",
+          "cardCount": 25
+        },
+        {
+          "topic": "Management",
+          "focus": "Surgical and Percutaneous Interventions",
+          "category": "Medicine",
+          "difficultyLevel": "Advanced",
+          "cardCount": 40
+        }
+      ]
+    },
+    {
+      "name": "Cardiomyopathies",
+      "subject": "Cardiology",
+      "description": "Classification, pathophysiology, diagnosis, and management of primary myocardial diseases",
+      "isPublic": true,
+      "decks": [
+        {
+          "topic": "Dilated Cardiomyopathy",
+          "focus": "Etiology and Pathophysiology",
+          "category": "Medicine",
+          "difficultyLevel": "Advanced",
+          "cardCount": 40
+        },
+        {
+          "topic": "Dilated Cardiomyopathy",
+          "focus": "Diagnosis and Management",
+          "category": "Medicine",
+          "difficultyLevel": "Advanced",
+          "cardCount": 40
+        },
+        {
+          "topic": "Hypertrophic Cardiomyopathy",
+          "focus": "Genetics and Pathophysiology",
+          "category": "Medicine",
+          "difficultyLevel": "Advanced",
+          "cardCount": 40
+        },
+        {
+          "topic": "Hypertrophic Cardiomyopathy",
+          "focus": "Diagnosis and Management",
+          "category": "Medicine",
+          "difficultyLevel": "Advanced",
+          "cardCount": 40
+        },
+        {
+          "topic": "Restrictive Cardiomyopathy",
+          "focus": "Etiology and Pathophysiology",
+          "category": "Medicine",
+          "difficultyLevel": "Advanced",
+          "cardCount": 40
+        },
+        {
+          "topic": "Restrictive Cardiomyopathy",
+          "focus": "Diagnosis and Management",
+          "category": "Medicine",
+          "difficultyLevel": "Advanced",
+          "cardCount": 40
+        },
+        {
+          "topic": "Arrhythmogenic Cardiomyopathy",
+          "focus": "Genetics and Pathophysiology",
+          "category": "Medicine",
+          "difficultyLevel": "Advanced",
+          "cardCount": 40
+        },
+        {
+          "topic": "Arrhythmogenic Cardiomyopathy",
+          "focus": "Diagnosis and Management",
+          "category": "Medicine",
+          "difficultyLevel": "Advanced",
+          "cardCount": 40
+        }
+      ]
+    },
+    {
+      "name": "Pericardial Disease",
+      "subject": "Cardiology",
+      "description": "Pathophysiology, diagnosis, and management of diseases affecting the pericardium",
+      "isPublic": true,
+      "decks": [
+        {
+          "topic": "Acute Pericarditis",
+          "focus": "Etiology and Pathophysiology",
+          "category": "Medicine",
+          "difficultyLevel": "Intermediate",
+          "cardCount": 25
+        },
+        {
+          "topic": "Acute Pericarditis",
+          "focus": "Diagnosis and Management",
+          "category": "Medicine",
+          "difficultyLevel": "Intermediate",
+          "cardCount": 25
+        },
+        {
+          "topic": "Pericardial Effusion",
+          "focus": "Etiology and Pathophysiology",
+          "category": "Medicine",
+          "difficultyLevel": "Intermediate",
+          "cardCount": 25
+        },
+        {
+          "topic": "Pericardial Effusion",
+          "focus": "Diagnosis and Management",
+          "category": "Medicine",
+          "difficultyLevel": "Intermediate",
+          "cardCount": 25
+        },
+        {
+          "topic": "Cardiac Tamponade",
+          "focus": "Pathophysiology",
+          "category": "Medicine",
+          "difficultyLevel": "Advanced",
+          "cardCount": 40
+        },
+        {
+          "topic": "Cardiac Tamponade",
+          "focus": "Diagnosis and Management",
+          "category": "Medicine",
+          "difficultyLevel": "Advanced",
+          "cardCount": 40
+        },
+        {
+          "topic": "Constrictive Pericarditis",
+          "focus": "Etiology and Pathophysiology",
+          "category": "Medicine",
+          "difficultyLevel": "Advanced",
+          "cardCount": 40
+        },
+        {
+          "topic": "Constrictive Pericarditis",
+          "focus": "Diagnosis and Management",
+          "category": "Medicine",
+          "difficultyLevel": "Advanced",
+          "cardCount": 40
+        }
+      ]
+    },
+    {
+      "name": "Pulmonary Hypertension",
+      "subject": "Cardiology",
+      "description": "Classification, pathophysiology, diagnosis, and management of pulmonary hypertension",
+      "isPublic": true,
+      "decks": [
+        {
+          "topic": "Classification",
+          "focus": "WHO Groups",
+          "category": "Medicine",
+          "difficultyLevel": "Intermediate",
+          "cardCount": 25
+        },
+        {
+          "topic": "Pathophysiology",
+          "focus": "PAH Mechanisms",
+          "category": "Medicine",
+          "difficultyLevel": "Advanced",
+          "cardCount": 40
+        },
+        {
+          "topic": "Diagnosis",
+          "focus": "Clinical Evaluation",
+          "category": "Medicine",
+          "difficultyLevel": "Intermediate",
+          "cardCount": 25
+        },
+        {
+          "topic": "Diagnosis",
+          "focus": "Diagnostic Testing",
+          "category": "Medicine",
+          "difficultyLevel": "Advanced",
+          "cardCount": 40
+        },
+        {
+          "topic": "Management",
+          "focus": "PAH-Specific Therapy",
+          "category": "Medicine",
+          "difficultyLevel": "Advanced",
+          "cardCount": 40
+        },
+        {
+          "topic": "Management",
+          "focus": "Supportive Care",
+          "category": "Medicine",
+          "difficultyLevel": "Intermediate",
+          "cardCount": 25
+        }
+      ]
+    },
+    {
+      "name": "Aortic Disease",
+      "subject": "Cardiology",
+      "description": "Pathophysiology, diagnosis, and management of diseases affecting the aorta",
+      "isPublic": true,
+      "decks": [
+        {
+          "topic": "Aortic Aneurysm",
+          "focus": "Thoracic Aneurysms",
+          "category": "Medicine",
+          "difficultyLevel": "Advanced",
+          "cardCount": 40
+        },
+        {
+          "topic": "Aortic Aneurysm",
+          "focus": "Abdominal Aneurysms",
+          "category": "Medicine",
+          "difficultyLevel": "Intermediate",
+          "cardCount": 25
+        },
+        {
+          "topic": "Aortic Dissection",
+          "focus": "Classification",
+          "category": "Medicine",
+          "difficultyLevel": "Intermediate",
+          "cardCount": 25
+        },
+        {
+          "topic": "Aortic Dissection",
+          "focus": "Diagnosis",
+          "category": "Medicine",
+          "difficultyLevel": "Advanced",
+          "cardCount": 40
+        },
+        {
+          "topic": "Aortic Dissection",
+          "focus": "Management",
+          "category": "Medicine",
+          "difficultyLevel": "Advanced",
+          "cardCount": 40
+        },
+        {
+          "topic": "Aortitis",
+          "focus": "Inflammatory Aortic Diseases",
+          "category": "Medicine",
+          "difficultyLevel": "Advanced",
+          "cardCount": 40
+        }
+      ]
+    },
+    {
+      "name": "Congenital Heart Disease",
+      "subject": "Cardiology",
+      "description": "Pathophysiology, diagnosis, and management of congenital cardiac defects in children and adults",
+      "isPublic": true,
+      "decks": [
+        {
+          "topic": "Acyanotic Defects",
+          "focus": "ASD, VSD, PDA",
+          "category": "Medicine",
+          "difficultyLevel": "Intermediate",
+          "cardCount": 25
+        },
+        {
+          "topic": "Acyanotic Defects",
+          "focus": "Coarctation of Aorta",
+          "category": "Medicine",
+          "difficultyLevel": "Intermediate",
+          "cardCount": 25
+        },
+        {
+          "topic": "Cyanotic Defects",
+          "focus": "Tetralogy of Fallot",
+          "category": "Medicine",
+          "difficultyLevel": "Advanced",
+          "cardCount": 40
+        },
+        {
+          "topic": "Cyanotic Defects",
+          "focus": "Transposition of Great Arteries",
+          "category": "Medicine",
+          "difficultyLevel": "Advanced",
+          "cardCount": 40
+        },
+        {
+          "topic": "Adult Congenital Heart Disease",
+          "focus": "Long-term Complications",
+          "category": "Medicine",
+          "difficultyLevel": "Advanced",
+          "cardCount": 40
+        },
+        {
+          "topic": "Adult Congenital Heart Disease",
+          "focus": "Management Principles",
+          "category": "Medicine",
+          "difficultyLevel": "Advanced",
+          "cardCount": 40
+        }
+      ]
+    },
+    {
+      "name": "Cardiovascular Testing",
+      "subject": "Cardiology",
+      "description": "Principles, indications, and interpretation of cardiovascular diagnostic tests",
+      "isPublic": true,
+      "decks": [
+        {
+          "topic": "Electrocardiography",
+          "focus": "Basic Interpretation",
+          "category": "Medicine",
+          "difficultyLevel": "Intermediate",
+          "cardCount": 25
+        },
+        {
+          "topic": "Electrocardiography",
+          "focus": "Advanced Interpretation",
+          "category": "Medicine",
+          "difficultyLevel": "Advanced",
+          "cardCount": 40
+        },
+        {
+          "topic": "Echocardiography",
+          "focus": "TTE Basics",
+          "category": "Medicine",
+          "difficultyLevel": "Intermediate",
+          "cardCount": 25
+        },
+        {
+          "topic": "Echocardiography",
+          "focus": "TEE and Advanced Echo",
+          "category": "Medicine",
+          "difficultyLevel": "Advanced",
+          "cardCount": 40
+        },
+        {
+          "topic": "Stress Testing",
+          "focus": "Exercise Stress Tests",
+          "category": "Medicine",
+          "difficultyLevel": "Intermediate",
+          "cardCount": 25
+        },
+        {
+          "topic": "Stress Testing",
+          "focus": "Nuclear and Stress Echo",
+          "category": "Medicine",
+          "difficultyLevel": "Advanced",
+          "cardCount": 40
+        },
+        {
+          "topic": "Cardiac CT and MRI",
+          "focus": "Indications and Interpretation",
+          "category": "Medicine",
+          "difficultyLevel": "Advanced",
+          "cardCount": 40
+        },
+        {
+          "topic": "Cardiac Catheterization",
+          "focus": "Hemodynamics",
+          "category": "Medicine",
+          "difficultyLevel": "Advanced",
+          "cardCount": 40
+        },
+        {
+          "topic": "Cardiac Catheterization",
+          "focus": "Coronary Angiography",
+          "category": "Medicine",
+          "difficultyLevel": "Advanced",
+          "cardCount": 40
+        }
+      ]
+    },
+    {
+      "name": "Preventive Cardiology",
+      "subject": "Cardiology",
+      "description": "Risk assessment, prevention strategies, and management of cardiovascular risk factors",
+      "isPublic": true,
+      "decks": [
+        {
+          "topic": "Risk Assessment",
+          "focus": "Risk Calculators",
+          "category": "Medicine",
+          "difficultyLevel": "Intermediate",
+          "cardCount": 25
+        },
+        {
+          "topic": "Dyslipidemia",
+          "focus": "Lipid Guidelines",
+          "category": "Medicine",
+          "difficultyLevel": "Intermediate",
+          "cardCount": 25
+        },
+        {
+          "topic": "Dyslipidemia",
+          "focus": "Management Strategies",
+          "category": "Medicine",
+          "difficultyLevel": "Advanced",
+          "cardCount": 40
+        },
+        {
+          "topic": "Hypertension",
+          "focus": "Guidelines and Classification",
+          "category": "Medicine",
+          "difficultyLevel": "Intermediate",
+          "cardCount": 25
+        },
+        {
+          "topic": "Hypertension",
+          "focus": "Management Strategies",
+          "category": "Medicine",
+          "difficultyLevel": "Advanced",
+          "cardCount": 40
+        },
+        {
+          "topic": "Diabetes and CVD",
+          "focus": "Cardiovascular Risk Management",
+          "category": "Medicine",
+          "difficultyLevel": "Advanced",
+          "cardCount": 40
+        },
+        {
+          "topic": "Lifestyle Modifications",
+          "focus": "Diet and Exercise",
+          "category": "Medicine",
+          "difficultyLevel": "Beginner",
+          "cardCount": 10
+        },
+        {
+          "topic": "Lifestyle Modifications",
+          "focus": "Smoking Cessation",
+          "category": "Medicine",
+          "difficultyLevel": "Beginner",
+          "cardCount": 10
+        }
+      ]
+    },
+    {
+      "name": "Cardiovascular Pharmacology",
+      "subject": "Cardiology",
+      "description": "Mechanisms, indications, contraindications, and side effects of cardiovascular medications",
+      "isPublic": true,
+      "decks": [
+        {
+          "topic": "Antiplatelets",
+          "focus": "Aspirin and P2Y12 Inhibitors",
+          "category": "Medicine",
+          "difficultyLevel": "Intermediate",
+          "cardCount": 25
+        },
+        {
+          "topic": "Anticoagulants",
+          "focus": "Warfarin and DOACs",
+          "category": "Medicine",
+          "difficultyLevel": "Advanced",
+          "cardCount": 40
+        },
+        {
+          "topic": "Antihypertensives",
+          "focus": "First-line Agents",
+          "category": "Medicine",
+          "difficultyLevel": "Intermediate",
+          "cardCount": 25
+        },
+        {
+          "topic": "Antihypertensives",
+          "focus": "Second-line Agents",
+          "category": "Medicine",
+          "difficultyLevel": "Intermediate",
+          "cardCount": 25
+        },
+        {
+          "topic": "Heart Failure Medications",
+          "focus": "Neurohormonal Antagonists",
+          "category": "Medicine",
+          "difficultyLevel": "Advanced",
+          "cardCount": 40
+        },
+        {
+          "topic": "Heart Failure Medications",
+          "focus": "Novel Therapies",
+          "category": "Medicine",
+          "difficultyLevel": "Advanced",
+          "cardCount": 40
+        },
+        {
+          "topic": "Antiarrhythmics",
+          "focus": "Vaughan Williams Classification",
+          "category": "Medicine",
+          "difficultyLevel": "Advanced",
+          "cardCount": 40
+        },
+        {
+          "topic": "Lipid-Lowering Agents",
+          "focus": "Statins and Non-statins",
+          "category": "Medicine",
+          "difficultyLevel": "Intermediate",
+          "cardCount": 25
+        }
+      ]
+    },
+    {
+      "name": "Special Topics in Cardiology",
+      "subject": "Cardiology",
+      "description": "Specialized areas in cardiovascular medicine including pregnancy, geriatrics, and cardio-oncology",
+      "isPublic": true,
+      "decks": [
+        {
+          "topic": "Pregnancy and Heart Disease",
+          "focus": "Physiologic Changes",
+          "category": "Medicine",
+          "difficultyLevel": "Advanced",
+          "cardCount": 40
+        },
+        {
+          "topic": "Pregnancy and Heart Disease",
+          "focus": "Management Principles",
+          "category": "Medicine",
+          "difficultyLevel": "Advanced",
+          "cardCount": 40
+        },
+        {
+          "topic": "Geriatric Cardiology",
+          "focus": "Age-Related Changes",
+          "category": "Medicine",
+          "difficultyLevel": "Intermediate",
+          "cardCount": 25
+        },
+        {
+          "topic": "Geriatric Cardiology",
+          "focus": "Management Considerations",
+          "category": "Medicine",
+          "difficultyLevel": "Advanced",
+          "cardCount": 40
+        },
+        {
+          "topic": "Cardio-Oncology",
+          "focus": "Cancer Therapy Cardiotoxicity",
+          "category": "Medicine",
+          "difficultyLevel": "Advanced",
+          "cardCount": 40
+        },
+        {
+          "topic": "Cardio-Oncology",
+          "focus": "Monitoring and Management",
+          "category": "Medicine",
+          "difficultyLevel": "Advanced",
+          "cardCount": 40
+        },
+        {
+          "topic": "Sports Cardiology",
+          "focus": "Athletic Heart Syndrome",
+          "category": "Medicine",
+          "difficultyLevel": "Advanced",
+          "cardCount": 40
+        },
+        {
+          "topic": "Sports Cardiology",
+          "focus": "Exercise Recommendations",
+          "category": "Medicine",
+          "difficultyLevel": "Intermediate",
+          "cardCount": 25
+        }
+      ]
+    }
+  ]
+} 

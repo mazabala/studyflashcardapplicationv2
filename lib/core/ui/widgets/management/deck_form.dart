@@ -147,7 +147,18 @@ class DeckFormCard extends ConsumerWidget {
   }
 
   Widget _buildCategoryDropdown(WidgetRef ref) {
-    if (categories != null) {
+    // If categories are passed directly, use them
+    if (categories != null && categories!.isNotEmpty) {
+      // Ensure selectedCategory is valid
+      if (formData.selectedCategory == null ||
+          !categories!.contains(formData.selectedCategory)) {
+        // Set it to the first item in the list
+        formData.selectedCategory = categories!.first;
+      }
+
+      // Create a Set to ensure unique values
+      final uniqueCategories = categories!.toSet().toList();
+
       return DropdownButtonFormField<String>(
         borderRadius: BorderRadius.circular(10),
         value: formData.selectedCategory,
@@ -164,7 +175,7 @@ class DeckFormCard extends ConsumerWidget {
             borderRadius: BorderRadius.circular(8),
           ),
         ),
-        items: categories!.map((category) {
+        items: uniqueCategories.map((category) {
           return DropdownMenuItem(
             value: category,
             child: Text(
@@ -180,10 +191,27 @@ class DeckFormCard extends ConsumerWidget {
       );
     }
 
+    // Otherwise, fetch categories from the database
     return FutureBuilder<List<String>>(
       future: ref.read(deckStateProvider.notifier).getDeckCategory(),
       builder: (context, snapshot) {
-        if (snapshot.hasData) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const SizedBox(
+            height: 48,
+            child: Center(child: CircularProgressIndicator(strokeWidth: 2)),
+          );
+        }
+
+        if (snapshot.hasData && snapshot.data!.isNotEmpty) {
+          // Create a Set to ensure unique values
+          final uniqueCategories = snapshot.data!.toSet().toList();
+
+          // If selectedCategory is null or not in the list, set it to the first item
+          if (formData.selectedCategory == null ||
+              !uniqueCategories.contains(formData.selectedCategory)) {
+            formData.selectedCategory = uniqueCategories.first;
+          }
+
           return DropdownButtonFormField<String>(
             borderRadius: BorderRadius.circular(10),
             value: formData.selectedCategory,
@@ -200,7 +228,7 @@ class DeckFormCard extends ConsumerWidget {
                 borderRadius: BorderRadius.circular(8),
               ),
             ),
-            items: snapshot.data!.map((category) {
+            items: uniqueCategories.map((category) {
               return DropdownMenuItem(
                 value: category,
                 child: Text(
@@ -215,16 +243,34 @@ class DeckFormCard extends ConsumerWidget {
             },
           );
         }
+
+        // If we have no data, show an error
         return const SizedBox(
           height: 48,
-          child: Center(child: CircularProgressIndicator(strokeWidth: 2)),
+          child: Center(
+            child: Text(
+              "No categories available",
+              style: TextStyle(color: Colors.red),
+            ),
+          ),
         );
       },
     );
   }
 
   Widget _buildDifficultyDropdown(WidgetRef ref) {
-    if (difficulties != null) {
+    // If difficulties are passed directly, use them
+    if (difficulties != null && difficulties!.isNotEmpty) {
+      // Create a Set to ensure unique values
+      final uniqueDifficulties = difficulties!.toSet().toList();
+
+      // Ensure selectedDifficulty is valid
+      if (formData.selectedDifficulty == null ||
+          !uniqueDifficulties.contains(formData.selectedDifficulty)) {
+        // Set it to the first item in the list
+        formData.selectedDifficulty = uniqueDifficulties.first;
+      }
+
       return DropdownButtonFormField<String>(
         borderRadius: BorderRadius.circular(10),
         value: formData.selectedDifficulty,
@@ -241,7 +287,7 @@ class DeckFormCard extends ConsumerWidget {
             borderRadius: BorderRadius.circular(8),
           ),
         ),
-        items: difficulties!.map((difficulty) {
+        items: uniqueDifficulties.map((difficulty) {
           return DropdownMenuItem(
             value: difficulty,
             child: Text(
@@ -257,11 +303,28 @@ class DeckFormCard extends ConsumerWidget {
       );
     }
 
+    // Otherwise, fetch difficulties from the database
     return FutureBuilder<List<String>>(
       future: ref.read(deckStateProvider.notifier).getDeckDifficulty(
           ref.watch(userStateProvider).subscriptionPlanID ?? ''),
       builder: (context, snapshot) {
-        if (snapshot.hasData) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const SizedBox(
+            height: 48,
+            child: Center(child: CircularProgressIndicator(strokeWidth: 2)),
+          );
+        }
+
+        if (snapshot.hasData && snapshot.data!.isNotEmpty) {
+          // Create a Set to ensure unique values
+          final uniqueDifficulties = snapshot.data!.toSet().toList();
+
+          // If selectedDifficulty is null or not in the list, set it to the first item
+          if (formData.selectedDifficulty == null ||
+              !uniqueDifficulties.contains(formData.selectedDifficulty)) {
+            formData.selectedDifficulty = uniqueDifficulties.first;
+          }
+
           return DropdownButtonFormField<String>(
             borderRadius: BorderRadius.circular(10),
             value: formData.selectedDifficulty,
@@ -278,7 +341,7 @@ class DeckFormCard extends ConsumerWidget {
                 borderRadius: BorderRadius.circular(8),
               ),
             ),
-            items: snapshot.data!.map((difficulty) {
+            items: uniqueDifficulties.map((difficulty) {
               return DropdownMenuItem(
                 value: difficulty,
                 child: Text(
@@ -293,9 +356,16 @@ class DeckFormCard extends ConsumerWidget {
             },
           );
         }
+
+        // If we have no data, show an error
         return const SizedBox(
           height: 48,
-          child: Center(child: CircularProgressIndicator(strokeWidth: 2)),
+          child: Center(
+            child: Text(
+              "No difficulty levels available",
+              style: TextStyle(color: Colors.red),
+            ),
+          ),
         );
       },
     );

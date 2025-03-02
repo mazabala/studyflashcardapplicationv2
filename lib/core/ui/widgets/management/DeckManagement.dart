@@ -4,6 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flashcardstudyapplication/core/themes/app_theme.dart';
 import 'package:flashcardstudyapplication/core/models/deck.dart';
+import 'package:flashcardstudyapplication/core/utils/file_import_utils.dart';
+import 'package:flashcardstudyapplication/core/models/deck_import.dart';
+import 'dart:convert';
+import 'dart:async';
 
 class DeckManagementPage extends ConsumerWidget {
   const DeckManagementPage({super.key});
@@ -255,11 +259,10 @@ class CreateDeckPage extends ConsumerStatefulWidget {
 class _CreateDeckPageState extends ConsumerState<CreateDeckPage> {
   final List<DeckFormData> _deckForms = [];
   bool _isCreating = false;
-
-  // Add cached data
+  bool _isLoadingInitialData = true;
   List<String>? _categories;
   List<String>? _difficulties;
-  bool _isLoadingInitialData = true;
+  dynamic _collectionInfo; // Can be CollectionInfo or List<CollectionInfo>
 
   @override
   void initState() {
@@ -345,55 +348,376 @@ class _CreateDeckPageState extends ConsumerState<CreateDeckPage> {
   }
 
   Future<void> _createDecks() async {
-    if (_isCreating) return;
-
-    final scaffoldMessenger = ScaffoldMessenger.of(context);
-    final navigator = Navigator.of(context);
-
     // Validate all forms
-    bool allValid = _deckForms.every((form) => form.isValid());
+    bool allValid = true;
+    for (final form in _deckForms) {
+      if (!form.isValid()) {
+        allValid = false;
+        break;
+      }
+    }
+
     if (!allValid) {
-      scaffoldMessenger.showSnackBar(
+      ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-            content: Text('Please fill all required fields in all decks')),
+          content: Text('Please fill in all required fields for all decks'),
+          backgroundColor: Colors.red,
+        ),
       );
       return;
     }
 
-    setState(() => _isCreating = true);
+    setState(() {
+      _isCreating = true;
+    });
 
     try {
-      final userId = ref.watch(userStateProvider).userId;
-      if (userId == null) throw Exception('User not logged in');
+      final userState = ref.read(userStateProvider);
+      final userId = userState.userId;
 
-      // Create each deck sequentially
-      for (var form in _deckForms) {
-        await ref.read(deckStateProvider.notifier).createDeck(
-              form.topicController.text,
-              form.focusController.text,
-              form.selectedCategory!,
-              form.selectedDifficulty!,
-              userId,
-              int.parse(form.cardCountController.text),
-            );
+      if (userId == null) {
+        throw Exception('User not logged in');
       }
 
-      if (!context.mounted) return;
-      navigator.pop();
-      scaffoldMessenger.showSnackBar(
-        SnackBar(
-          content: Text('${_deckForms.length} deck(s) created successfully'),
-        ),
-      );
+      // Check if we're processing imported collections
+      if (_collectionInfo != null) {
+        await _processCollectionsInBatches(userId);
+      } else {
+        // Regular deck creation without collections
+        final deckNotifier = ref.read(deckStateProvider.notifier);
+        for (final form in _deckForms) {
+          await deckNotifier.createDeck(
+            form.topicController.text,
+            form.focusController.text,
+            form.selectedCategory!,
+            form.selectedDifficulty!,
+            userId,
+            int.parse(form.cardCountController.text),
+          );
+        }
+      }
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Successfully created ${_deckForms.length} decks'),
+            backgroundColor: Colors.green,
+          ),
+        );
+        Navigator.pop(context);
+      }
     } catch (e) {
-      if (!context.mounted) return;
-      scaffoldMessenger.showSnackBar(
-        SnackBar(content: Text('Error creating decks: $e')),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error creating decks: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
     } finally {
       if (mounted) {
-        setState(() => _isCreating = false);
+        setState(() {
+          _isCreating = false;
+        });
       }
+    }
+  }
+
+  // Process collections in batches, one collection at a time
+  Future<void> _processCollectionsInBatches(String userId) async {
+    final deckNotifier = ref.read(deckStateProvider.notifier);
+    final collectionService = ref.read(collectionServiceProvider);
+    final deckService = ref.read(deckServiceProvider);
+
+    // Get the collections to process
+    List<CollectionInfo> collectionsToProcess = [];
+    if (_collectionInfo is List<CollectionInfo>) {
+      collectionsToProcess = _collectionInfo as List<CollectionInfo>;
+    } else if (_collectionInfo is CollectionInfo) {
+      collectionsToProcess = [_collectionInfo as CollectionInfo];
+    } else {
+      throw Exception('Invalid collection information');
+    }
+
+    // Calculate total decks for progress tracking
+    final totalDecks = collectionsToProcess.fold<int>(
+        0, (sum, collection) => sum + collection.decks.length);
+    int processedDecks = 0;
+    int processedCollections = 0;
+    String currentCollectionName =
+        collectionsToProcess.isNotEmpty ? collectionsToProcess[0].name : '';
+    String currentDeckInfo = '';
+
+    // Track success/failure statistics
+    int successfulCollections = 0;
+    int failedCollections = 0;
+    int successfulDecks = 0;
+    int failedDecks = 0;
+    List<String> errors = [];
+
+    // Create a stateful dialog that we can update
+    final progressDialogCompleter = Completer<void>();
+
+    if (mounted) {
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (dialogContext) => StatefulBuilder(
+          builder: (context, setDialogState) {
+            // Store the setState function to update the dialog
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (!progressDialogCompleter.isCompleted) {
+                progressDialogCompleter.complete();
+              }
+            });
+
+            return AlertDialog(
+              title: const Text('Processing Collections'),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  LinearProgressIndicator(
+                    value: processedDecks / totalDecks,
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    'Processing collection ${processedCollections + 1}/${collectionsToProcess.length}: $currentCollectionName',
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Decks: $processedDecks/$totalDecks',
+                    textAlign: TextAlign.center,
+                  ),
+                  if (currentDeckInfo.isNotEmpty) ...[
+                    const SizedBox(height: 8),
+                    Text(
+                      currentDeckInfo,
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(fontStyle: FontStyle.italic),
+                    ),
+                  ],
+                ],
+              ),
+            );
+          },
+        ),
+      ).then((_) {
+        // Dialog was closed
+        if (!progressDialogCompleter.isCompleted) {
+          progressDialogCompleter.complete();
+        }
+      });
+    }
+
+    // Wait for the dialog to be built
+    await progressDialogCompleter.future;
+
+    // Function to update the progress dialog
+    void updateProgressDialog() {
+      if (mounted) {
+        // Use setState to rebuild the dialog
+        setState(() {
+          // This will trigger a rebuild of the current widget
+          // which will update the dialog with new values
+        });
+      }
+    }
+
+    try {
+      // Process each collection one by one
+      for (int collectionIndex = 0;
+          collectionIndex < collectionsToProcess.length;
+          collectionIndex++) {
+        final collection = collectionsToProcess[collectionIndex];
+        processedCollections = collectionIndex;
+        currentCollectionName = collection.name;
+        updateProgressDialog();
+
+        // Create all decks for this collection
+        final List<String> createdDeckIds = [];
+        bool collectionSuccess = true;
+
+        for (int deckIndex = 0;
+            deckIndex < collection.decks.length;
+            deckIndex++) {
+          final deck = collection.decks[deckIndex];
+          currentDeckInfo = '${deck.topic} - ${deck.focus}';
+          updateProgressDialog();
+
+          try {
+            // Create the deck
+            await deckNotifier.createDeck(
+              deck.topic,
+              deck.focus,
+              deck.category,
+              deck.difficultyLevel,
+              userId,
+              deck.cardCount,
+            );
+
+            // Get the ID of the created deck
+            final userDecks = await deckService.getUserDecks(userId);
+            final recentlyCreatedDecks = userDecks
+                .where((d) => d.creatorid == userId)
+                .toList()
+              ..sort((a, b) => b.createdat.compareTo(a.createdat));
+
+            if (recentlyCreatedDecks.isNotEmpty) {
+              createdDeckIds.add(recentlyCreatedDecks.first.id);
+              successfulDecks++;
+            } else {
+              // Deck was created but we couldn't get its ID
+              failedDecks++;
+              errors.add(
+                  'Could not retrieve ID for deck: ${deck.topic} - ${deck.focus}');
+              collectionSuccess = false;
+            }
+          } catch (e) {
+            // Handle deck creation error
+            failedDecks++;
+            errors.add(
+                'Error creating deck "${deck.topic} - ${deck.focus}": ${e.toString()}');
+            collectionSuccess = false;
+          }
+
+          // Update progress
+          processedDecks++;
+          updateProgressDialog();
+        }
+
+        // Create the collection with the decks we just created
+        if (createdDeckIds.isNotEmpty) {
+          try {
+            currentDeckInfo = 'Creating collection: ${collection.name}';
+            updateProgressDialog();
+
+            await collectionService.createCollection(
+              name: collection.name,
+              subject: collection.subject,
+              description: collection.description,
+              deckIds: createdDeckIds,
+              isPublic: collection.isPublic,
+            );
+
+            currentDeckInfo = 'Collection created: ${collection.name}';
+            successfulCollections++;
+          } catch (e) {
+            // Handle collection creation error
+            failedCollections++;
+            errors.add(
+                'Error creating collection "${collection.name}": ${e.toString()}');
+            currentDeckInfo = 'Failed to create collection: ${collection.name}';
+          }
+          updateProgressDialog();
+        } else {
+          // No decks were successfully created for this collection
+          failedCollections++;
+          errors.add(
+              'No decks were successfully created for collection: ${collection.name}');
+        }
+      }
+    } catch (e) {
+      // Handle unexpected errors
+      errors.add('Unexpected error during processing: ${e.toString()}');
+    } finally {
+      // Close progress dialog
+      if (mounted) {
+        Navigator.of(context).pop();
+
+        // Show completion dialog with statistics
+        showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Text('Import Complete'),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Processed ${collectionsToProcess.length} collections with $totalDecks total decks.',
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Successful collections: $successfulCollections',
+                  style: TextStyle(
+                    color:
+                        successfulCollections > 0 ? Colors.green : Colors.grey,
+                  ),
+                ),
+                Text(
+                  'Failed collections: $failedCollections',
+                  style: TextStyle(
+                    color: failedCollections > 0 ? Colors.red : Colors.grey,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Successful decks: $successfulDecks',
+                  style: TextStyle(
+                    color: successfulDecks > 0 ? Colors.green : Colors.grey,
+                  ),
+                ),
+                Text(
+                  'Failed decks: $failedDecks',
+                  style: TextStyle(
+                    color: failedDecks > 0 ? Colors.red : Colors.grey,
+                  ),
+                ),
+                if (errors.isNotEmpty) ...[
+                  const SizedBox(height: 16),
+                  const Text(
+                    'Errors:',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  Container(
+                    height: 100,
+                    width: double.maxFinite,
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Colors.red.withOpacity(0.5)),
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                    child: ListView.builder(
+                      shrinkWrap: true,
+                      itemCount: errors.length.clamp(0, 5),
+                      itemBuilder: (context, index) {
+                        return Padding(
+                          padding: const EdgeInsets.all(4.0),
+                          child: Text(
+                            '• ${errors[index]}',
+                            style: const TextStyle(
+                              color: Colors.red,
+                              fontSize: 12,
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                  if (errors.length > 5)
+                    Text(
+                      '... and ${errors.length - 5} more errors',
+                      style: const TextStyle(
+                        color: Colors.red,
+                        fontSize: 12,
+                      ),
+                    ),
+                ],
+              ],
+            ),
+            actions: [
+              ElevatedButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('OK'),
+              ),
+            ],
+          ),
+        );
+      }
+
+      // Reset collection info after processing
+      _collectionInfo = null;
     }
   }
 
@@ -434,15 +758,30 @@ class _CreateDeckPageState extends ConsumerState<CreateDeckPage> {
                                     fontWeight: FontWeight.bold,
                                   ),
                             ),
-                            ElevatedButton.icon(
-                              onPressed: _addNewDeckForm,
-                              icon: const Icon(Icons.add),
-                              label: const Text('Add Deck',
-                                  style: TextStyle(fontSize: 16)),
-                              style: ElevatedButton.styleFrom(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 16, vertical: 12),
-                              ),
+                            Row(
+                              children: [
+                                ElevatedButton.icon(
+                                  onPressed: _showImportDialog,
+                                  icon: const Icon(Icons.upload_file),
+                                  label: const Text('Import from JSON',
+                                      style: TextStyle(fontSize: 16)),
+                                  style: ElevatedButton.styleFrom(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 16, vertical: 12),
+                                  ),
+                                ),
+                                const SizedBox(width: 12),
+                                ElevatedButton.icon(
+                                  onPressed: _addNewDeckForm,
+                                  icon: const Icon(Icons.add),
+                                  label: const Text('Add Deck',
+                                      style: TextStyle(fontSize: 16)),
+                                  style: ElevatedButton.styleFrom(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 16, vertical: 12),
+                                  ),
+                                ),
+                              ],
                             ),
                           ],
                         ),
@@ -514,6 +853,239 @@ class _CreateDeckPageState extends ConsumerState<CreateDeckPage> {
       form.dispose();
     }
     super.dispose();
+  }
+
+  Future<dynamic> _showCollectionSelectionDialog(
+      List<CollectionInfo> collections) async {
+    return showDialog<dynamic>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Select Collection'),
+        content: SizedBox(
+          width: double.maxFinite,
+          // Limit the height to prevent the dialog from being too large
+          height: MediaQuery.of(context).size.height * 0.6,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Add "Process All Collections" option at the top
+              Card(
+                color: Colors.green.withOpacity(0.1),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  side: BorderSide(color: Colors.green.withOpacity(0.5)),
+                ),
+                child: ListTile(
+                  title: const Text(
+                    'Process All Collections',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  subtitle: Text(
+                    '${collections.length} collections with ${collections.fold<int>(0, (sum, collection) => sum + collection.decks.length)} total decks',
+                    style: TextStyle(color: Colors.green[700]),
+                  ),
+                  leading: Icon(Icons.all_inclusive, color: Colors.green[700]),
+                  onTap: () => Navigator.pop(context, collections),
+                ),
+              ),
+              const Divider(height: 16),
+              const Padding(
+                padding: EdgeInsets.symmetric(vertical: 8.0),
+                child: Text(
+                  'Or select a single collection:',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+              ),
+              Expanded(
+                child: ListView.builder(
+                  shrinkWrap: true,
+                  itemCount: collections.length,
+                  itemBuilder: (context, index) {
+                    final collection = collections[index];
+                    return Card(
+                      margin: const EdgeInsets.symmetric(vertical: 4.0),
+                      child: ListTile(
+                        title: Text(collection.name),
+                        subtitle: Text(
+                          '${collection.subject} • ${collection.decks.length} decks',
+                        ),
+                        leading: Icon(
+                          Icons.collections_bookmark,
+                          color: Theme.of(context).primaryColor,
+                        ),
+                        onTap: () => Navigator.pop(context, collection),
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _showImportDialog() async {
+    try {
+      // Show loading indicator
+      setState(() {
+        _isLoadingInitialData = true;
+      });
+
+      // Pick JSON file
+      final jsonContent = await FileImportUtils.pickJsonFile();
+
+      // Hide loading indicator
+      setState(() {
+        _isLoadingInitialData = false;
+      });
+
+      if (jsonContent == null) {
+        // User cancelled file picking
+        return;
+      }
+
+      if (!FileImportUtils.isValidJsonStructure(jsonContent)) {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+                'Invalid JSON format. Please select a valid deck import file.'),
+            backgroundColor: Colors.red,
+          ),
+        );
+        return;
+      }
+
+      // Parse the JSON content
+      try {
+        final jsonMap = jsonDecode(jsonContent) as Map<String, dynamic>;
+        final deckImport = DeckImport.fromJson(jsonMap);
+
+        // Clear existing deck forms
+        setState(() {
+          _deckForms.clear();
+        });
+
+        // Check if there are any collections
+        if (deckImport.collections.isEmpty) {
+          if (!mounted) return;
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('No collections found in the imported file.'),
+              backgroundColor: Colors.red,
+            ),
+          );
+          return;
+        }
+
+        // Show collection selection dialog
+        if (!mounted) return;
+        final selection =
+            await _showCollectionSelectionDialog(deckImport.collections);
+
+        if (selection == null) {
+          // User cancelled collection selection
+          return;
+        }
+
+        // Process the selection (either a single collection or all collections)
+        List<CollectionInfo> collectionsToProcess = [];
+        if (selection is List<CollectionInfo>) {
+          // User selected "Process All Collections"
+          collectionsToProcess = selection;
+        } else if (selection is CollectionInfo) {
+          // User selected a single collection
+          collectionsToProcess = [selection];
+        } else {
+          // Invalid selection type
+          return;
+        }
+
+        // Create deck forms from the first collection's decks initially
+        // We'll process the rest during batch creation
+        if (collectionsToProcess.isNotEmpty) {
+          final firstCollection = collectionsToProcess[0];
+          for (final deck in firstCollection.decks) {
+            final formData = DeckFormData();
+            formData.topicController.text = deck.topic;
+            formData.focusController.text = deck.focus;
+            formData.cardCountController.text = deck.cardCount.toString();
+            formData.selectedCategory = deck.category;
+            formData.selectedDifficulty = deck.difficultyLevel;
+
+            setState(() {
+              _deckForms.add(formData);
+            });
+          }
+        }
+
+        // Store collection info for batch processing
+        _collectionInfo = collectionsToProcess;
+
+        // Show success message with batch processing info
+        if (!mounted) return;
+        final totalDecks = collectionsToProcess.fold<int>(
+            0, (sum, collection) => sum + collection.decks.length);
+        final collectionNames =
+            collectionsToProcess.map((c) => '"${c.name}"').join(', ');
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+                'Ready to import ${collectionsToProcess.length} collections with $totalDecks total decks.\n'
+                'Collections will be processed in batches.'),
+            backgroundColor: Colors.green,
+            duration: const Duration(seconds: 5),
+          ),
+        );
+
+        // Update UI to show the first collection's decks
+        if (!mounted) return;
+        if (collectionsToProcess.length > 1) {
+          showDialog(
+            context: context,
+            builder: (context) => AlertDialog(
+              title: const Text('Batch Processing'),
+              content: Text(
+                  'The form now shows decks from the first collection "${collectionsToProcess[0].name}".\n\n'
+                  'When you click "Create All Decks", all ${collectionsToProcess.length} collections '
+                  'with $totalDecks total decks will be processed in sequence, '
+                  'creating one collection at a time.'),
+              actions: [
+                ElevatedButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text('Got it'),
+                ),
+              ],
+            ),
+          );
+        }
+      } catch (e) {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error parsing JSON: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error importing decks: ${e.toString()}'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
   }
 }
 

@@ -1,0 +1,599 @@
+{
+  "collections": [
+    {
+      "name": "Basic Principles of Pharmacology",
+      "subject": "Pharmacology",
+      "description": "Fundamental concepts of pharmacokinetics and pharmacodynamics",
+      "isPublic": true,
+      "decks": [
+        {
+          "topic": "Pharmacokinetics",
+          "focus": "Absorption",
+          "category": "Medicine",
+          "difficultyLevel": "Beginner",
+          "cardCount": 10
+        },
+        {
+          "topic": "Pharmacokinetics",
+          "focus": "Distribution",
+          "category": "Medicine",
+          "difficultyLevel": "Beginner",
+          "cardCount": 10
+        },
+        {
+          "topic": "Pharmacokinetics",
+          "focus": "Metabolism",
+          "category": "Medicine",
+          "difficultyLevel": "Intermediate",
+          "cardCount": 25
+        },
+        {
+          "topic": "Pharmacokinetics",
+          "focus": "Excretion",
+          "category": "Medicine",
+          "difficultyLevel": "Beginner",
+          "cardCount": 10
+        },
+        {
+          "topic": "Pharmacodynamics",
+          "focus": "Receptor Theory",
+          "category": "Medicine",
+          "difficultyLevel": "Intermediate",
+          "cardCount": 25
+        },
+        {
+          "topic": "Pharmacodynamics",
+          "focus": "Dose-Response Relationships",
+          "category": "Medicine",
+          "difficultyLevel": "Intermediate",
+          "cardCount": 25
+        },
+        {
+          "topic": "Pharmacodynamics",
+          "focus": "Signal Transduction",
+          "category": "Medicine",
+          "difficultyLevel": "Advanced",
+          "cardCount": 40
+        }
+      ]
+    },
+    {
+      "name": "Autonomic Nervous System Pharmacology",
+      "subject": "Pharmacology",
+      "description": "Drugs affecting the autonomic nervous system, including cholinergic and adrenergic agents",
+      "isPublic": true,
+      "decks": [
+        {
+          "topic": "Cholinergic Drugs",
+          "focus": "Muscarinic Agonists",
+          "category": "Medicine",
+          "difficultyLevel": "Intermediate",
+          "cardCount": 25
+        },
+        {
+          "topic": "Cholinergic Drugs",
+          "focus": "Muscarinic Antagonists",
+          "category": "Medicine",
+          "difficultyLevel": "Intermediate",
+          "cardCount": 25
+        },
+        {
+          "topic": "Cholinergic Drugs",
+          "focus": "Nicotinic Agents",
+          "category": "Medicine",
+          "difficultyLevel": "Intermediate",
+          "cardCount": 25
+        },
+        {
+          "topic": "Cholinergic Drugs",
+          "focus": "Acetylcholinesterase Inhibitors",
+          "category": "Medicine",
+          "difficultyLevel": "Intermediate",
+          "cardCount": 25
+        },
+        {
+          "topic": "Adrenergic Drugs",
+          "focus": "Alpha Agonists",
+          "category": "Medicine",
+          "difficultyLevel": "Intermediate",
+          "cardCount": 25
+        },
+        {
+          "topic": "Adrenergic Drugs",
+          "focus": "Beta Agonists",
+          "category": "Medicine",
+          "difficultyLevel": "Intermediate",
+          "cardCount": 25
+        },
+        {
+          "topic": "Adrenergic Drugs",
+          "focus": "Alpha Antagonists",
+          "category": "Medicine",
+          "difficultyLevel": "Intermediate",
+          "cardCount": 25
+        },
+        {
+          "topic": "Adrenergic Drugs",
+          "focus": "Beta Antagonists",
+          "category": "Medicine",
+          "difficultyLevel": "Intermediate",
+          "cardCount": 25
+        }
+      ]
+    },
+    {
+      "name": "Cardiovascular Pharmacology",
+      "subject": "Pharmacology",
+      "description": "Drugs used to treat cardiovascular conditions including hypertension, angina, arrhythmias, heart failure, and lipid disorders",
+      "isPublic": true,
+      "decks": [
+        {
+          "topic": "Antihypertensive Drugs",
+          "focus": "Diuretics",
+          "category": "Medicine",
+          "difficultyLevel": "Intermediate",
+          "cardCount": 25
+        },
+        {
+          "topic": "Antihypertensive Drugs",
+          "focus": "ACE Inhibitors and ARBs",
+          "category": "Medicine",
+          "difficultyLevel": "Intermediate",
+          "cardCount": 25
+        },
+        {
+          "topic": "Antihypertensive Drugs",
+          "focus": "Calcium Channel Blockers",
+          "category": "Medicine",
+          "difficultyLevel": "Intermediate",
+          "cardCount": 25
+        },
+        {
+          "topic": "Antianginal Drugs",
+          "focus": "Nitrates",
+          "category": "Medicine",
+          "difficultyLevel": "Intermediate",
+          "cardCount": 25
+        },
+        {
+          "topic": "Antiarrhythmic Drugs",
+          "focus": "Classification and Mechanisms",
+          "category": "Medicine",
+          "difficultyLevel": "Advanced",
+          "cardCount": 40
+        },
+        {
+          "topic": "Heart Failure Drugs",
+          "focus": "Treatment Strategy",
+          "category": "Medicine",
+          "difficultyLevel": "Advanced",
+          "cardCount": 40
+        },
+        {
+          "topic": "Lipid-Lowering Drugs",
+          "focus": "Statins and Beyond",
+          "category": "Medicine",
+          "difficultyLevel": "Intermediate",
+          "cardCount": 25
+        }
+      ]
+    },
+    {
+      "name": "Central Nervous System Pharmacology",
+      "subject": "Pharmacology",
+      "description": "Drugs affecting the central nervous system, including anxiolytics, antidepressants, antipsychotics, mood stabilizers, and drugs for neurodegenerative disorders",
+      "isPublic": true,
+      "decks": [
+        {
+          "topic": "Anxiolytics and Hypnotics",
+          "focus": "Benzodiazepines",
+          "category": "Medicine",
+          "difficultyLevel": "Intermediate",
+          "cardCount": 25
+        },
+        {
+          "topic": "Anxiolytics and Hypnotics",
+          "focus": "Non-Benzodiazepine Agents",
+          "category": "Medicine",
+          "difficultyLevel": "Intermediate",
+          "cardCount": 25
+        },
+        {
+          "topic": "Antidepressants",
+          "focus": "SSRIs and SNRIs",
+          "category": "Medicine",
+          "difficultyLevel": "Intermediate",
+          "cardCount": 25
+        },
+        {
+          "topic": "Antidepressants",
+          "focus": "TCAs and MAOIs",
+          "category": "Medicine",
+          "difficultyLevel": "Advanced",
+          "cardCount": 40
+        },
+        {
+          "topic": "Antipsychotics",
+          "focus": "Typical vs Atypical",
+          "category": "Medicine",
+          "difficultyLevel": "Advanced",
+          "cardCount": 40
+        },
+        {
+          "topic": "Mood Stabilizers",
+          "focus": "Lithium and Anticonvulsants",
+          "category": "Medicine",
+          "difficultyLevel": "Intermediate",
+          "cardCount": 25
+        },
+        {
+          "topic": "Neurodegenerative Disorders",
+          "focus": "Parkinson's and Alzheimer's",
+          "category": "Medicine",
+          "difficultyLevel": "Advanced",
+          "cardCount": 40
+        }
+      ]
+    },
+    {
+      "name": "Antimicrobial Pharmacology",
+      "subject": "Pharmacology",
+      "description": "Drugs used to treat bacterial, viral, fungal, and parasitic infections",
+      "isPublic": true,
+      "decks": [
+        {
+          "topic": "Antibacterial Drugs",
+          "focus": "Beta-lactams",
+          "category": "Medicine",
+          "difficultyLevel": "Intermediate",
+          "cardCount": 25
+        },
+        {
+          "topic": "Antibacterial Drugs",
+          "focus": "Protein Synthesis Inhibitors",
+          "category": "Medicine",
+          "difficultyLevel": "Advanced",
+          "cardCount": 40
+        },
+        {
+          "topic": "Antibacterial Drugs",
+          "focus": "DNA/RNA Synthesis Inhibitors",
+          "category": "Medicine",
+          "difficultyLevel": "Advanced",
+          "cardCount": 40
+        },
+        {
+          "topic": "Antiviral Drugs",
+          "focus": "HIV Antivirals",
+          "category": "Medicine",
+          "difficultyLevel": "Advanced",
+          "cardCount": 40
+        },
+        {
+          "topic": "Antiviral Drugs",
+          "focus": "Herpes and Influenza",
+          "category": "Medicine",
+          "difficultyLevel": "Intermediate",
+          "cardCount": 25
+        },
+        {
+          "topic": "Antifungal Drugs",
+          "focus": "Mechanisms and Classes",
+          "category": "Medicine",
+          "difficultyLevel": "Intermediate",
+          "cardCount": 25
+        },
+        {
+          "topic": "Antiparasitic Drugs",
+          "focus": "Malaria and Helminths",
+          "category": "Medicine",
+          "difficultyLevel": "Advanced",
+          "cardCount": 40
+        }
+      ]
+    },
+    {
+      "name": "Respiratory System Pharmacology",
+      "subject": "Pharmacology",
+      "description": "Drugs used to treat respiratory conditions such as asthma, COPD, and cough",
+      "isPublic": true,
+      "decks": [
+        {
+          "topic": "Asthma and COPD",
+          "focus": "Bronchodilators",
+          "category": "Medicine",
+          "difficultyLevel": "Intermediate",
+          "cardCount": 25
+        },
+        {
+          "topic": "Asthma and COPD",
+          "focus": "Anti-inflammatory Agents",
+          "category": "Medicine",
+          "difficultyLevel": "Intermediate",
+          "cardCount": 25
+        },
+        {
+          "topic": "Asthma and COPD",
+          "focus": "Biologics and Novel Therapies",
+          "category": "Medicine",
+          "difficultyLevel": "Advanced",
+          "cardCount": 40
+        },
+        {
+          "topic": "Antitussives and Expectorants",
+          "focus": "Cough Suppressants",
+          "category": "Medicine",
+          "difficultyLevel": "Beginner",
+          "cardCount": 8
+        }
+      ]
+    },
+    {
+      "name": "Gastrointestinal Pharmacology",
+      "subject": "Pharmacology",
+      "description": "Drugs used to treat gastrointestinal conditions such as acid reflux, nausea, constipation, diarrhea, and inflammatory bowel disease",
+      "isPublic": true,
+      "decks": [
+        {
+          "topic": "Acid-Reducing Drugs",
+          "focus": "PPIs and H2 Blockers",
+          "category": "Medicine",
+          "difficultyLevel": "Intermediate",
+          "cardCount": 25
+        },
+        {
+          "topic": "Antiemetics",
+          "focus": "Mechanisms and Classes",
+          "category": "Medicine",
+          "difficultyLevel": "Intermediate",
+          "cardCount": 25
+        },
+        {
+          "topic": "Laxatives and Antidiarrheals",
+          "focus": "GI Motility Agents",
+          "category": "Medicine",
+          "difficultyLevel": "Beginner",
+          "cardCount": 10
+        },
+        {
+          "topic": "Inflammatory Bowel Disease",
+          "focus": "Treatment Approaches",
+          "category": "Medicine",
+          "difficultyLevel": "Advanced",
+          "cardCount": 40
+        }
+      ]
+    },
+    {
+      "name": "Endocrine Pharmacology",
+      "subject": "Pharmacology",
+      "description": "Drugs affecting the endocrine system, including diabetes medications, thyroid drugs, corticosteroids, and sex hormones",
+      "isPublic": true,
+      "decks": [
+        {
+          "topic": "Diabetes Medications",
+          "focus": "Insulin",
+          "category": "Medicine",
+          "difficultyLevel": "Intermediate",
+          "cardCount": 25
+        },
+        {
+          "topic": "Diabetes Medications",
+          "focus": "Oral Antidiabetics",
+          "category": "Medicine",
+          "difficultyLevel": "Intermediate",
+          "cardCount": 25
+        },
+        {
+          "topic": "Diabetes Medications",
+          "focus": "Novel Agents",
+          "category": "Medicine",
+          "difficultyLevel": "Advanced",
+          "cardCount": 40
+        },
+        {
+          "topic": "Thyroid Medications",
+          "focus": "Hypo and Hyperthyroidism",
+          "category": "Medicine",
+          "difficultyLevel": "Intermediate",
+          "cardCount": 25
+        },
+        {
+          "topic": "Corticosteroids",
+          "focus": "Systemic and Topical",
+          "category": "Medicine",
+          "difficultyLevel": "Intermediate",
+          "cardCount": 25
+        },
+        {
+          "topic": "Sex Hormones",
+          "focus": "Contraceptives and HRT",
+          "category": "Medicine",
+          "difficultyLevel": "Intermediate",
+          "cardCount": 25
+        }
+      ]
+    },
+    {
+      "name": "Chemotherapy and Immunopharmacology",
+      "subject": "Pharmacology",
+      "description": "Antineoplastic drugs and immunosuppressants used in cancer treatment and transplantation",
+      "isPublic": true,
+      "decks": [
+        {
+          "topic": "Antineoplastic Drugs",
+          "focus": "Traditional Chemotherapy",
+          "category": "Medicine",
+          "difficultyLevel": "Advanced",
+          "cardCount": 40
+        },
+        {
+          "topic": "Antineoplastic Drugs",
+          "focus": "Targeted Therapies",
+          "category": "Medicine",
+          "difficultyLevel": "Advanced",
+          "cardCount": 40
+        },
+        {
+          "topic": "Antineoplastic Drugs",
+          "focus": "Immunotherapies",
+          "category": "Medicine",
+          "difficultyLevel": "Advanced",
+          "cardCount": 40
+        },
+        {
+          "topic": "Immunosuppressants",
+          "focus": "Transplant Medications",
+          "category": "Medicine",
+          "difficultyLevel": "Advanced",
+          "cardCount": 40
+        }
+      ]
+    },
+    {
+      "name": "Pain Management and Anesthesia",
+      "subject": "Pharmacology",
+      "description": "Drugs used for pain management and anesthesia, including opioids, non-opioid analgesics, local anesthetics, and general anesthetics",
+      "isPublic": true,
+      "decks": [
+        {
+          "topic": "Opioid Analgesics",
+          "focus": "Mechanisms and Classes",
+          "category": "Medicine",
+          "difficultyLevel": "Intermediate",
+          "cardCount": 25
+        },
+        {
+          "topic": "Non-opioid Analgesics",
+          "focus": "NSAIDs and Acetaminophen",
+          "category": "Medicine",
+          "difficultyLevel": "Intermediate",
+          "cardCount": 25
+        },
+        {
+          "topic": "Non-opioid Analgesics",
+          "focus": "Adjuvant Analgesics",
+          "category": "Medicine",
+          "difficultyLevel": "Intermediate",
+          "cardCount": 25
+        },
+        {
+          "topic": "Local Anesthetics",
+          "focus": "Mechanisms and Applications",
+          "category": "Medicine",
+          "difficultyLevel": "Intermediate",
+          "cardCount": 25
+        },
+        {
+          "topic": "General Anesthetics",
+          "focus": "Inhalational and IV Agents",
+          "category": "Medicine",
+          "difficultyLevel": "Advanced",
+          "cardCount": 40
+        }
+      ]
+    },
+    {
+      "name": "Toxicology and Antidotes",
+      "subject": "Pharmacology",
+      "description": "Common toxidromes and their antidotes",
+      "isPublic": true,
+      "decks": [
+        {
+          "topic": "Common Toxidromes",
+          "focus": "Recognition and Management",
+          "category": "Medicine",
+          "difficultyLevel": "Advanced",
+          "cardCount": 40
+        },
+        {
+          "topic": "Important Antidotes",
+          "focus": "Specific Reversal Agents",
+          "category": "Medicine",
+          "difficultyLevel": "Advanced",
+          "cardCount": 40
+        }
+      ]
+    },
+    {
+      "name": "Special Populations",
+      "subject": "Pharmacology",
+      "description": "Pharmacology considerations for special populations including pediatrics, geriatrics, and pregnancy/lactation",
+      "isPublic": true,
+      "decks": [
+        {
+          "topic": "Pediatric Pharmacology",
+          "focus": "Developmental Considerations",
+          "category": "Medicine",
+          "difficultyLevel": "Advanced",
+          "cardCount": 40
+        },
+        {
+          "topic": "Geriatric Pharmacology",
+          "focus": "Age-Related Changes",
+          "category": "Medicine",
+          "difficultyLevel": "Advanced",
+          "cardCount": 40
+        },
+        {
+          "topic": "Pregnancy and Lactation",
+          "focus": "Safety Categories",
+          "category": "Medicine",
+          "difficultyLevel": "Advanced",
+          "cardCount": 40
+        }
+      ]
+    },
+    {
+      "name": "Drug Interactions and Adverse Effects",
+      "subject": "Pharmacology",
+      "description": "Mechanisms of drug interactions, common adverse drug reactions, and monitoring strategies",
+      "isPublic": true,
+      "decks": [
+        {
+          "topic": "Mechanisms of Drug Interactions",
+          "focus": "PK and PD Interactions",
+          "category": "Medicine",
+          "difficultyLevel": "Advanced",
+          "cardCount": 40
+        },
+        {
+          "topic": "Common Adverse Drug Reactions",
+          "focus": "Classification and Examples",
+          "category": "Medicine",
+          "difficultyLevel": "Advanced",
+          "cardCount": 40
+        },
+        {
+          "topic": "Monitoring for Adverse Effects",
+          "focus": "Clinical Vigilance",
+          "category": "Medicine",
+          "difficultyLevel": "Intermediate",
+          "cardCount": 25
+        }
+      ]
+    },
+    {
+      "name": "Pharmacogenomics",
+      "subject": "Pharmacology",
+      "description": "Genetic variations affecting drug response and clinical applications",
+      "isPublic": true,
+      "decks": [
+        {
+          "topic": "Genetic Variations",
+          "focus": "Polymorphisms and Drug Response",
+          "category": "Medicine",
+          "difficultyLevel": "Advanced",
+          "cardCount": 40
+        },
+        {
+          "topic": "Clinical Applications",
+          "focus": "Personalized Medicine",
+          "category": "Medicine",
+          "difficultyLevel": "Advanced",
+          "cardCount": 40
+        }
+      ]
+    }
+  ]
+} 

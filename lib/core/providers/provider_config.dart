@@ -94,11 +94,18 @@ final userServiceProvider = Provider<IUserService>((ref) {
   );
 });
 
+// Collection Service Provider
+final collectionServiceProvider = Provider<ICollectionService>((ref) {
+  ref.keepAlive();
+  return CollectionService(ref.read(supabaseClientProvider));
+});
+
 final deckServiceProvider = Provider<IDeckService>((ref) {
   ref.keepAlive();
   return DeckService(
     ref.read(supabaseClientProvider),
     ref.read(apiClientProvider),
+    ref.read(collectionServiceProvider),
   );
 });
 
@@ -133,12 +140,6 @@ final authStateProvider =
 final subscriptionStateProvider =
     StateNotifierProvider<SubscriptionNotifier, SubscriptionState>((ref) {
   return SubscriptionNotifier(ref.read(subscriptionServiceProvider));
-});
-
-// Collection Service Provider
-final collectionServiceProvider = Provider<ICollectionService>((ref) {
-  ref.keepAlive();
-  return CollectionService(ref.read(supabaseClientProvider));
 });
 
 // Public collections provider

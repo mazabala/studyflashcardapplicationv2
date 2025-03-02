@@ -2,6 +2,7 @@
 
 import 'package:flashcardstudyapplication/core/models/deck.dart';
 import 'package:flashcardstudyapplication/core/models/flashcard.dart';
+import 'package:flashcardstudyapplication/core/models/deck_import.dart';
 
 abstract class IDeckService {
   Future<List<String>> getDeckDifficulty(String? subscriptionId);
@@ -9,7 +10,7 @@ abstract class IDeckService {
   Future<void> flagFlashcard(String flashcardId);
 
   Future<List<Deck>> loadDeckPool(String userId);
-  
+
   Future<List<Flashcard>> getFlashcards(String deckid);
   // Add the missing method to get details of a single deck
   Future<List<Deck>> getDeckDetails(List<String> deckIds);
@@ -36,4 +37,8 @@ abstract class IDeckService {
   Future<List<String>> getDeckCategory();
 
   Future<void> addDeckCategory(String category);
+
+  // Import decks from JSON file (admin only)
+  Future<DeckImportResult> importDecksFromJson(
+      String jsonContent, String userId);
 }
