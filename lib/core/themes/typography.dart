@@ -4,7 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 
 class AppTypography {
   // Font family to use throughout the app
-  static const String primaryFontFamily = 'OpenSans';
+  static const String primaryFontFamily = 'Teko';
 
   // Helper method to create TextStyle with the primary font
   static TextStyle _createTextStyle({
