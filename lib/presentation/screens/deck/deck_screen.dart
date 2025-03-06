@@ -1,6 +1,6 @@
 import 'package:flashcardstudyapplication/core/themes/colors.dart';
+import 'package:flashcardstudyapplication/presentation/widgets/common/CustomScaffold.dart';
 import 'package:flutter/material.dart';
-import 'package:flashcardstudyapplication/core/ui/widgets/CustomScaffold.dart';
 
 class FlashcardPreviewScreen extends StatefulWidget {
   const FlashcardPreviewScreen({super.key});

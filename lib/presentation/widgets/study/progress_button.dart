@@ -1,5 +1,7 @@
 import 'package:flashcardstudyapplication/core/ui/study_screen_controller.dart';
-import 'package:flashcardstudyapplication/core/ui/widgets/CustomButton.dart';
+import 'package:flashcardstudyapplication/presentation/screens/study/study_screen_controller.dart';
+import 'package:flashcardstudyapplication/presentation/widgets/common/CustomButton.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flashcardstudyapplication/core/providers/provider_config.dart';
@@ -7,7 +9,8 @@ import 'package:flashcardstudyapplication/core/providers/provider_config.dart';
 class ProgressButtonWidget extends ConsumerWidget {
   final StudyScreenController controller;
 
-  const ProgressButtonWidget({Key? key, required this.controller}) : super(key: key);
+  const ProgressButtonWidget({Key? key, required this.controller})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -26,7 +29,8 @@ class ProgressButtonWidget extends ConsumerWidget {
 
     final currentCard = flashcards[flashcardState.currentCardIndex];
     final isMarked = flashcardState.markedForLater.contains(currentCard.id);
-    final shouldBreak = ref.read(flashcardStateProvider.notifier).shouldTakeBreak();
+    final shouldBreak =
+        ref.read(flashcardStateProvider.notifier).shouldTakeBreak();
 
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -80,7 +84,8 @@ class ProgressButtonWidget extends ConsumerWidget {
                   text: 'Getting There',
                   isLoading: false,
                   icon: Icons.sentiment_neutral,
-                  onPressed: () => controller.handleConfidenceResponse('medium'),
+                  onPressed: () =>
+                      controller.handleConfidenceResponse('medium'),
                 ),
               ),
               SizedBox(
@@ -96,7 +101,7 @@ class ProgressButtonWidget extends ConsumerWidget {
           ),
 
         const SizedBox(height: 16),
-        
+
         // Mark for later button
         SizedBox(
           width: isSmallScreen ? double.infinity : 200,

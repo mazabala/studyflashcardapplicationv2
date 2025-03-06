@@ -3,24 +3,21 @@ import 'package:flashcardstudyapplication/core/navigation/router_manager.dart';
 import 'package:flashcardstudyapplication/core/providers/auth_provider.dart';
 import 'package:flashcardstudyapplication/core/providers/provider_config.dart';
 import 'package:flashcardstudyapplication/core/services/deck/deck_service.dart';
-import 'package:flashcardstudyapplication/core/ui/widgets/CategoryMultiSelect.dart';
-import 'package:flashcardstudyapplication/core/ui/widgets/CustomButton.dart';
-import 'package:flashcardstudyapplication/core/ui/widgets/CustomDialog.dart';
-import 'package:flashcardstudyapplication/core/ui/widgets/CustomScaffold.dart';
-import 'package:flashcardstudyapplication/core/ui/widgets/CustomTextField.dart';
+
 import 'package:flashcardstudyapplication/core/ui/widgets/deck/create_deck_dialog.dart';
 import 'package:flashcardstudyapplication/core/ui/widgets/deck/deck_action_buttons.dart';
 import 'package:flashcardstudyapplication/core/ui/widgets/deck/deck_display.dart';
-import 'package:flashcardstudyapplication/core/ui/widgets/myDeckToolBar.dart';
+import 'package:flashcardstudyapplication/presentation/widgets/common/CustomScaffold.dart';
+import 'package:flashcardstudyapplication/presentation/widgets/deck/myDeckToolBar.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flashcardstudyapplication/core/providers/deck_provider.dart';
 import 'package:flashcardstudyapplication/core/providers/user_provider.dart';
 import 'package:flashcardstudyapplication/core/providers/subscription_provider.dart'; // Correct import
 import 'package:flashcardstudyapplication/core/services/api/api_manager.dart';
-import 'package:flashcardstudyapplication/core/ui/widgets/progress_dashboard_widget.dart';
 
-import 'widgets/deck/deck_search_bar.dart';
+import 'package:flashcardstudyapplication/presentation/widgets/deck/deck_search_bar.dart';
 
 class MyDeckScreen extends ConsumerStatefulWidget {
   const MyDeckScreen({super.key});
@@ -38,17 +35,13 @@ class _MyDeckScreenState extends ConsumerState<MyDeckScreen> {
   bool isSystemUser = false;
   List<String>? _selectedCategories = [];
   Map<String, TextEditingController> _descriptionControllers = {};
-  bool isInitialized= false;
+  bool isInitialized = false;
 
+  TextEditingController _categoriesController = TextEditingController();
+  TextEditingController _descriptionsController = TextEditingController();
+  TextEditingController _cardCountController = TextEditingController();
 
-
-TextEditingController _categoriesController = TextEditingController();
-TextEditingController _descriptionsController = TextEditingController();
-TextEditingController _cardCountController = TextEditingController();
-
-
-
-   @override
+  @override
   void initState() {
     super.initState();
   }
@@ -56,18 +49,16 @@ TextEditingController _cardCountController = TextEditingController();
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    
+
     if (!isInitialized) {
-  _initializeServices();
-}
+      _initializeServices();
+    }
   }
 
   Future<void> _initializeServices() async {
     try {
-
       // First check if user is authenticated
       final userState = ref.read(authStateProvider);
-      
 
       if (!userState.isAuthenticated) {
         // Instead of showing a dialog, just navigate to login
@@ -76,14 +67,13 @@ TextEditingController _cardCountController = TextEditingController();
         }
         return;
       }
-      
+
       // Then check if user is admin (only if authenticated)
       _checkSystemUser();
       if (ref.read(deckStateProvider).deckloaded == false) {
         await _loadUserDecks();
       }
       isInitialized = true;
-
     } catch (e) {
       print('Initialization error: $e');
       // Instead of showing dialog, you could use a SnackBar or just log the error
@@ -100,63 +90,49 @@ TextEditingController _cardCountController = TextEditingController();
 
   // Modify _checkSystemUser to watch the provider state
   void _checkSystemUser() {
-   
     // Watch the provider instead of just reading it once
     final userState = ref.watch(userStateProvider);
-
 
     print(userState.isAdmin);
     // Check both isAdmin and role for superAdmin
     if (userState.isAdmin == true || userState.role == 'superAdmin') {
       print('Setting isSystemUser to true - user is an admin');
-      
-      
-          isSystemUser = true;
-       
-      
+
+      isSystemUser = true;
     } else {
       print('User is not an admin - isSystemUser remains $isSystemUser');
     }
   }
+
   // Method to reset the search state and navigate to study screen
   void _resetSearchStateAndNavigate() {
- 
+    isSearchingNewDecks = false; // Reset search state
 
-        isSearchingNewDecks = false; // Reset search state
-
-      _loadUserDecks();
-      Navigator.pushReplacementNamed(context, '/myDecks'); // Navigate to /study
-    
+    _loadUserDecks();
+    Navigator.pushReplacementNamed(context, '/myDecks'); // Navigate to /study
   }
 
   Future<List<String>> _getDeckCategory() async {
-    
     final deckReader = ref.read(deckServiceProvider);
     return await deckReader.getDeckCategory();
   }
 
- 
- Future<List<String>> _getDeckDifficulty() async {
-
-  
+  Future<List<String>> _getDeckDifficulty() async {
     final deckReader = ref.read(deckServiceProvider);
 
     final userService = ref.read(userStateProvider);
-    
-
 
     return await deckReader.getDeckDifficulty(userService.subscriptionPlanID);
   }
 
-
   void _searchNewDecks() async {
     try {
-      final decks = await ref.read(deckStateProvider.notifier).loadAvailableDecks();
-      if (mounted) { // Ensure the widget is still mounted before calling setState
+      final decks =
+          await ref.read(deckStateProvider.notifier).loadAvailableDecks();
+      if (mounted) {
+        // Ensure the widget is still mounted before calling setState
         setState(() {
-
           if (decks.isEmpty || decks == []) {
-
             isSearchingNewDecks = false;
             _filteredDecks = decks;
             _loadUserDecks();
@@ -184,8 +160,8 @@ TextEditingController _cardCountController = TextEditingController();
     final authNotifier = ref.read(authStateProvider.notifier);
     await authNotifier.signOut(); // Ensure signOut is called using the notifier
 
-
-    if (mounted) { // Check if widget is still mounted before navigating
+    if (mounted) {
+      // Check if widget is still mounted before navigating
       Navigator.pushReplacementNamed(context, '/login');
     } else {
       print("Widget already disposed, can't navigate.");
@@ -194,7 +170,6 @@ TextEditingController _cardCountController = TextEditingController();
 
   // Function to show the Create Deck dialog and create the deck
   void _createDeck() async {
-
     final userService = ref.read(userStateProvider);
 
     showDialog(
@@ -212,9 +187,7 @@ TextEditingController _cardCountController = TextEditingController();
                 // Ensure the widget is still mounted before popping
                 _loadUserDecks(); // Refresh the deck list
               }
-            } else {
-
-            }
+            } else {}
           },
         );
       },
@@ -224,35 +197,38 @@ TextEditingController _cardCountController = TextEditingController();
   // Function to load user decks from the service
   Future<void> _loadUserDecks() async {
     final userService = ref.read(userStateProvider);
-    
 
     final userId = userService.userId;
 
     if (userId != null) {
-        print('(inside the if statement) loading users decks with user id: $userId');
-        
-      //await ref.read(deckStateProvider.notifier).loadUserDecks(userId);
-      final decks = await ref.read(deckStateProvider.notifier).loadUserDecks(userId);
+      print(
+          '(inside the if statement) loading users decks with user id: $userId');
 
-      if (mounted) { // Ensure the widget is still mounted before calling setState
+      //await ref.read(deckStateProvider.notifier).loadUserDecks(userId);
+      final decks =
+          await ref.read(deckStateProvider.notifier).loadUserDecks(userId);
+
+      if (mounted) {
+        // Ensure the widget is still mounted before calling setState
         setState(() {
           _filteredDecks = decks;
           isSearchingNewDecks = false;
         });
       }
-    
     }
   }
 
   // Show a blocking dialog if subscription is expired
   void _showSubscriptionExpiredDialog() {
     showDialog(
-      barrierDismissible: false, // Prevent interaction with the screen outside the dialog
+      barrierDismissible:
+          false, // Prevent interaction with the screen outside the dialog
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
           title: const Text('Subscription Expired'),
-          content: const Text('Your subscription has expired. Please renew your subscription to continue.'),
+          content: const Text(
+              'Your subscription has expired. Please renew your subscription to continue.'),
           actions: <Widget>[
             TextButton(
               onPressed: () {
@@ -261,10 +237,10 @@ TextEditingController _cardCountController = TextEditingController();
               },
               child: const Text('Renew Subscription'),
             ),
-              TextButton(
+            TextButton(
               onPressed: () {
                 // Navigate to subscription renewal page
-                      _signOut(); // Implement sign-out logic here
+                _signOut(); // Implement sign-out logic here
               },
               child: const Text('Logout'),
             ),
@@ -274,22 +250,12 @@ TextEditingController _cardCountController = TextEditingController();
     );
   }
 
-
- 
-
-
-
-
-
-
-
   @override
   Widget build(BuildContext context) {
     final String currentRoute = ModalRoute.of(context)?.settings.name ?? '/';
 
     // Check subscription status using the subscription provider
     final subscriptionStatus = ref.watch(subscriptionStateProvider);
-
 
     // If subscription is expired, show the blocking dialog
     if (subscriptionStatus.isExpired) {
@@ -304,33 +270,28 @@ TextEditingController _cardCountController = TextEditingController();
           onCreateDeck: _createDeck,
           onSeachNewDecks: () {
             if (!isSearchingNewDecks) {
-              _searchNewDecks();  
+              _searchNewDecks();
             } else {
               _loadUserDecks();
             }
           },
           isSearchingNewDecks: isSearchingNewDecks),
 
+      SearchBarWidget(
+        controller: _searchController,
+        onChanged: _searchDecks,
+      ),
+      DeckDisplayWidget(
+        filteredDecks: _filteredDecks ?? [],
+        searchController: _searchController,
+        isSearchingNewDecks: isSearchingNewDecks,
+        onDeckAdded: _resetSearchStateAndNavigate,
+      ),
+      // If subscription expired, disable the Deck buttons
+    ];
 
-            
-            SearchBarWidget(
-              controller: _searchController,
-              onChanged: _searchDecks,
-            ),
-            DeckDisplayWidget(
-              filteredDecks: _filteredDecks ?? [],
-              searchController: _searchController,
-              isSearchingNewDecks: isSearchingNewDecks,
-              onDeckAdded: _resetSearchStateAndNavigate,
-            ),
-            // If subscription expired, disable the Deck buttons
-      
-             
-          ];
-   
     return CustomScaffold(
       currentRoute: currentRoute,
-
       body: SingleChildScrollView(
         child: Column(
           children: children,

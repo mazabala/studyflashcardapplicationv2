@@ -1,7 +1,8 @@
 import 'package:flashcardstudyapplication/core/providers/CatSub_Manager.dart';
 
 import 'package:flashcardstudyapplication/core/themes/colors.dart';
-import 'package:flashcardstudyapplication/core/ui/widgets/CustomScaffold.dart';
+import 'package:flashcardstudyapplication/presentation/widgets/common/CustomScaffold.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:purchases_ui_flutter/purchases_ui_flutter.dart';
@@ -20,14 +21,9 @@ class _PricingScreenState extends ConsumerState<PricingScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       await ref.read(subscriptionStateProvider.notifier).initialize();
 
-
       ref.read(catSubManagerProvider.notifier).initialize();
     });
   }
-
-
-
-
 
   @override
   Widget build(BuildContext context) {
@@ -59,17 +55,17 @@ class _PricingScreenState extends ConsumerState<PricingScreen> {
           child: Text(
             'Choose Your Plan',
             style: Theme.of(context).textTheme.displayLarge?.copyWith(
-              fontWeight: FontWeight.bold,
-              color: Theme.of(context).colorScheme.primary,
-            ),
+                  fontWeight: FontWeight.bold,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
           ),
         ),
         const SizedBox(height: 16),
         Text(
           'Select the perfect plan for your study needs',
           style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-            color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
-          ),
+                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
+              ),
           textAlign: TextAlign.center,
         ),
       ],
@@ -95,7 +91,9 @@ class _PricingScreenState extends ConsumerState<PricingScreen> {
             children: [
               Expanded(child: _buildPricingCard(context, 'Basic', 9.99)),
               const SizedBox(width: 24),
-              Expanded(child: _buildPricingCard(context, 'Advanced', 14.99, isPremium: true)),
+              Expanded(
+                  child: _buildPricingCard(context, 'Advanced', 14.99,
+                      isPremium: true)),
             ],
           );
         }
@@ -103,27 +101,23 @@ class _PricingScreenState extends ConsumerState<PricingScreen> {
     );
   }
 
-  Widget _buildPricingCard(BuildContext context, String planName, double price, {bool isPremium = false}) {
-    final features = isPremium ? [
-      'All Basic features',
-      'Unlimited difficulty on decks',
-      'Up to 60 flashcard decks',
-
-
-    ] : [
-      'Up to 15 flashcard decks',
-      'Limited difficulty on decks'
-
-
-    ];
+  Widget _buildPricingCard(BuildContext context, String planName, double price,
+      {bool isPremium = false}) {
+    final features = isPremium
+        ? [
+            'All Basic features',
+            'Unlimited difficulty on decks',
+            'Up to 60 flashcard decks',
+          ]
+        : ['Up to 15 flashcard decks', 'Limited difficulty on decks'];
 
     return Card(
       elevation: 8,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
         side: BorderSide(
-          color: isPremium 
-              ? Theme.of(context).colorScheme.primary 
+          color: isPremium
+              ? Theme.of(context).colorScheme.primary
               : Colors.transparent,
           width: 2,
         ),
@@ -141,12 +135,13 @@ class _PricingScreenState extends ConsumerState<PricingScreen> {
                   children: [
                     Text(
                       planName,
-                      style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: isPremium 
-                            ? Theme.of(context).colorScheme.primary
-                            : Theme.of(context).colorScheme.onSurface,
-                      ),
+                      style:
+                          Theme.of(context).textTheme.headlineSmall?.copyWith(
+                                fontWeight: FontWeight.bold,
+                                color: isPremium
+                                    ? Theme.of(context).colorScheme.primary
+                                    : Theme.of(context).colorScheme.onSurface,
+                              ),
                     ),
                     const SizedBox(height: 8),
                     RichText(
@@ -154,15 +149,22 @@ class _PricingScreenState extends ConsumerState<PricingScreen> {
                         children: [
                           TextSpan(
                             text: '\$$price',
-                            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                              fontWeight: FontWeight.bold,
-                            ),
+                            style: Theme.of(context)
+                                .textTheme
+                                .headlineSmall
+                                ?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                ),
                           ),
                           TextSpan(
                             text: '/month',
-                            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
-                            ),
+                            style:
+                                Theme.of(context).textTheme.bodyLarge?.copyWith(
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .onSurface
+                                          .withOpacity(0.7),
+                                    ),
                           ),
                         ],
                       ),
@@ -172,63 +174,70 @@ class _PricingScreenState extends ConsumerState<PricingScreen> {
                 if (isPremium) ...[
                   const Spacer(),
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                     decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+                      color: Theme.of(context)
+                          .colorScheme
+                          .primary
+                          .withOpacity(0.1),
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: Text(
                       'Popular',
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Theme.of(context).colorScheme.primary,
-                        fontWeight: FontWeight.bold,
-                      ),
+                            color: Theme.of(context).colorScheme.primary,
+                            fontWeight: FontWeight.bold,
+                          ),
                     ),
                   ),
                 ],
               ],
             ),
             const SizedBox(height: 32),
-            
+
             // Features list
             ...features.map((feature) => Padding(
-              padding: const EdgeInsets.only(bottom: 16),
-              child: Row(
-                children: [
-                  Icon(
-                    Icons.check_circle,
-                    color: Theme.of(context).colorScheme.primary,
-                    size: 20,
+                  padding: const EdgeInsets.only(bottom: 16),
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.check_circle,
+                        color: Theme.of(context).colorScheme.primary,
+                        size: 20,
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          feature,
+                          style: Theme.of(context).textTheme.bodyMedium,
+                        ),
+                      ),
+                    ],
                   ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Text(
-                      feature,
-                      style: Theme.of(context).textTheme.bodyMedium,
-                    ),
-                  ),
-                ],
-              ),
-            )),
-            
+                )),
+
             const SizedBox(height: 32),
-            
+
             // Subscribe button
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
                 onPressed: () {
                   //_handleSubscription(planName, price);
-                  isPremium 
-                  ? ref.read(catSubManagerProvider.notifier).purchasePlan('premium', 'premium') 
-                  : ref.read(catSubManagerProvider.notifier).purchasePlan('basic', 'basic');
-
+                  isPremium
+                      ? ref
+                          .read(catSubManagerProvider.notifier)
+                          .purchasePlan('premium', 'premium')
+                      : ref
+                          .read(catSubManagerProvider.notifier)
+                          .purchasePlan('basic', 'basic');
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: isPremium 
+                  backgroundColor: isPremium
                       ? Theme.of(context).colorScheme.tertiary
                       : Theme.of(context).colorScheme.primary,
-                  foregroundColor: isPremium 
+                  foregroundColor: isPremium
                       ? Colors.white
                       : Theme.of(context).colorScheme.primary,
                   padding: const EdgeInsets.symmetric(vertical: 16),
@@ -242,8 +251,13 @@ class _PricingScreenState extends ConsumerState<PricingScreen> {
                 child: Text(
                   'Get Started',
                   style: isPremium
-                  ? Theme.of(context).textTheme.labelLarge?.copyWith(color: AppColors.primaryColor, fontWeight: FontWeight.bold,)
-                  : Theme.of(context).textTheme.labelLarge?.copyWith(fontWeight: FontWeight.bold,),
+                      ? Theme.of(context).textTheme.labelLarge?.copyWith(
+                            color: AppColors.primaryColor,
+                            fontWeight: FontWeight.bold,
+                          )
+                      : Theme.of(context).textTheme.labelLarge?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
                 ),
               ),
             ),

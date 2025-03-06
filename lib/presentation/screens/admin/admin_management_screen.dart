@@ -1,10 +1,11 @@
 import 'dart:developer';
 
 import 'package:flashcardstudyapplication/core/providers/provider_config.dart';
-import 'package:flashcardstudyapplication/core/ui/systemDeck_Screen.dart';
-import 'package:flashcardstudyapplication/core/ui/widgets/CustomScaffold.dart';
-import 'package:flashcardstudyapplication/core/ui/widgets/management/DeckManagement.dart';
-import 'package:flashcardstudyapplication/core/ui/widgets/management/UserManagement.dart';
+
+import 'package:flashcardstudyapplication/presentation/screens/deck/system_deck_screen.dart';
+import 'package:flashcardstudyapplication/presentation/widgets/common/CustomScaffold.dart';
+import 'package:flashcardstudyapplication/presentation/widgets/common/DeckManagement.dart';
+import 'package:flashcardstudyapplication/presentation/widgets/common/UserManagement.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 

@@ -1,7 +1,6 @@
-import 'package:flashcardstudyapplication/core/ui/widgets/CustomScaffold.dart';
+import 'package:flashcardstudyapplication/presentation/widgets/common/CustomScaffold.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
 
 class AboutUsScreen extends StatelessWidget {
   const AboutUsScreen({Key? key}) : super(key: key);
@@ -15,15 +14,20 @@ class AboutUsScreen extends StatelessWidget {
     return CustomScaffold(
       currentRoute: '/aboutUs',
       body: Padding(
-        padding: EdgeInsets.all(screenWidth * 0.05), // 5% padding of screen width
+        padding:
+            EdgeInsets.all(screenWidth * 0.05), // 5% padding of screen width
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
               'About Us',
-              style: Theme.of(context).textTheme.displayLarge?.copyWith(fontWeight: FontWeight.bold),
+              style: Theme.of(context)
+                  .textTheme
+                  .displayLarge
+                  ?.copyWith(fontWeight: FontWeight.bold),
             ),
-            SizedBox(height: screenHeight * 0.02), // 2% of screen height for spacing
+            SizedBox(
+                height: screenHeight * 0.02), // 2% of screen height for spacing
 
             // Using Row to place text on the left and image on the right
             Row(
@@ -37,28 +41,37 @@ class AboutUsScreen extends StatelessWidget {
                     children: [
                       // Wrap text in Container to control width
                       Container(
-                        width: screenWidth < 600 ? screenWidth : 600, // Adjust text width dynamically
-                        padding: EdgeInsets.only(right: screenWidth * 0.05), // Add some padding to the text
+                        width: screenWidth < 600
+                            ? screenWidth
+                            : 600, // Adjust text width dynamically
+                        padding: EdgeInsets.only(
+                            right: screenWidth *
+                                0.05), // Add some padding to the text
                         child: _buildIntroText(context),
                       ),
                       SizedBox(height: screenHeight * 0.02), // Dynamic spacing
                       Container(
-                        width: screenWidth < 600 ? screenWidth : 600, // Adjust text width dynamically
+                        width: screenWidth < 600
+                            ? screenWidth
+                            : 600, // Adjust text width dynamically
                         padding: EdgeInsets.only(right: screenWidth * 0.05),
                         child: _buildMissionText(context),
                       ),
                       SizedBox(height: screenHeight * 0.02), // Dynamic spacing
                       Container(
-                        width: screenWidth < 600 ? screenWidth : 600, // Adjust text width dynamically
+                        width: screenWidth < 600
+                            ? screenWidth
+                            : 600, // Adjust text width dynamically
                         padding: EdgeInsets.only(right: screenWidth * 0.05),
                         child: _buildChallengesText(context),
                       ),
                     ],
                   ),
                 ),
-                
+
                 // Right Side: Image Placeholder (dynamic square size)
-                if (screenWidth > 800) // Show image only on larger screens (web/tablets)
+                if (screenWidth >
+                    800) // Show image only on larger screens (web/tablets)
                   Expanded(
                     flex: 2,
                     child: _buildImagePlaceholder(screenHeight),
@@ -97,7 +110,10 @@ class AboutUsScreen extends StatelessWidget {
       children: [
         Text(
           'The Struggles with Traditional Study Tools',
-          style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
+          style: Theme.of(context)
+              .textTheme
+              .headlineSmall
+              ?.copyWith(fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 10),
         Text(
@@ -130,7 +146,10 @@ class AboutUsScreen extends StatelessWidget {
       children: [
         Text(
           'What Our Users Say',
-          style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
+          style: Theme.of(context)
+              .textTheme
+              .headlineSmall
+              ?.copyWith(fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 10),
         Text(
@@ -158,14 +177,19 @@ class AboutUsScreen extends StatelessWidget {
       children: [
         Text(
           'Key Features of Brain Decks',
-          style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
+          style: Theme.of(context)
+              .textTheme
+              .headlineSmall
+              ?.copyWith(fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 10),
         const Row(
           children: [
             Icon(Icons.check, color: Colors.green),
             SizedBox(width: 10),
-            Expanded(child: Text('Customizable flashcards that suit your learning style.')),
+            Expanded(
+                child: Text(
+                    'Customizable flashcards that suit your learning style.')),
           ],
         ),
         const SizedBox(height: 10),
@@ -173,7 +197,9 @@ class AboutUsScreen extends StatelessWidget {
           children: [
             Icon(Icons.check, color: Colors.green),
             SizedBox(width: 10),
-            Expanded(child: Text('Adaptive learning algorithms that help you study smarter.')),
+            Expanded(
+                child: Text(
+                    'Adaptive learning algorithms that help you study smarter.')),
           ],
         ),
         const SizedBox(height: 10),
@@ -181,7 +207,9 @@ class AboutUsScreen extends StatelessWidget {
           children: [
             Icon(Icons.check, color: Colors.green),
             SizedBox(width: 10),
-            Expanded(child: Text('Easy-to-use interface that helps you focus on what matters.')),
+            Expanded(
+                child: Text(
+                    'Easy-to-use interface that helps you focus on what matters.')),
           ],
         ),
       ],
@@ -195,7 +223,10 @@ class AboutUsScreen extends StatelessWidget {
       children: [
         Text(
           'Our Mission',
-          style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
+          style: Theme.of(context)
+              .textTheme
+              .headlineSmall
+              ?.copyWith(fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 10),
         Text(
@@ -210,11 +241,11 @@ class AboutUsScreen extends StatelessWidget {
           },
           child: const Text('Start Studying Now'),
           style: ElevatedButton.styleFrom(
-            backgroundColor: Theme.of(context).colorScheme.primary,
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-            textStyle: Theme.of(context).textTheme.labelLarge?.copyWith(
-                         color: Colors.white,)
-          ),
+              backgroundColor: Theme.of(context).colorScheme.primary,
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+              textStyle: Theme.of(context).textTheme.labelLarge?.copyWith(
+                    color: Colors.white,
+                  )),
         ),
       ],
     );

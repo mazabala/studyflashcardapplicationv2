@@ -4,6 +4,7 @@ import 'package:flashcardstudyapplication/core/providers/user_provider.dart';
 import 'package:flashcardstudyapplication/presentation/widgets/deck/CardCountSlider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+// Make sure to import the slider widget
 
 class CreateDeckDialog extends ConsumerStatefulWidget {
   final Function(String topic, String focus, String category,

@@ -1,8 +1,7 @@
 import 'package:flashcardstudyapplication/core/providers/provider_config.dart';
-import 'package:flashcardstudyapplication/core/themes/app_theme.dart';
 import 'package:flashcardstudyapplication/core/themes/colors.dart';
+import 'package:flashcardstudyapplication/presentation/widgets/common/CustomScaffold.dart';
 import 'package:flutter/material.dart';
-import 'package:flashcardstudyapplication/core/ui/widgets/CustomScaffold.dart';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 

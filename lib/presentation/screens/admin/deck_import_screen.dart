@@ -5,7 +5,7 @@ import 'package:flashcardstudyapplication/core/services/deck/deck_service.dart';
 import 'package:flashcardstudyapplication/core/utils/file_import_utils.dart';
 import 'package:flashcardstudyapplication/core/services/auth/auth_service.dart';
 import 'package:provider/provider.dart';
-import 'package:flashcardstudyapplication/presentation/admin/import_report_screen.dart';
+import 'package:flashcardstudyapplication/presentation/screens/admin/import_report_screen.dart';
 
 class DeckImportScreen extends StatefulWidget {
   const DeckImportScreen({Key? key}) : super(key: key);

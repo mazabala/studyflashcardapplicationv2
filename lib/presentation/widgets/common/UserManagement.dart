@@ -1,8 +1,8 @@
 // user_management_page.dart
 
 import 'package:flashcardstudyapplication/core/providers/provider_config.dart';
-
 import 'package:flashcardstudyapplication/presentation/widgets/common/CustomButton.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flashcardstudyapplication/core/themes/app_theme.dart';
@@ -50,14 +50,14 @@ class UserActions extends ConsumerWidget {
               final userNotifier = ref.read(userStateProvider.notifier);
               final isAdmin = ref.watch(userStateProvider).isAdmin;
               if (isAdmin != null && isAdmin) {
-                _navigateTo(context, CreateUserPage());
+                _navigateTo(context, const CreateUserPage());
               } else {
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(content: Text('Only admins can create users')),
                 );
               }
             },
-            child: Text('Create User'),
+            child: const Text('Create User'),
           ),
           ElevatedButton(
             onPressed: () => _navigateTo(context, ReviewMembershipPage()),

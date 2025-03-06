@@ -2,8 +2,9 @@ import 'package:flashcardstudyapplication/core/models/collection.dart';
 import 'package:flashcardstudyapplication/core/models/user_collection.dart';
 import 'package:flashcardstudyapplication/core/providers/provider_config.dart';
 import 'package:flashcardstudyapplication/core/providers/collection_provider.dart';
-import 'package:flashcardstudyapplication/core/ui/widgets/CustomScaffold.dart';
+
 import 'package:flashcardstudyapplication/core/ui/widgets/collection/collection_deck_manager.dart';
+import 'package:flashcardstudyapplication/presentation/widgets/common/CustomScaffold.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 

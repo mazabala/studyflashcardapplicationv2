@@ -1,10 +1,11 @@
 import 'dart:math';
 
+import 'package:flashcardstudyapplication/presentation/widgets/common/theme_toggle.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flashcardstudyapplication/core/providers/provider_config.dart';
 import 'package:flashcardstudyapplication/core/themes/colors.dart';
-import 'package:flashcardstudyapplication/core/ui/widgets/theme_toggle.dart';
+
 import 'dart:io' show Platform;
 
 class CustomScaffold extends ConsumerStatefulWidget {

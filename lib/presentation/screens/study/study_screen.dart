@@ -1,15 +1,19 @@
 import 'package:flashcardstudyapplication/core/models/deck.dart';
 import 'package:flashcardstudyapplication/core/models/collection.dart';
-import 'package:flashcardstudyapplication/core/ui/study_screen_controller.dart';
-import 'package:flashcardstudyapplication/core/ui/widgets/CustomButton.dart';
-import 'package:flashcardstudyapplication/core/ui/widgets/CustomScaffold.dart';
-import 'package:flashcardstudyapplication/core/ui/widgets/navigation_button.dart';
+import 'package:flashcardstudyapplication/presentation/screens/study/study_screen_controller.dart';
+
+import 'package:flashcardstudyapplication/presentation/widgets/common/CustomButton.dart';
+import 'package:flashcardstudyapplication/presentation/widgets/common/CustomScaffold.dart';
+import 'package:flashcardstudyapplication/presentation/widgets/common/navigation_button.dart';
+import 'package:flashcardstudyapplication/presentation/widgets/study/flashcard_display.dart';
+import 'package:flashcardstudyapplication/presentation/widgets/study/progress_button.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flashcardstudyapplication/core/providers/provider_config.dart';
-import 'package:flashcardstudyapplication/core/ui/widgets/flashcard_display.dart';
-import 'package:flashcardstudyapplication/core/ui/widgets/progress_indicator.dart';
-import 'package:flashcardstudyapplication/core/ui/widgets/progress_button.dart';
+
+import 'package:flashcardstudyapplication/presentation/widgets/common/progress_indicator.dart';
+
 import 'package:flashcardstudyapplication/core/providers/flashcard_provider.dart';
 import 'dart:math';
 

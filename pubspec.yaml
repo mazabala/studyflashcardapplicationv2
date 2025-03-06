@@ -70,6 +70,7 @@ flutter:
     - 'assets/images/logo.png'
     - 'assets/logos/light mode/logo-lightmode.png'
     - 'assets/logos/dark mode/logo-darkmode.png'
+    - data/
     
   # Add custom fonts if needed
   fonts:

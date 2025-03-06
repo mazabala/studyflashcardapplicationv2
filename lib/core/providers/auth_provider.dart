@@ -1,16 +1,12 @@
 import 'dart:async';
 import 'dart:developer';
 
-import 'package:flashcardstudyapplication/core/providers/CatSub_Manager.dart';
 import 'package:flashcardstudyapplication/core/providers/provider_config.dart';
-import 'package:flashcardstudyapplication/core/providers/user_provider.dart';
 import 'package:flashcardstudyapplication/core/services/api/api_manager.dart';
-import 'package:flashcardstudyapplication/core/services/subscription/subscription_service.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:flashcardstudyapplication/core/services/authentication/authentication_service.dart';
 import 'package:flashcardstudyapplication/core/interfaces/i_auth_service.dart';
-import 'package:flashcardstudyapplication/core/providers/subscription_provider.dart'; // Import your subscription provider
+// Import your subscription provider
 
 // AuthenthicationState class to hold the authentication state
 class AuthenthicationState {
@@ -47,27 +43,31 @@ class AuthNotifier extends StateNotifier<AuthenthicationState> {
   final Ref _ref;
   StreamSubscription? _authSubscription;
 
-  AuthNotifier(this._authService, this._ref) : super(const AuthenthicationState()) {
+  AuthNotifier(this._authService, this._ref)
+      : super(const AuthenthicationState()) {
     // Listen to auth state changes from Supabase
     _setupAuthListener();
   }
 
   void _setupAuthListener() {
-    _authSubscription = Supabase.instance.client.auth.onAuthStateChange.listen((data) {
+    _authSubscription =
+        Supabase.instance.client.auth.onAuthStateChange.listen((data) {
       _handleAuthenthicationStateChange(data.event, data.session);
     });
   }
 
   Future<void> setupApiManager() async {
     final apiManager = ApiManager.instance;
-    await apiManager.initialize();  
+    await apiManager.initialize();
   }
 
-  void _handleAuthenthicationStateChange(AuthChangeEvent event, Session? session) async {
+  void _handleAuthenthicationStateChange(
+      AuthChangeEvent event, Session? session) async {
     print('Auth state change event: $event');
 
     // Handle signOut and userDeleted first
-    if (event == AuthChangeEvent.signedOut || event == AuthChangeEvent.userDeleted) {
+    if (event == AuthChangeEvent.signedOut ||
+        event == AuthChangeEvent.userDeleted) {
       _ref.read(analyticsProvider.notifier).trackEvent('user_signed_out');
       _ref.read(analyticsProvider.notifier).reset();
       state = const AuthenthicationState();
@@ -82,8 +82,8 @@ class AuthNotifier extends StateNotifier<AuthenthicationState> {
     }
 
     // Only process these events if we have a valid session and user
-    if ((event == AuthChangeEvent.signedIn || 
-         event == AuthChangeEvent.tokenRefreshed) && 
+    if ((event == AuthChangeEvent.signedIn ||
+            event == AuthChangeEvent.tokenRefreshed) &&
         session?.user != null) {
       try {
         // Update state after API Manager initialization
@@ -92,7 +92,7 @@ class AuthNotifier extends StateNotifier<AuthenthicationState> {
           isAuthenticated: true,
           isLoading: false,
         );
-        
+
         _ref.read(analyticsProvider.notifier).identifyUser(
           session!.user.id,
           userProperties: {
@@ -105,9 +105,12 @@ class AuthNotifier extends StateNotifier<AuthenthicationState> {
         if (state.isAuthenticated && state.user != null) {
           print('Proceeding with user initialization');
           await _ref.read(userStateProvider.notifier).initializeUser();
-          await _ref.read(subscriptionStateProvider.notifier).fetchSubscriptionStatus(state.user!.id);
+          await _ref
+              .read(subscriptionStateProvider.notifier)
+              .fetchSubscriptionStatus(state.user!.id);
 
-          if (state.user != null) {  // Double check user is still valid
+          if (state.user != null) {
+            // Double check user is still valid
             print('initializing the api manager');
             await setupApiManager();
             print('initializing the cat sub manager');
@@ -144,11 +147,11 @@ class AuthNotifier extends StateNotifier<AuthenthicationState> {
     state = state.copyWith(isLoading: true, errorMessage: null);
     await _authService.signInWithGoogle();
     final user = await _authService.getCurrentUser();
-      _ref.read(analyticsProvider.notifier).trackLogin(method: 'google');
-      _ref.read(analyticsProvider.notifier).identifyUser(
-        user?.id ?? ''  ,
-        userProperties: {'email': user?.email},
-      );
+    _ref.read(analyticsProvider.notifier).trackLogin(method: 'google');
+    _ref.read(analyticsProvider.notifier).identifyUser(
+      user?.id ?? '',
+      userProperties: {'email': user?.email},
+    );
     state = state.copyWith(
       user: user,
       isAuthenticated: true,
@@ -158,7 +161,7 @@ class AuthNotifier extends StateNotifier<AuthenthicationState> {
 
   Future<void> signIn(String email, String password) async {
     state = state.copyWith(isLoading: true, errorMessage: null);
-    
+
     try {
       await _authService.signIn(email, password);
       final user = await _authService.getCurrentUser();
@@ -169,12 +172,14 @@ class AuthNotifier extends StateNotifier<AuthenthicationState> {
         isLoading: false,
       );
 
-      if(state.isAuthenticated && user != null){
+      if (state.isAuthenticated && user != null) {
         // Initialize API Manager first
-       // await _ref.read(userStateProvider.notifier).initializeUser();
-        
+        // await _ref.read(userStateProvider.notifier).initializeUser();
+
         // Initialize user details after successful sign in
-        await _ref.read(subscriptionStateProvider.notifier).fetchSubscriptionStatus(user.id);
+        await _ref
+            .read(subscriptionStateProvider.notifier)
+            .fetchSubscriptionStatus(user.id);
       }
     } catch (e) {
       print('in the catch auth');
@@ -186,12 +191,14 @@ class AuthNotifier extends StateNotifier<AuthenthicationState> {
     }
   }
 
-  Future<void> signUp(String email, String password, String firstName, String lastName) async {
+  Future<void> signUp(
+      String email, String password, String firstName, String lastName) async {
     try {
       state = state.copyWith(isLoading: true);
-      
+
       // Sign the user up
-      final AuthResponse response = await _authService.signUp(email, password, firstName, lastName);
+      final AuthResponse response =
+          await _authService.signUp(email, password, firstName, lastName);
 
       if (response.user != null) {
         state = state.copyWith(
@@ -222,7 +229,7 @@ class AuthNotifier extends StateNotifier<AuthenthicationState> {
 
   Future<void> signOut() async {
     state = state.copyWith(isLoading: true, errorMessage: null);
-    
+
     try {
       await _authService.signOut();
       _ref.read(analyticsProvider.notifier).trackLogout();
@@ -284,7 +291,7 @@ class AuthNotifier extends StateNotifier<AuthenthicationState> {
     try {
       final user = await _authService.getCurrentUser();
       print('Current user from initialization: ${user?.id}');
-      
+
       if (user != null) {
         // Initialize API Manager first if user exists
         await setupApiManager();
@@ -300,7 +307,9 @@ class AuthNotifier extends StateNotifier<AuthenthicationState> {
       // Only proceed with other initializations if authenticated
       if (state.isAuthenticated && state.user != null) {
         await _ref.read(userStateProvider.notifier).initializeUser();
-        await _ref.read(subscriptionStateProvider.notifier).fetchSubscriptionStatus(state.user!.id);
+        await _ref
+            .read(subscriptionStateProvider.notifier)
+            .fetchSubscriptionStatus(state.user!.id);
       }
     } catch (e) {
       print('Error during auth initialization: $e');
@@ -311,7 +320,7 @@ class AuthNotifier extends StateNotifier<AuthenthicationState> {
         user: null,
       );
     }
-    print('Auth initialization completed. State: authenticated=${state.isAuthenticated}, user=${state.user?.id}');
+    print(
+        'Auth initialization completed. State: authenticated=${state.isAuthenticated}, user=${state.user?.id}');
   }
 }
-

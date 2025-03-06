@@ -1,13 +1,13 @@
 import 'dart:developer';
 
-import 'package:flashcardstudyapplication/core/ui/widgets/CustomDialog.dart';
+import 'package:flashcardstudyapplication/presentation/widgets/common/CustomButton.dart';
+import 'package:flashcardstudyapplication/presentation/widgets/common/CustomDialog.dart';
+import 'package:flashcardstudyapplication/presentation/widgets/common/CustomScaffold.dart';
+import 'package:flashcardstudyapplication/presentation/widgets/common/CustomTextField.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:flashcardstudyapplication/core/providers/provider_config.dart';
-import 'package:flashcardstudyapplication/core/ui/widgets/CustomScaffold.dart';
-import 'package:flashcardstudyapplication/core/ui/widgets/CustomTextField.dart';
-import 'package:flashcardstudyapplication/core/ui/widgets/CustomButton.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
   @override

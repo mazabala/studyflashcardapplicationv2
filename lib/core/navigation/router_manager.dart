@@ -1,18 +1,19 @@
 import 'package:flashcardstudyapplication/core/models/collection.dart';
 import 'package:flashcardstudyapplication/core/models/deck.dart';
 import 'package:flashcardstudyapplication/core/models/user_collection.dart';
-import 'package:flashcardstudyapplication/core/ui/about_us.dart';
-import 'package:flashcardstudyapplication/core/ui/admin_management_screen.dart';
-import 'package:flashcardstudyapplication/core/ui/collection_study_screen.dart';
-import 'package:flashcardstudyapplication/core/ui/collections_screen.dart';
-import 'package:flashcardstudyapplication/core/ui/study_screen.dart';
-import 'package:flashcardstudyapplication/core/ui/pricing_screen.dart';
+import 'package:flashcardstudyapplication/presentation/screens/about_us_screen.dart';
+import 'package:flashcardstudyapplication/presentation/screens/admin/admin_management_screen.dart';
+import 'package:flashcardstudyapplication/presentation/screens/auth/login_screen.dart';
+
+import 'package:flashcardstudyapplication/presentation/screens/deck/collections_screen.dart';
+import 'package:flashcardstudyapplication/presentation/screens/deck/deck_screen.dart';
+import 'package:flashcardstudyapplication/presentation/screens/deck/my_deck_screen.dart';
+import 'package:flashcardstudyapplication/presentation/screens/home_screen.dart';
+import 'package:flashcardstudyapplication/presentation/screens/study/collection_study_screen.dart';
+import 'package:flashcardstudyapplication/presentation/screens/study/study_screen.dart';
+import 'package:flashcardstudyapplication/presentation/screens/user/pricing_screen.dart';
+import 'package:flashcardstudyapplication/presentation/screens/user/user_profile_screen.dart';
 import 'package:flutter/material.dart';
-import 'package:flashcardstudyapplication/core/ui/deck_screen.dart';
-import 'package:flashcardstudyapplication/core/ui/user_profile_screen.dart';
-import 'package:flashcardstudyapplication/core/ui/login_screen.dart';
-import 'package:flashcardstudyapplication/core/ui/home_screen.dart';
-import 'package:flashcardstudyapplication/core/ui/my_deck_screen.dart';
 
 class RouteManager {
   static Route<dynamic> generateRoute(RouteSettings settings) {
