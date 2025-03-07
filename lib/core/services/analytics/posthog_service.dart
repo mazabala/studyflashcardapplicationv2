@@ -22,7 +22,7 @@ class PostHogService implements IPostHogService {
 
       final apiKey = response['api_key'] as String;
       log('apiKey: $apiKey');
-      
+
       // Initialize PostHog
       _posthog = Posthog();
       await _posthog.setup(
@@ -43,7 +43,8 @@ class PostHogService implements IPostHogService {
     try {
       _posthog.capture(
         eventName: eventName,
-        properties: properties?.map((key, value) => MapEntry(key, value as Object)),
+        properties:
+            properties?.map((key, value) => MapEntry(key, value as Object)),
       );
     } catch (e) {
       print('Error capturing event: $e');
@@ -51,11 +52,13 @@ class PostHogService implements IPostHogService {
   }
 
   @override
-  void identify({required String userId, Map<String, dynamic>? userProperties}) {
+  void identify(
+      {required String userId, Map<String, dynamic>? userProperties}) {
     try {
       _posthog.identify(
         userId: userId,
-        userProperties: userProperties?.map((key, value) => MapEntry(key, value as Object)),
+        userProperties:
+            userProperties?.map((key, value) => MapEntry(key, value as Object)),
       );
     } catch (e) {
       print('Error identifying user: $e');
@@ -67,7 +70,8 @@ class PostHogService implements IPostHogService {
     try {
       _posthog.screen(
         screenName: screenName,
-        properties: properties?.map((key, value) => MapEntry(key, value as Object)),
+        properties:
+            properties?.map((key, value) => MapEntry(key, value as Object)),
       );
     } catch (e) {
       print('Error logging screen view: $e');
@@ -82,4 +86,4 @@ class PostHogService implements IPostHogService {
       print('Error resetting PostHog: $e');
     }
   }
-} 
+}

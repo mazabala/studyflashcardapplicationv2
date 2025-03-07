@@ -136,6 +136,7 @@ class AuthNotifier extends StateNotifier<AuthenthicationState> {
     await _authService.signInWithApple();
 
     final user = await _authService.getCurrentUser();
+    print('user: $user logged in with apple');
     state = state.copyWith(
       user: user,
       isAuthenticated: true,

@@ -1,39 +1,25 @@
+// ignore_for_file: avoid_web_libraries_in_flutter
 import 'dart:convert';
-import 'dart:html' as html;
 import 'dart:async';
+import 'package:flutter/foundation.dart' show kIsWeb;
 
+// Conditionally import for web platform
+// This is the proper way to handle conditional imports in Flutter
+import 'web_file_utils.dart' if (dart.library.html) 'web_file_utils_web.dart';
+
+/// Utility class for file import operations
+/// Web-specific functionality is guarded by platform checks
 class FileImportUtils {
   /// Opens a file picker dialog for JSON files and returns the file content
+  /// This only works on web platforms, returns null on other platforms
   static Future<String?> pickJsonFile() async {
-    final completer = Completer<String?>();
+    // Skip on non-web platforms
+    if (!kIsWeb) {
+      print('File picking is not supported on this platform');
+      return null;
+    }
 
-    // Create file input element
-    final html.FileUploadInputElement input = html.FileUploadInputElement();
-    input.accept = '.json';
-    input.click();
-
-    // Listen for file selection
-    input.onChange.listen((event) {
-      final files = input.files;
-      if (files != null && files.isNotEmpty) {
-        final file = files[0];
-        final reader = html.FileReader();
-
-        reader.onLoad.listen((event) {
-          completer.complete(reader.result as String);
-        });
-
-        reader.onError.listen((event) {
-          completer.complete(null);
-        });
-
-        reader.readAsText(file);
-      } else {
-        completer.complete(null);
-      }
-    });
-
-    return completer.future;
+    return WebFileUtils.pickJsonFile();
   }
 
   /// Validates the basic structure of the JSON content
@@ -64,7 +50,19 @@ class FileImportUtils {
   }
 
   /// Downloads a sample JSON template
+  /// This only works on web platforms, does nothing on other platforms
   static void downloadSampleTemplate() {
+    // Skip on non-web platforms
+    if (!kIsWeb) {
+      print('File download is not supported on this platform');
+      return;
+    }
+
+    WebFileUtils.downloadSampleTemplate(getSampleTemplate());
+  }
+
+  /// Returns a sample JSON template as a string
+  static String getSampleTemplate() {
     final sampleJson = {
       "collections": [
         {
@@ -151,14 +149,6 @@ class FileImportUtils {
       ]
     };
 
-    final jsonString = const JsonEncoder.withIndent('  ').convert(sampleJson);
-    final blob = html.Blob([jsonString], 'application/json');
-    final url = html.Url.createObjectUrlFromBlob(blob);
-
-    final anchor = html.AnchorElement(href: url)
-      ..setAttribute('download', 'deck_import_template.json')
-      ..click();
-
-    html.Url.revokeObjectUrl(url);
+    return const JsonEncoder.withIndent('  ').convert(sampleJson);
   }
 }

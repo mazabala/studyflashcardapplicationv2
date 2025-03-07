@@ -11,9 +11,9 @@ import 'package:flashcardstudyapplication/core/error/error_handler.dart';
 import 'package:flashcardstudyapplication/core/interfaces/i_api_service.dart';
 import 'package:flashcardstudyapplication/core/services/api/api_client.dart';
 import 'package:uuid/uuid.dart';
-import 'package:posthog_flutter/posthog_flutter.dart';
 import 'package:flashcardstudyapplication/core/models/deck_import.dart';
 import 'package:flashcardstudyapplication/core/interfaces/i_collection_service.dart';
+import 'package:posthog_flutter/posthog_flutter.dart';
 
 class SystemDeckConfig {
   final String category;
